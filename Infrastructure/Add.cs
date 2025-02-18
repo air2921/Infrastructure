@@ -90,6 +90,8 @@ public static class AddInfrastructureBuilder
             .Select(p => p.PropertyType.GetGenericArguments()[0])
             .ToList();
 
+        builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();
+
         foreach (var entityType in entityTypes)
         {
             var repositoryType = typeof(Repository<,>).MakeGenericType(entityType, dbContextType);
