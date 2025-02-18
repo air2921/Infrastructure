@@ -11,6 +11,10 @@ using Infrastructure.Services.S3;
 using Infrastructure.Services.EntityFramework;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Smtp;
+using Infrastructure.Services.ElasticSearch;
+using Serilog;
+using System.Reflection;
+using Serilog.Sinks.Elasticsearch;
 
 namespace Infrastructure;
 
@@ -18,6 +22,42 @@ public static class AddInfrastructureBuilder
 {
     public static IInfrastructureBuilder AddInfrastructure(this IServiceCollection services)
         => new InfrastructureBuilder(services);
+
+    public static IInfrastructureBuilder AddElasticSearchLogger(this IInfrastructureBuilder builder, Action<ElasticSearchConfigureOptions> configureOptions)
+    {
+        var options = new ElasticSearchConfigureOptions();
+        configureOptions.Invoke(options);
+
+        if (!options.IsEnable)
+            return builder;
+
+        if (!options.IsValidConfigure())
+            throw new InfrastructureConfigurationException("Invalid ElasticSearch configuration. Please check connection", nameof(options.Connection));
+
+        const string ASPNETCORE_ENV = "ASPNETCORE_ENVIRONMENT";
+        const string ENV_PROPERTY = "Environment";
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
+            .Enrich.WithProperty(ENV_PROPERTY, Environment.GetEnvironmentVariable(ASPNETCORE_ENV)!)
+            .WriteTo.Console()
+            .ReadFrom.Configuration(options.Configuration)
+            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))
+            {
+                AutoRegisterTemplate = true,
+                IndexFormat = $"logs-{DateTime.UtcNow:yyyy}"
+            })
+            .CreateLogger();
+
+        builder.Services.AddLogging(logger =>
+        {
+            logger.AddSerilog(Log.Logger);
+        });
+
+        return builder;
+    }
 
     public static IInfrastructureBuilder AddSmtpClient(this IInfrastructureBuilder builder, Action<SmtpConfigureOptions> configureOptions)
     {
