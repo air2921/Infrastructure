@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Infrastructure.Abstractions;
 using Infrastructure.Exceptions;
-using System.Linq.Expressions;
-using Infrastructure.Abstractions;
 using Infrastructure.Services.EntityFramework.Builder;
 using Infrastructure.Services.EntityFramework.Entity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework;
 

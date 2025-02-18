@@ -1,20 +1,20 @@
-﻿using Infrastructure.Abstractions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Infrastructure.Configuration;
+﻿using Amazon;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using Amazon.S3;
-using Amazon;
+using Infrastructure.Abstractions;
+using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
-using Infrastructure.Services.S3;
-using Infrastructure.Services.EntityFramework;
 using Infrastructure.Services.DistributedCache;
-using Infrastructure.Services.Smtp;
 using Infrastructure.Services.ElasticSearch;
+using Infrastructure.Services.EntityFramework;
+using Infrastructure.Services.S3;
+using Infrastructure.Services.Smtp;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using System.Reflection;
 using Serilog.Sinks.Elasticsearch;
+using System.Reflection;
 
 namespace Infrastructure;
 
