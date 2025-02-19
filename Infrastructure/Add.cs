@@ -10,6 +10,7 @@ using Infrastructure.Services.Cryptography;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.ElasticSearch;
 using Infrastructure.Services.EntityFramework;
+using Infrastructure.Services.EntityFramework.Entity;
 using Infrastructure.Services.S3;
 using Infrastructure.Services.Smtp;
 using Microsoft.EntityFrameworkCore;
@@ -143,25 +144,32 @@ public static class AddInfrastructureBuilder
         return builder;
     }
 
-    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder) where TDbContext : DbContext
+    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Assembly[] assemblies) where TDbContext : DbContext
     {
-        var dbContextType = typeof(TDbContext);
-        var entityTypes = dbContextType.GetProperties()
-            .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
-            .Select(p => p.PropertyType.GetGenericArguments()[0])
-            .ToList();
-
         builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();
 
-        foreach (var entityType in entityTypes)
+        var dbContextType = typeof(TDbContext);
+        var baseType = typeof(EntityBase);
+        var entityTypes = new List<Type>();
+
+
+        foreach (var assembly in assemblies)
         {
-            var repositoryType = typeof(Repository<,>).MakeGenericType(entityType, dbContextType);
-            var interfaceType = typeof(IRepository<>).MakeGenericType(entityType);
+            var types = assembly.GetTypes();
 
-            if (builder.Services.Any(x => x.ServiceType == interfaceType))
-                continue;
+            foreach (var type in types)
+            {
+                if (baseType.IsAssignableFrom(type) && type != baseType && !type.IsAbstract)
+                    entityTypes.Add(type);
+            }
 
-            builder.Services.AddScoped(interfaceType, repositoryType);
+            foreach (var entityType in entityTypes)
+            {
+                var repositoryType = typeof(Repository<,>).MakeGenericType(entityType, dbContextType);
+                var interfaceType = typeof(IRepository<>).MakeGenericType(entityType);
+
+                builder.Services.AddScoped(interfaceType, repositoryType);
+            }
         }
 
         return builder;
