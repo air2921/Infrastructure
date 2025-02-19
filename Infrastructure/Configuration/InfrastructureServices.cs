@@ -4,5 +4,5 @@ namespace Infrastructure.Configuration;
 
 public class InfrastructureBuilder(IServiceCollection services) : IInfrastructureBuilder
 {
-    public IServiceCollection Services { get; set; } = services;
+    public IServiceCollection Services { get; } = services;
 }

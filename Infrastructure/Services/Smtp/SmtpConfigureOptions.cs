@@ -5,13 +5,15 @@ namespace Infrastructure.Services.Smtp;
 public class SmtpConfigureOptions : Validator
 {
     public string Provider { get; set; } = string.Empty;
+    public string SenderName { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public int Port { get; set; }
 
     public override bool IsValidConfigure()
     {
-        if (string.IsNullOrWhiteSpace(Provider) || string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Password) || !IsValidPort(Port))
+        if (string.IsNullOrWhiteSpace(Provider) || string.IsNullOrWhiteSpace(Address) ||
+            string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(SenderName) || !IsValidPort(Port))
             return false;
 
         return true;

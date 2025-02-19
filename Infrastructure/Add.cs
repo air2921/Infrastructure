@@ -4,7 +4,9 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Infrastructure.Abstractions;
 using Infrastructure.Configuration;
+using Infrastructure.Data_Transfer_Object;
 using Infrastructure.Exceptions.Global;
+using Infrastructure.Services.Cryptography;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.ElasticSearch;
 using Infrastructure.Services.EntityFramework;
@@ -12,6 +14,7 @@ using Infrastructure.Services.S3;
 using Infrastructure.Services.Smtp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using System.Reflection;
@@ -22,6 +25,13 @@ public static class AddInfrastructureBuilder
 {
     public static IInfrastructureBuilder AddInfrastructure(this IServiceCollection services)
         => new InfrastructureBuilder(services);
+
+    public static IInfrastructureBuilder AddCryptography(this IInfrastructureBuilder builder)
+    {
+        builder.Services.AddScoped<IHasher, Hasher>();
+
+        return builder;
+    }
 
     public static IInfrastructureBuilder AddElasticSearchLogger(this IInfrastructureBuilder builder, Action<ElasticSearchConfigureOptions> configureOptions)
     {
@@ -70,7 +80,18 @@ public static class AddInfrastructureBuilder
         if (!options.IsValidConfigure())
             throw new InfrastructureConfigurationException("Invalid SMTP configuration. Please check Provider, Address, Password and Port.", nameof(options));
 
-        // Планируется реализация
+        builder.Services.AddScoped(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<SmtpClientWrapper>>();
+            return new SmtpClientWrapper(logger, options);
+        });
+
+        builder.Services.AddScoped<ISmtpSender<MailDto>>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<SmtpSender>>();
+            var smtpWrapper = provider.GetRequiredService<SmtpClientWrapper>();
+            return new SmtpSender(logger, options, smtpWrapper);
+        });
 
         return builder;
     }
