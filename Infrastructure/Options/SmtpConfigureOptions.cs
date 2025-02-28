@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Configuration;
 
-namespace Infrastructure.Services.Smtp;
+namespace Infrastructure.Options;
 
 public class SmtpConfigureOptions : Validator
 {

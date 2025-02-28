@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Configuration;
 using System.Text.Json;
 
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Options;
 
 public class CacheConfigureOptions : Validator
 {

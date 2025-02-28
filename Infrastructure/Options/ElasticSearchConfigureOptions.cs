@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Services.ElasticSearch;
+namespace Infrastructure.Options;
 
 public class ElasticSearchConfigureOptions : Validator
 {
@@ -13,7 +13,7 @@ public class ElasticSearchConfigureOptions : Validator
     {
         if (string.IsNullOrWhiteSpace(Connection))
             return false;
-        
+
         return true;
     }
 }

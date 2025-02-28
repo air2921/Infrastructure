@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Abstractions;
 using Infrastructure.Exceptions;
+using Infrastructure.Options;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;

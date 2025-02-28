@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Configuration;
 
-namespace Infrastructure.Services.S3;
+namespace Infrastructure.Options;
 
 public class S3ConfigureOptions : Validator
 {
