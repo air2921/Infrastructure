@@ -8,7 +8,7 @@ namespace Infrastructure.Services.DistributedCache;
 
 public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, CacheConfigureOptions configureOptions) : ICacheClient
 {
-    public async Task<TObject?> GetAsync<TObject>(string key, CancellationToken cancellationToken = default) where TObject : class
+    public async Task<TValue?> GetAsync<TValue>(string key, CancellationToken cancellationToken = default) where TValue : class
     {
         try
         {
@@ -18,15 +18,15 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
             if (cacheObj is null)
                 return null;
 
-            if (typeof(TObject) == typeof(string))
+            if (typeof(TValue) == typeof(string))
             {
                 if (cacheObj is null)
                     return null;
 
-                return (TObject?)cacheObj;
+                return (TValue?)cacheObj;
             }
 
-            return JsonSerializer.Deserialize<TObject>((string)cacheObj);
+            return JsonSerializer.Deserialize<TValue>((string)cacheObj);
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     }
 
 
-    public async Task SetAsync<TObject>(string key, TObject value, TimeSpan absolute, TimeSpan sliding, CancellationToken cancellationToken = default) where TObject : class
+    public async Task SetAsync<TResult>(string key, TResult value, TimeSpan absolute, TimeSpan sliding, CancellationToken cancellationToken = default) where TResult : notnull
     {
         try
         {
@@ -57,7 +57,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
     }
 
-    public async Task SetAsync<TObject>(string key, TObject value, TimeSpan absolute, CancellationToken cancellationToken = default) where TObject : class
+    public async Task SetAsync<TResult>(string key, TResult value, TimeSpan absolute, CancellationToken cancellationToken = default) where TResult : notnull
     {
         try
         {

@@ -8,7 +8,9 @@ using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework;
 
-public class Repository<TEntity, TDbContext> : IRepository<TEntity> where TEntity : EntityBase where TDbContext : DbContext
+public class Repository<TEntity, TDbContext> :
+    IRepository<TEntity>,
+    IRepository<TEntity, TDbContext> where TEntity : EntityBase where TDbContext : DbContext
 {
     #region Const
 
