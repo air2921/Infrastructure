@@ -8,7 +8,7 @@ namespace Infrastructure.Services.DistributedCache;
 
 public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, CacheConfigureOptions configureOptions) : ICacheClient
 {
-    public async Task<TValue?> GetAsync<TValue>(string key, CancellationToken cancellationToken = default) where TValue : class
+    public async Task<TResult?> GetAsync<TResult>(string key, CancellationToken cancellationToken = default) where TResult : class
     {
         try
         {
@@ -18,15 +18,15 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
             if (cacheObj is null)
                 return null;
 
-            if (typeof(TValue) == typeof(string))
+            if (typeof(TResult) == typeof(string))
             {
                 if (cacheObj is null)
                     return null;
 
-                return (TValue?)cacheObj;
+                return (TResult?)cacheObj;
             }
 
-            return JsonSerializer.Deserialize<TValue>((string)cacheObj);
+            return JsonSerializer.Deserialize<TResult>((string)cacheObj);
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     }
 
 
-    public async Task SetAsync<TResult>(string key, TResult value, TimeSpan absolute, TimeSpan sliding, CancellationToken cancellationToken = default) where TResult : notnull
+    public async Task SetAsync<TValue>(string key, TValue value, TimeSpan absolute, TimeSpan sliding, CancellationToken cancellationToken = default) where TValue : notnull
     {
         try
         {
@@ -57,7 +57,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
     }
 
-    public async Task SetAsync<TResult>(string key, TResult value, TimeSpan absolute, CancellationToken cancellationToken = default) where TResult : notnull
+    public async Task SetAsync<TValue>(string key, TValue value, TimeSpan absolute, CancellationToken cancellationToken = default) where TValue : notnull
     {
         try
         {
