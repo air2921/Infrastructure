@@ -88,7 +88,7 @@ public static class AddInfrastructureBuilder
             return new SmtpClientWrapper(logger, options);
         });
 
-        builder.Services.AddScoped<ISmtpSender<MailDto>>(provider =>
+        builder.Services.AddScoped<ISmtpSender<MailDetails>>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<SmtpSender>>();
             var smtpWrapper = provider.GetRequiredService<SmtpClientWrapper>();

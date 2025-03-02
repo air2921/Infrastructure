@@ -10,9 +10,9 @@ namespace Infrastructure.Services.Smtp;
 public class SmtpSender(
     ILogger<SmtpSender> logger,
     SmtpConfigureOptions configureOptions,
-    SmtpClientWrapper smtpClient) : ISmtpSender<MailDto>
+    SmtpClientWrapper smtpClient) : ISmtpSender<MailDetails>
 {
-    public async Task SendMailAsync(MailDto mail, CancellationToken cancellationToken = default)
+    public async Task SendMailAsync(MailDetails mail, CancellationToken cancellationToken = default)
     {
         try
         {
