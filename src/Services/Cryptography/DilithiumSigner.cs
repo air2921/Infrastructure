@@ -32,21 +32,18 @@ public class DilithiumSigner : ISigner, IDisposable
 
             string resourceName = "Infrastructure.Assembly.oqs.dll";
 
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)!)
-            {
-                if (stream is null)
-                    throw new CryptographyException("DLL not found in resources.");
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ??
+                throw new CryptographyException("DLL not found in resources");
 
-                byte[] assemblyData = new byte[stream.Length];
-                stream.Read(assemblyData, 0, assemblyData.Length);
+            byte[] assemblyData = new byte[stream.Length];
+            stream.Read(assemblyData, 0, assemblyData.Length);
 
-                string tempFilePath = Path.Combine(Path.GetTempPath(), "oqs.dll");
-                File.WriteAllBytes(tempFilePath, assemblyData);
+            string tempFilePath = Path.Combine(Path.GetTempPath(), "oqs.dll");
+            File.WriteAllBytes(tempFilePath, assemblyData);
 
-                _oqsLibraryHandle = NativeLibrary.Load(tempFilePath);
-                if (_oqsLibraryHandle == IntPtr.Zero)
-                    throw new CryptographyException("Failed to load oqs.dll");
-            }
+            _oqsLibraryHandle = NativeLibrary.Load(tempFilePath);
+            if (_oqsLibraryHandle == IntPtr.Zero)
+                throw new CryptographyException("Failed to load oqs.dll");
 
             Console.WriteLine("Resolving OQS_SIG_new...");
             _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
