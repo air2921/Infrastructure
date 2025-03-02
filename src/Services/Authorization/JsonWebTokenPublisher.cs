@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace Infrastructure.Services.Authorization;
 
-public class JsonWebTokenPublisher(AuthorizationOptions authorizationOptions) : IPublisher<JsonWebTokenDetails>
+public class JsonWebTokenPublisher(AuthorizationConfigureOptions authorizationOptions) : IPublisher<JsonWebTokenDetails>
 {
     public string Publish(JsonWebTokenDetails details)
     {

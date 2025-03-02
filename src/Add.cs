@@ -37,9 +37,9 @@ public static class AddInfrastructureBuilder
         return builder;
     }
 
-    public static IInfrastructureBuilder AddAuthorization(this IInfrastructureBuilder builder, Action<AuthorizationOptions> configureOptions)
+    public static IInfrastructureBuilder AddAuthorization(this IInfrastructureBuilder builder, Action<AuthorizationConfigureOptions> configureOptions)
     {
-        var options = new AuthorizationOptions();
+        var options = new AuthorizationConfigureOptions();
         configureOptions.Invoke(options);
 
         if (!options.IsEnable)

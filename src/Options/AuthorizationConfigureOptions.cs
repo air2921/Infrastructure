@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Infrastructure.Options;
 
-public class AuthorizationOptions : Validator
+public class AuthorizationConfigureOptions : Validator
 {
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
