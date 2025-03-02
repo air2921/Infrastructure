@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Data_Transfer_Object;
 
-public class MailDto
+public class MailDetails
 {
     public required string UsernameTo { get; set; }
     public required string EmailTo { get; set; }
