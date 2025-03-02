@@ -5,8 +5,10 @@ using Amazon.S3;
 using Infrastructure.Abstractions;
 using Infrastructure.Configuration;
 using Infrastructure.Data_Transfer_Object;
+using Infrastructure.Data_Transfer_Object.Authorization;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
+using Infrastructure.Services.Authorization;
 using Infrastructure.Services.Cryptography;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.EntityFramework;
@@ -31,6 +33,23 @@ public static class AddInfrastructureBuilder
     {
         builder.Services.AddScoped<IHasher, Hasher>();
         builder.Services.AddTransient<ISigner, DilithiumSigner>();
+
+        return builder;
+    }
+
+    public static IInfrastructureBuilder AddAuthorization(this IInfrastructureBuilder builder, Action<AuthorizationOptions> configureOptions)
+    {
+        var options = new AuthorizationOptions();
+        configureOptions.Invoke(options);
+
+        if (!options.IsEnable)
+            return builder;
+
+        if (!options.IsValidConfigure())
+            throw new InfrastructureConfigurationException("Invalid auth options, check your configuration");
+
+        builder.Services.AddSingleton(options);
+        builder.Services.AddScoped<IPublisher<JsonWebTokenDetails>, JsonWebTokenPublisher>();
 
         return builder;
     }

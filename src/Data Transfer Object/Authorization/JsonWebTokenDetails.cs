@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Data_Transfer_Object.Authorization;
 
-public class JwtDetails : AuthorizationDetails
+public class JsonWebTokenDetails : AuthorizationDetails
 {
     public required string UserId { get; set; }
     public required string Role { get; set; }

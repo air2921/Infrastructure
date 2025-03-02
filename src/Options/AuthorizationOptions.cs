@@ -11,9 +11,13 @@ public class AuthorizationOptions : Validator
 
     public string Key { get; set; } = null!;
 
+    public string Issuer { get; set; } = null!;
+
+    public string Audience { get; set; } = null!;
+
     public override bool IsValidConfigure()
     {
-        if (string.IsNullOrWhiteSpace(Key))
+        if (string.IsNullOrWhiteSpace(Key) || string.IsNullOrWhiteSpace(Issuer) || string.IsNullOrWhiteSpace(Audience))
             return false;
 
         if (Expiration == TimeSpan.Zero || Expiration.TotalSeconds <= 900)
