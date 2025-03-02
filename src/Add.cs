@@ -30,6 +30,7 @@ public static class AddInfrastructureBuilder
     public static IInfrastructureBuilder AddCryptography(this IInfrastructureBuilder builder)
     {
         builder.Services.AddScoped<IHasher, Hasher>();
+        builder.Services.AddTransient<ISigner, DilithiumSigner>();
 
         return builder;
     }
