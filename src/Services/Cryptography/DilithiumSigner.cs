@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Infrastructure.Services.Cryptography;
 
-public class DilithiumSigner : ISigner
+public class DilithiumSigner : ISigner, IDisposable
 {
     private static readonly string OqsLibraryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "assembly", "oqs.dll");
 
@@ -32,9 +32,7 @@ public class DilithiumSigner : ISigner
             Console.WriteLine("Loading oqs.dll...");
             _oqsLibraryHandle = NativeLibrary.Load(OqsLibraryPath);
             if (_oqsLibraryHandle == IntPtr.Zero)
-            {
-                throw new Exception("Failed to load oqs.dll");
-            }
+                throw new CryptographyException("Failed to load oqs.dll");
 
             Console.WriteLine("Resolving OQS_SIG_new...");
             _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
@@ -64,18 +62,16 @@ public class DilithiumSigner : ISigner
         catch (Exception ex)
         {
             Console.WriteLine("Error during initialization: " + ex.ToString());
-            throw;
+            throw new CryptographyException(ex.Message, ex);
         }
     }
 
     public DilithiumSigner()
     {
-        // Инициализация алгоритма Dilithium
+        // Инициализация алгоритма
         _sig = _oqsSigNew("Dilithium3");
         if (_sig == IntPtr.Zero)
-        {
             throw new CryptographyException("Failed to initialize Dilithium");
-        }
     }
 
     public void Dispose()
@@ -119,7 +115,7 @@ public class DilithiumSigner : ISigner
 
         int result = _oqsSigKeypair(_sig, publicKey, privateKey);
         if (result != 0)
-            throw new Exception("Failed to generate key pair");
+            throw new CryptographyException("Failed to generate key pair");
 
         return (publicKey, privateKey);
     }
@@ -133,7 +129,7 @@ public class DilithiumSigner : ISigner
 
         int result = _oqsSigSign(_sig, signature, out long signatureLen, message, message.Length, privateKey);
         if (result != 0)
-            throw new Exception("Failed to sign message");
+            throw new CryptographyException("Failed to sign message");
 
         return signature;
     }
@@ -143,7 +139,6 @@ public class DilithiumSigner : ISigner
         if (_disposed)
             throw new ObjectDisposedException("DilithiumSignature");
 
-        // Проверка подписи
         int result = _oqsSigVerify(_sig, message, message.Length, signature, signature.Length, publicKey);
         return result == 0;
     }

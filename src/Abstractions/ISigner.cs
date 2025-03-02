@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure.Abstractions;
 
-public interface ISigner : IDisposable
+public interface ISigner
 {
     public (byte[] publicKey, byte[] privateKey) GenerateKeyPair();
     public byte[] Sign(byte[] message, byte[] privateKey);
