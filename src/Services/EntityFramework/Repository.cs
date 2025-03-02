@@ -12,21 +12,6 @@ public class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
     IRepository<TEntity, TDbContext> where TEntity : EntityBase where TDbContext : DbContext
 {
-    #region Const
-
-    private const int GET_ALL_AWAITING = 20;
-    private const int GET_BY_FILTER_AWAITING = 20;
-    private const int GET_BY_ID_AWAITING = 20;
-    private const int ADD_AWAITING = 20;
-    private const int ADD_RANGE_AWAITING = 20;
-    private const int DELETE_AWAITING = 20;
-    private const int DELETE_RANGE_AWAITING = 90;
-    private const int DELETE_BY_FILTER = 20;
-    private const int UPDATE_AWAITING = 20;
-    private const int UPDATE_RANGE_AWAITING = 60;
-
-    #endregion
-
     #region fields and constructor
 
     private readonly ILogger<Repository<TEntity, TDbContext>> _logger;
@@ -78,7 +63,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(GET_BY_ID_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByIdAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             return await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
@@ -98,7 +83,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(GET_BY_FILTER_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -123,7 +108,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(GET_BY_FILTER_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -158,7 +143,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(GET_ALL_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -198,7 +183,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(ADD_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.AddAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             await _dbSet.AddAsync(entity, cancellationToken);
@@ -221,7 +206,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(ADD_RANGE_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.AddRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             await _dbSet.AddRangeAsync(entities, cancellationToken);
@@ -242,7 +227,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DELETE_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveByIdAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             var entity = await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
@@ -269,7 +254,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DELETE_BY_FILTER));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveByFilterAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -298,7 +283,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DELETE_RANGE_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             _dbSet.RemoveRange(entities);
@@ -320,7 +305,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DELETE_RANGE_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             var entities = new List<TEntity>();
@@ -351,7 +336,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(UPDATE_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             _dbSet.Attach(entity);
@@ -375,7 +360,7 @@ public class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(UPDATE_RANGE_AWAITING));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             foreach (var entity in entities)
