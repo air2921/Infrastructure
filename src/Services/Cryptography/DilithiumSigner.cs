@@ -1,13 +1,12 @@
 ﻿using Infrastructure.Abstractions;
 using Infrastructure.Exceptions;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Infrastructure.Services.Cryptography;
 
 public class DilithiumSigner : ISigner, IDisposable
 {
-    private static readonly string OqsLibraryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "assembly", "oqs.dll");
-
     private static IntPtr _oqsLibraryHandle;
     private IntPtr _sig;
 
@@ -29,10 +28,25 @@ public class DilithiumSigner : ISigner, IDisposable
     {
         try
         {
-            Console.WriteLine("Loading oqs.dll...");
-            _oqsLibraryHandle = NativeLibrary.Load(OqsLibraryPath);
-            if (_oqsLibraryHandle == IntPtr.Zero)
-                throw new CryptographyException("Failed to load oqs.dll");
+            Console.WriteLine("Loading oqs.dll from resources...");
+
+            string resourceName = "Infrastructure.Assembly.oqs.dll";
+
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)!)
+            {
+                if (stream is null)
+                    throw new CryptographyException("DLL not found in resources.");
+
+                byte[] assemblyData = new byte[stream.Length];
+                stream.Read(assemblyData, 0, assemblyData.Length);
+
+                string tempFilePath = Path.Combine(Path.GetTempPath(), "oqs.dll");
+                File.WriteAllBytes(tempFilePath, assemblyData);
+
+                _oqsLibraryHandle = NativeLibrary.Load(tempFilePath);
+                if (_oqsLibraryHandle == IntPtr.Zero)
+                    throw new CryptographyException("Failed to load oqs.dll");
+            }
 
             Console.WriteLine("Resolving OQS_SIG_new...");
             _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
