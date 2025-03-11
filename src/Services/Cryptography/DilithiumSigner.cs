@@ -26,6 +26,8 @@ public class DilithiumSigner : ISigner, IDisposable
     private readonly object _lock = new();
     private bool _disposed = false;
 
+    private const string ResourceName = "Infrastructure.Assembly.oqs.dll";
+    private const string AlgorithmName = "Dilithium3";
     private const int PublicKeyLength = 1952;
     private const int PrivateKeyLength = 4000;
     private const int SignatureLength = 3293;
@@ -34,11 +36,9 @@ public class DilithiumSigner : ISigner, IDisposable
     {
         try
         {
-            Console.WriteLine("Loading oqs.dll from resources...");
+            Console.WriteLine($"Loading {ResourceName}...");
 
-            string resourceName = "Infrastructure.Assembly.oqs.dll";
-
-            using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ??
+            using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName) ??
                 throw new CryptographyException("DLL not found in resources");
 
             using var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
@@ -83,7 +83,7 @@ public class DilithiumSigner : ISigner, IDisposable
     public DilithiumSigner()
     {
         // Инициализация алгоритма
-        _sig = _oqsSigNew("Dilithium3");
+        _sig = _oqsSigNew(AlgorithmName);
         if (_sig == IntPtr.Zero)
             throw new CryptographyException("Failed to initialize Dilithium");
     }
@@ -160,7 +160,9 @@ public class DilithiumSigner : ISigner, IDisposable
             _oqsLibraryHandle = IntPtr.Zero;
         }
 
-        File.Delete(_dllPath);
+        if (File.Exists(_dllPath))
+            File.Delete(_dllPath);
+
         _disposed = true;
     }
 }
