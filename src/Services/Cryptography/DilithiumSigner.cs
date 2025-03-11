@@ -22,7 +22,13 @@ public class DilithiumSigner : ISigner, IDisposable
     private readonly static OQS_SIG_signDelegate _oqsSigSign;
     private readonly static OQS_SIG_verifyDelegate _oqsSigVerify;
 
+    private readonly static string _dllPath = Path.Combine(Path.GetTempPath(), "oqs.dll");
+    private readonly object _lock = new();
     private bool _disposed = false;
+
+    private const int PublicKeyLength = 1952;
+    private const int PrivateKeyLength = 4000;
+    private const int SignatureLength = 3293;
 
     static DilithiumSigner()
     {
@@ -32,14 +38,13 @@ public class DilithiumSigner : ISigner, IDisposable
 
             string resourceName = "Infrastructure.Assembly.oqs.dll";
 
-            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ??
+            using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ??
                 throw new CryptographyException("DLL not found in resources");
 
-            string tempFilePath = Path.Combine(Path.GetTempPath(), "oqs.dll");
-            using var fileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
-            stream.CopyTo(fileStream);
+            using var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
+            assemblyStream.CopyTo(fileStream);
 
-            _oqsLibraryHandle = NativeLibrary.Load(tempFilePath);
+            _oqsLibraryHandle = NativeLibrary.Load(_dllPath);
             if (_oqsLibraryHandle == IntPtr.Zero)
                 throw new CryptographyException("Failed to load oqs.dll");
 
@@ -83,6 +88,55 @@ public class DilithiumSigner : ISigner, IDisposable
             throw new CryptographyException("Failed to initialize Dilithium");
     }
 
+    ~DilithiumSigner()
+    {
+        Dispose(false);
+    }
+
+    public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        lock (_lock)
+        {
+            byte[] publicKey = new byte[PublicKeyLength];
+            byte[] privateKey = new byte[PrivateKeyLength];
+
+            int result = _oqsSigKeypair(_sig, publicKey, privateKey);
+            if (result != 0)
+                throw new CryptographyException("Failed to generate key pair");
+
+            return (publicKey, privateKey);
+        }
+    }
+
+    public byte[] Sign(byte[] message, byte[] privateKey)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        lock (_lock)
+        {
+            byte[] signature = new byte[SignatureLength];
+
+            int result = _oqsSigSign(_sig, signature, out long signatureLen, message, message.Length, privateKey);
+            if (result != 0)
+                throw new CryptographyException("Failed to sign message");
+
+            return signature;
+        }
+    }
+
+    public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        lock (_lock)
+        {
+            int result = _oqsSigVerify(_sig, message, message.Length, signature, signature.Length, publicKey);
+            return result == 0;
+        }
+    }
+
     public void Dispose()
     {
         Dispose(true);
@@ -91,73 +145,22 @@ public class DilithiumSigner : ISigner, IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposed)
+        if (_disposed)
+            return;
+
+        if (_sig != IntPtr.Zero)
         {
-            if (_sig != IntPtr.Zero)
-            {
-                _oqsSigFree(_sig);
-                _sig = IntPtr.Zero;
-            }
-
-            if (_oqsLibraryHandle != IntPtr.Zero)
-            {
-                NativeLibrary.Free(_oqsLibraryHandle);
-                _oqsLibraryHandle = IntPtr.Zero;
-            }
-
-            _disposed = true;
+            _oqsSigFree(_sig);
+            _sig = IntPtr.Zero;
         }
+
+        if (_oqsLibraryHandle != IntPtr.Zero)
+        {
+            NativeLibrary.Free(_oqsLibraryHandle);
+            _oqsLibraryHandle = IntPtr.Zero;
+        }
+
+        File.Delete(_dllPath);
+        _disposed = true;
     }
-
-    ~DilithiumSigner()
-    {
-        Dispose(false);
-    }
-
-    public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
-    {
-        if (_disposed)
-            throw new ObjectDisposedException("DilithiumSignature");
-
-        byte[] publicKey = new byte[OQS_SIG_length_public_key()];
-        byte[] privateKey = new byte[OQS_SIG_length_private_key()];
-
-        int result = _oqsSigKeypair(_sig, publicKey, privateKey);
-        if (result != 0)
-            throw new CryptographyException("Failed to generate key pair");
-
-        return (publicKey, privateKey);
-    }
-
-    public byte[] Sign(byte[] message, byte[] privateKey)
-    {
-        if (_disposed)
-            throw new ObjectDisposedException("DilithiumSignature");
-
-        byte[] signature = new byte[OQS_SIG_length_signature()];
-
-        int result = _oqsSigSign(_sig, signature, out long signatureLen, message, message.Length, privateKey);
-        if (result != 0)
-            throw new CryptographyException("Failed to sign message");
-
-        return signature;
-    }
-
-    public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
-    {
-        if (_disposed)
-            throw new ObjectDisposedException("DilithiumSignature");
-
-        int result = _oqsSigVerify(_sig, message, message.Length, signature, signature.Length, publicKey);
-        return result == 0;
-    }
-
-    private int OQS_SIG_length_public_key()
-        => 1952;
-
-    private int OQS_SIG_length_private_key()
-        => 4000;
-
-    private int OQS_SIG_length_signature()
-        => 3293;
 }

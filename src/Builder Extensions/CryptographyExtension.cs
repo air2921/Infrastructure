@@ -10,7 +10,7 @@ public static class CryptographyExtension
     public static IInfrastructureBuilder AddCryptography(this IInfrastructureBuilder builder)
     {
         builder.Services.AddScoped<IHasher, Hasher>();
-        builder.Services.AddTransient<ISigner, DilithiumSigner>();
+        builder.Services.AddSingleton<ISigner, DilithiumSigner>();
 
         return builder;
     }
