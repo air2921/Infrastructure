@@ -35,11 +35,9 @@ public class DilithiumSigner : ISigner, IDisposable
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ??
                 throw new CryptographyException("DLL not found in resources");
 
-            byte[] assemblyData = new byte[stream.Length];
-            stream.Read(assemblyData, 0, assemblyData.Length);
-
             string tempFilePath = Path.Combine(Path.GetTempPath(), "oqs.dll");
-            File.WriteAllBytes(tempFilePath, assemblyData);
+            using var fileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
+            stream.CopyTo(fileStream);
 
             _oqsLibraryHandle = NativeLibrary.Load(tempFilePath);
             if (_oqsLibraryHandle == IntPtr.Zero)
