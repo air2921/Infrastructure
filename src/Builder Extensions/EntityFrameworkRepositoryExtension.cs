@@ -1,34 +1,24 @@
 ﻿using Infrastructure.Abstractions;
 using Infrastructure.Configuration;
-using Infrastructure.Services.EntityFramework.Entity;
 using Infrastructure.Services.EntityFramework;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Immutable;
 
 namespace Infrastructure.Builder_Extensions;
 
 public static class EntityFrameworkRepositoryExtension
 {
-    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Assembly[] assemblies) where TDbContext : DbContext
+    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder) where TDbContext : DbContext
     {
         builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();
         builder.Services.AddTransient<ITransactionFactory<TDbContext>, TransactionFactory<TDbContext>>();
 
         var dbContextType = typeof(TDbContext);
-        var baseType = typeof(EntityBase);
-        var entityTypes = new List<Type>();
-
-        foreach (var assembly in assemblies)
-        {
-            var types = assembly.GetTypes();
-
-            foreach (var type in types)
-            {
-                if (baseType.IsAssignableFrom(type) && type != baseType && !type.IsAbstract)
-                    entityTypes.Add(type);
-            }
-        }
+        var entityTypes = dbContextType.GetProperties()
+            .Where(prop => prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+            .Select(prop => prop.PropertyType.GetGenericArguments()[0])
+            .ToImmutableArray();
 
         foreach (var entityType in entityTypes)
         {
