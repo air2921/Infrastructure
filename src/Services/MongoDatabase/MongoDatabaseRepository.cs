@@ -9,24 +9,27 @@ using System.Linq.Expressions;
 namespace Infrastructure.Services.MongoDatabase;
 
 /// <summary>
-/// A repository class for performing CRUD (Create, Read, Update, Delete) operations on a MongoDB collection.
-/// This class provides methods to interact with a specific MongoDB collection, using a provided connection provider and logger.
+/// A generic repository class for performing CRUD operations on a MongoDB collection.
+/// This class supports working with a specific MongoDB context and document type.
 /// </summary>
-/// <typeparam name="TDocument">
-/// The type of document stored in the MongoDB collection. This type must inherit from <see cref="DocumentBase"/>.
-/// </typeparam>
-/// <param name="provider">The MongoDB connection provider used to access the database.</param>
-/// <param name="logger">A logger for tracking the operations performed by this repository.</param>
+/// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoDatabaseContext"/>.</typeparam>
+/// <typeparam name="TDocument">The type of the document, which must inherit from <see cref="DocumentBase"/>.</typeparam>
+/// <param name="context">The MongoDB context used to access the database.</param>
+/// <param name="logger">A logger for tracking operations performed by this repository.</param>
 /// <param name="document">An instance of the document type used to determine the collection name.</param>
 /// <remarks>
-/// This class is designed to work with MongoDB collections and provides methods for querying, inserting, updating, and deleting documents.
+/// This class provides methods for querying, inserting, updating, and deleting documents in a MongoDB collection.
+/// It uses the provided <see cref="TMongoContext"/> to access the database and ensures thread-safe operations.
 /// </remarks>
-public class MongoDatabaseRepository<TDocument>(MongoDatabaseProvider provider, ILogger<MongoDatabaseRepository<TDocument>> logger, TDocument document) : IMongoRepository<TDocument> where TDocument : DocumentBase
+public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILogger<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
+    : IMongoRepository<TDocument>, IMongoRepository<TMongoContext, TDocument>
+    where TDocument : DocumentBase
+    where TMongoContext : MongoDatabaseContext
 {
     /// <summary>
     /// A private field that retrieves the specific collection from MongoDB.
     /// </summary>
-    private readonly IMongoCollection<TDocument> _collection = provider.Database.GetCollection<TDocument>(document.CollectionName);
+    private readonly IMongoCollection<TDocument> _collection = context.Database.GetCollection<TDocument>(document.CollectionName);
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.
@@ -290,4 +293,3 @@ public class MongoDatabaseRepository<TDocument>(MongoDatabaseProvider provider, 
         }
     }
 }
-
