@@ -15,7 +15,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// </remarks>
 public abstract class MongoDatabaseContext(MongoDatabaseConfigureOptions configureOptions) : IDisposable
 {
-    public virtual IMongoCollection<TDocument> SetDocument<TDocument>() where TDocument : DocumentBase, new()
+    protected virtual IMongoCollection<TDocument> SetDocument<TDocument>() where TDocument : DocumentBase, new()
     {
         var document = new TDocument();
         return Database.GetCollection<TDocument>(document.CollectionName);
@@ -38,7 +38,7 @@ public abstract class MongoDatabaseContext(MongoDatabaseConfigureOptions configu
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            _database = _client.GetDatabase(configureOptions.Connection);
+            _database = _client.GetDatabase(configureOptions.Database);
             return _database;
         }
     }
