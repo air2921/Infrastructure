@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Abstractions;
 using Infrastructure.Configuration;
+using Infrastructure.Options;
 using Infrastructure.Services.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,8 +10,16 @@ namespace Infrastructure.Builder_Extensions;
 
 public static class EntityFrameworkRepositoryExtension
 {
-    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder) where TDbContext : DbContext
+    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : DbContext
     {
+        var options = new EntityFrameworkConfigureOptions();
+        configureOptions.Invoke(options);
+
+        if (!options.IsEnable)
+            return builder;
+
+        builder.AddDatabaseContext<TDbContext>(options);
+
         builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();
         builder.Services.AddTransient<ITransactionFactory<TDbContext>, TransactionFactory<TDbContext>>();
 
