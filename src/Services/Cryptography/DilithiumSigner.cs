@@ -53,10 +53,10 @@ public class DilithiumSigner : ISigner, IDisposable
             Console.WriteLine($"Loading {ResourceName}...");
 
             using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName) ??
-                throw new CryptographyException("DLL not found in resources");
+                throw new CryptographyException($"{ResourceName} is not found");
 
-            using var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
-            assemblyStream.CopyTo(fileStream);
+            using (var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true))
+                assemblyStream.CopyTo(fileStream);
 
             _oqsLibraryHandle = NativeLibrary.Load(_dllPath);
             if (_oqsLibraryHandle == IntPtr.Zero)
