@@ -24,7 +24,8 @@ namespace Infrastructure.Services.EntityFramework;
 /// </remarks>
 public class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
-    IRepository<TEntity, TDbContext> where TEntity : EntityBase where TDbContext : DbContext
+    IRepository<TEntity, TDbContext>,
+    IDisposable where TEntity : EntityBase where TDbContext : DbContext
 {
     #region fields and constructor
 
@@ -34,6 +35,8 @@ public class Repository<TEntity, TDbContext> :
     private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
 
     private readonly SemaphoreSlim _semaphore = new(1, 1);
+
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Repository{TEntity, TDbContext}"/> class.
@@ -45,6 +48,21 @@ public class Repository<TEntity, TDbContext> :
         _logger = new Lazy<ILogger<Repository<TEntity, TDbContext>>>(() => logger);
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _dbSet = new Lazy<DbSet<TEntity>>(() => _context.Set<TEntity>(), LazyThreadSafetyMode.ExecutionAndPublication);
+    }
+
+    /// <summary>
+    /// Finalizes an instance of the <see cref="Repository{TEntity, TDbContext}"/> class.
+    /// <para>This destructor is called by the garbage collector when the object is being finalized.</para>
+    /// </summary>
+    /// <remarks>
+    /// The finalizer ensures that unmanaged resources are released if the <see cref="Dispose()"/> method 
+    /// was not called explicitly. It calls the <see cref="Dispose(bool)"/> method with <c>false</c> to release 
+    /// only unmanaged resources. Managed resources are not disposed in this case, as they are assumed to have 
+    /// already been released by the <see cref="Dispose()"/> method.
+    /// </remarks>
+    ~Repository()
+    {
+        Dispose(false);
     }
 
     #endregion
@@ -578,5 +596,48 @@ public class Repository<TEntity, TDbContext> :
         {
             _semaphore.Release();
         }
+    }
+
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="Repository{TEntity, TDbContext}"/> and optionally releases the managed resources.
+    /// <para>This method is called by the public <see cref="Dispose()"/> method and the finalizer.</para>
+    /// </summary>
+    /// <param name="disposing">
+    /// <c>true</c> to release both managed and unmanaged resources; 
+    /// <c>false</c> to release only unmanaged resources.
+    /// </param>
+    /// <remarks>
+    /// If <paramref name="disposing"/> is <c>true</c>, this method releases all resources held by the repository, 
+    /// including the <see cref="SemaphoreSlim"/> used for thread synchronization. 
+    /// If <paramref name="disposing"/> is <c>false</c>, only unmanaged resources are released.
+    /// This method ensures that resources are not disposed more than once by checking the <see cref="_disposed"/> field.
+    /// </remarks>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            // Release managed resources
+            _semaphore.Dispose();
+        }
+
+        _disposed = true;
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="Repository{TEntity, TDbContext}"/>.
+    /// <para>This method is thread-safe and can be called multiple times without causing exceptions.</para>
+    /// </summary>
+    /// <remarks>
+    /// This method calls the protected <see cref="Dispose(bool)"/> method with <c>true</c> to release both managed and unmanaged resources.
+    /// It also suppresses finalization of the current instance by calling <see cref="GC.SuppressFinalize(object)"/>.
+    /// After calling this method, the repository should not be used, as its resources have been released.
+    /// </remarks>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }
