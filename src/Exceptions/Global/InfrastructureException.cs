@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Pkcs;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Exceptions.Global;
 
@@ -21,8 +20,9 @@ public abstract class InfrastructureException : Exception
     }
 
     [DoesNotReturn]
-    public abstract void ThrowNoStackTrace(string message);
+    public abstract void Throw(string message);
 
-    [DoesNotReturn]
-    public abstract void ThrowWithStackTrace(Exception exception);
+    public abstract void ThrowIf([DoesNotReturnIf(true)] bool condition, string message);
+
+    public abstract void ThrowIfNull([NotNull] object? param, string message);
 }

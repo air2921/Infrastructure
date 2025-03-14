@@ -1,6 +1,5 @@
 ﻿using Infrastructure.Exceptions.Global;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.ExceptionServices;
 
 namespace Infrastructure.Exceptions;
 
@@ -22,10 +21,20 @@ public class InvalidAgrumentException : InfrastructureException
     }
 
     [DoesNotReturn]
-    public override void ThrowNoStackTrace(string message)
-        => throw ExceptionDispatchInfo.Capture(new InvalidAgrumentException(message)).SourceException;
+    public override void Throw(string message)
+        => throw new InvalidAgrumentException(message);
 
-    [DoesNotReturn]
-    public override void ThrowWithStackTrace(Exception exception)
-        => ExceptionDispatchInfo.Capture(exception).Throw();
+    public override void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
+    {
+        if (!condition)
+            return;
+
+        throw new InvalidAgrumentException(message);
+    }
+
+    public override void ThrowIfNull([NotNull] object? param, string message)
+    {
+        if (param is null)
+            throw new InvalidAgrumentException(message);
+    }
 }
