@@ -26,10 +26,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
     where TDocument : DocumentBase
     where TMongoContext : MongoDatabaseContext
 {
-    /// <summary>
-    /// A private field that retrieves the specific collection from MongoDB.
-    /// </summary>
-    private readonly IMongoCollection<TDocument> _collection = context.Database.GetCollection<TDocument>(document.CollectionName);
+    private readonly IMongoCollection<TDocument> _collection = context.SetDocument(document);
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.

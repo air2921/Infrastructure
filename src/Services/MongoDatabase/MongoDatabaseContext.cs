@@ -15,13 +15,14 @@ namespace Infrastructure.Services.MongoDatabase;
 /// </remarks>
 public abstract class MongoDatabaseContext(MongoDatabaseConfigureOptions configureOptions) : IDisposable
 {
-    /// <summary>
-    /// Retrieves a document set for the specified document type.
-    /// </summary>
-    /// <typeparam name="TDocument">The type of the document, which must inherit from <see cref="DocumentBase"/>.</typeparam>
-    /// <returns>A <see cref="DocumentSet{TDocument}"/> instance for the specified document type.</returns>
-    public virtual DocumentSet<TDocument> SetDocument<TDocument>() where TDocument : DocumentBase
-        => new();
+    public virtual IMongoCollection<TDocument> SetDocument<TDocument>() where TDocument : DocumentBase, new()
+    {
+        var document = new TDocument();
+        return Database.GetCollection<TDocument>(document.CollectionName);
+    }
+
+    public virtual IMongoCollection<TDocument> SetDocument<TDocument>(TDocument document) where TDocument : DocumentBase
+        => Database.GetCollection<TDocument>(document.CollectionName);
 
     private bool _disposed = false;
 
@@ -37,12 +38,8 @@ public abstract class MongoDatabaseContext(MongoDatabaseConfigureOptions configu
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            return _database;
-        }
-        set
-        {
-            ObjectDisposedException.ThrowIf(_disposed, this);
             _database = _client.GetDatabase(configureOptions.Connection);
+            return _database;
         }
     }
 
