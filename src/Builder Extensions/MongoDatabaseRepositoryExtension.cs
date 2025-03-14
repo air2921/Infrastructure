@@ -23,6 +23,7 @@ public static class MongoDatabaseRepositoryExtension
             throw new InfrastructureConfigurationException("Invalid Mongodb configuration. Please check connection or database", nameof(options));
 
         builder.Services.AddSingleton(options);
+        builder.Services.AddScoped<TMongoContext>();
 
         var mongoContextType = typeof(TMongoContext);
         var documentTypes = mongoContextType.GetProperties()
