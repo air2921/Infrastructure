@@ -6,8 +6,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Cryptography;
 
+/// <summary>
+/// A class responsible for hashing and verifying strings using the BCrypt algorithm.
+/// This class implements the <see cref="IHasher"/> interface to provide hashing and verification functionality.
+/// </summary>
+/// <param name="logger">A logger for tracking errors and operations performed by this class.</param>
+/// <remarks>
+/// This class uses the BCrypt algorithm to hash and verify strings. It supports enhanced hashing with different hash types,
+/// such as SHA512. Errors during hashing or verification are logged using the provided logger.
+/// </remarks>
 public class Hasher(ILogger<Hasher> logger) : IHasher
 {
+    /// <summary>
+    /// Hashes a password using the BCrypt algorithm.
+    /// </summary>
+    /// <param name="password">The password to hash.</param>
+    /// <param name="hashType">The hash type to use for enhanced hashing. Defaults to <see cref="HashType.SHA512"/>.</param>
+    /// <returns>A hashed string representation of the password.</returns>
+    /// <exception cref="CryptographyException">Thrown if an error occurs during hashing.</exception>
+    /// <example>
+    /// <code>
+    /// var hasher = new Hasher(logger);
+    /// string hashedPassword = hasher.Hash("myPassword123");
+    /// </code>
+    /// </example>
     public string Hash(string password, HashType hashType = HashType.SHA512)
     {
         try
@@ -21,7 +43,20 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
         }
     }
 
-
+    /// <summary>
+    /// Verifies if an input string matches a previously hashed string.
+    /// </summary>
+    /// <param name="input">The input string to verify (e.g., a password).</param>
+    /// <param name="src">The previously hashed string to compare against.</param>
+    /// <param name="hashType">The hash type used for enhanced verification. Defaults to <see cref="HashType.SHA512"/>.</param>
+    /// <returns><c>true</c> if the input matches the hashed string; otherwise, <c>false</c>.</returns>
+    /// <exception cref="CryptographyException">Thrown if an error occurs during verification.</exception>
+    /// <example>
+    /// <code>
+    /// var hasher = new Hasher(logger);
+    /// bool isValid = hasher.Verify("myPassword123", hashedPassword);
+    /// </code>
+    /// </example>
     public bool Verify(string input, string src, HashType hashType = HashType.SHA512)
     {
         try

@@ -5,6 +5,16 @@ using System.Runtime.InteropServices;
 
 namespace Infrastructure.Services.Cryptography;
 
+/// <summary>
+/// A class for performing cryptographic operations using the Dilithium post-quantum signature algorithm.
+/// This class implements the <see cref="ISigner"/> interface for signing and verifying messages,
+/// and the <see cref="IDisposable"/> interface for resource management.
+/// </summary>
+/// <remarks>
+/// This class uses the Open Quantum Safe (OQS) library to perform Dilithium-based cryptographic operations.
+/// It loads the OQS library from an embedded resource, initializes the Dilithium algorithm, and provides
+/// methods for generating key pairs, signing messages, and verifying signatures.
+/// </remarks>
 public class DilithiumSigner : ISigner, IDisposable
 {
     private static IntPtr _oqsLibraryHandle;
@@ -32,6 +42,10 @@ public class DilithiumSigner : ISigner, IDisposable
     private const int PrivateKeyLength = 4000;
     private const int SignatureLength = 3293;
 
+    /// <summary>
+    /// Static constructor to initialize the OQS library and resolve required functions.
+    /// </summary>
+    /// <exception cref="CryptographyException">Thrown if the OQS library fails to load or initialize.</exception>
     static DilithiumSigner()
     {
         try
@@ -80,19 +94,36 @@ public class DilithiumSigner : ISigner, IDisposable
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DilithiumSigner"/> class.
+    /// </summary>
+    /// <exception cref="CryptographyException">Thrown if the Dilithium algorithm fails to initialize.</exception>
     public DilithiumSigner()
     {
-        // Инициализация алгоритма
         _sig = _oqsSigNew(AlgorithmName);
         if (_sig == IntPtr.Zero)
             throw new CryptographyException("Failed to initialize Dilithium");
     }
 
+    /// <summary>
+    /// Finalizer to ensure resources are released if <see cref="Dispose()"/> is not called.
+    /// </summary>
     ~DilithiumSigner()
     {
         Dispose(false);
     }
 
+    /// <summary>
+    /// Generates a public/private key pair using the Dilithium algorithm.
+    /// </summary>
+    /// <returns>A tuple containing the public key and private key as byte arrays.</returns>
+    /// <exception cref="CryptographyException">Thrown if key pair generation fails.</exception>
+    /// <example>
+    /// <code>
+    /// var signer = new DilithiumSigner();
+    /// var (publicKey, privateKey) = signer.GenerateKeyPair();
+    /// </code>
+    /// </example>
     public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -110,6 +141,19 @@ public class DilithiumSigner : ISigner, IDisposable
         }
     }
 
+    /// <summary>
+    /// Signs a message using the provided private key.
+    /// </summary>
+    /// <param name="message">The message to sign as a byte array.</param>
+    /// <param name="privateKey">The private key to use for signing.</param>
+    /// <returns>The signature as a byte array.</returns>
+    /// <exception cref="CryptographyException">Thrown if signing fails.</exception>
+    /// <example>
+    /// <code>
+    /// var signer = new DilithiumSigner();
+    /// var signature = signer.Sign(message, privateKey);
+    /// </code>
+    /// </example>
     public byte[] Sign(byte[] message, byte[] privateKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -126,6 +170,19 @@ public class DilithiumSigner : ISigner, IDisposable
         }
     }
 
+    /// <summary>
+    /// Verifies a message's signature using the provided public key.
+    /// </summary>
+    /// <param name="message">The original message as a byte array.</param>
+    /// <param name="signature">The signature to verify as a byte array.</param>
+    /// <param name="publicKey">The public key to use for verification.</param>
+    /// <returns><c>true</c> if the signature is valid; otherwise, <c>false</c>.</returns>
+    /// <example>
+    /// <code>
+    /// var signer = new DilithiumSigner();
+    /// bool isValid = signer.Verify(message, signature, publicKey);
+    /// </code>
+    /// </example>
     public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -137,12 +194,19 @@ public class DilithiumSigner : ISigner, IDisposable
         }
     }
 
+    /// <summary>
+    /// Releases all resources used by the <see cref="DilithiumSigner"/>.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="DilithiumSigner"/> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
