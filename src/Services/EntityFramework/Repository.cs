@@ -5,6 +5,7 @@ using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Threading;
 
 namespace Infrastructure.Services.EntityFramework;
 
@@ -18,6 +19,8 @@ public class Repository<TEntity, TDbContext> :
     private readonly TDbContext _context;
     private readonly Lazy<DbSet<TEntity>> _dbSet;
     private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
+
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     /// <summary>
     /// Constructor that sets up the DbSet for the entity T.
@@ -43,6 +46,8 @@ public class Repository<TEntity, TDbContext> :
 
     public ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter)
     {
+        _semaphore.Wait();
+
         try
         {
             IQueryable<TEntity> query = _dbSet.Value;
@@ -57,10 +62,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByIdAwait));
@@ -77,10 +88,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity?> GetByFilterAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
@@ -102,10 +119,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity?> GetByFilterAsync(SingleQueryBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
@@ -137,10 +160,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<IEnumerable<TEntity>> GetRangeAsync(RangeQueryBuilder<TEntity>? builder, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetRangeAwait));
@@ -177,10 +206,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.AddAwait));
@@ -200,10 +235,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.AddRangeAwait));
@@ -221,10 +262,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity?> DeleteByIdAsync(object id, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveByIdAwait));
@@ -248,10 +295,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity?> DeleteByFilterAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveByFilterAwait));
@@ -277,10 +330,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<IEnumerable<TEntity>> DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
@@ -299,10 +358,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<IEnumerable<TEntity>> DeleteRangeAsync(IEnumerable<object> identifiers, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
@@ -330,10 +395,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<TEntity?> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateAwait));
@@ -354,10 +425,16 @@ public class Repository<TEntity, TDbContext> :
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<IEnumerable<TEntity?>> UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
+        await _semaphore.WaitAsync(cancellationToken);
+
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateRangeAwait));
@@ -380,6 +457,10 @@ public class Repository<TEntity, TDbContext> :
         {
             _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 }

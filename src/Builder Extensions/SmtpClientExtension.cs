@@ -22,18 +22,9 @@ public static class SmtpClientExtension
         if (!options.IsValidConfigure())
             throw new InfrastructureConfigurationException("Invalid SMTP configuration. Please check Provider, Address, Password and Port.", nameof(options));
 
-        builder.Services.AddScoped(provider =>
-        {
-            var logger = provider.GetRequiredService<ILogger<SmtpClientWrapper>>();
-            return new SmtpClientWrapper(logger, options);
-        });
-
-        builder.Services.AddScoped<ISmtpSender<MailDetails>>(provider =>
-        {
-            var logger = provider.GetRequiredService<ILogger<SmtpSender>>();
-            var smtpWrapper = provider.GetRequiredService<SmtpClientWrapper>();
-            return new SmtpSender(logger, options, smtpWrapper);
-        });
+        builder.Services.AddSingleton(options);
+        builder.Services.AddScoped<SmtpClientWrapper>();
+        builder.Services.AddScoped<ISmtpSender<MailDetails>, SmtpSender>();
 
         return builder;
     }

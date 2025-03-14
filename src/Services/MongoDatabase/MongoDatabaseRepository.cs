@@ -26,7 +26,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
     where TDocument : DocumentBase
     where TMongoContext : MongoDatabaseContext
 {
-    private readonly Lazy<IMongoCollection<TDocument>> _collection = new(() => context.SetDocument(document));
+    private readonly Lazy<IMongoCollection<TDocument>> _collection = new(() => context.SetDocument(document), LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.

@@ -52,7 +52,7 @@ public class SmtpClientWrapper : IDisposable
             }
 
             return client;
-        });
+        }, LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     /// <summary>
