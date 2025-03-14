@@ -92,7 +92,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
     }
 
-    public async Task<bool> IsExists(string key, CancellationToken cancellationToken = default)
+    public async Task<bool> IsExistsAsync(string key, CancellationToken cancellationToken = default)
     {
         try
         {

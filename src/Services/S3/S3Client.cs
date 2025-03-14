@@ -8,7 +8,7 @@ namespace Infrastructure.Services.S3;
 
 public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
 {
-    public string PreSignedUrl(string bucket, string key, DateTime expires)
+    public ValueTask<string> PreSignedUrl(string bucket, string key, DateTime expires)
     {
         try
         {
@@ -20,7 +20,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
                 Verb = HttpVerb.GET
             };
 
-            return s3Client.GetPreSignedURL(request);
+            return new ValueTask<string>(s3Client.GetPreSignedURL(request));
         }
         catch (Exception ex)
         {
