@@ -23,11 +23,11 @@ public static class EntityFrameworkRepositoryExtension
         foreach (var entityType in entityTypes)
         {
             var repositoryType = typeof(Repository<,>).MakeGenericType(entityType, dbContextType);
-            var interfaceType = typeof(IRepository<>).MakeGenericType(entityType);
-            builder.Services.AddScoped(interfaceType, repositoryType);
 
+            var interfaceType = typeof(IRepository<>).MakeGenericType(entityType);
             var repositoryWithContextInterfaceType = typeof(IRepository<,>).MakeGenericType(entityType, dbContextType);
             builder.Services.AddScoped(repositoryWithContextInterfaceType, repositoryType);
+            builder.Services.AddScoped(interfaceType, repositoryType);
         }
 
         return builder;
