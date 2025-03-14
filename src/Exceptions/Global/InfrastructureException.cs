@@ -1,4 +1,7 @@
-﻿namespace Infrastructure.Exceptions.Global;
+﻿using Org.BouncyCastle.Asn1.Pkcs;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Infrastructure.Exceptions.Global;
 
 public abstract class InfrastructureException : Exception
 {
@@ -16,4 +19,10 @@ public abstract class InfrastructureException : Exception
     {
 
     }
+
+    [DoesNotReturn]
+    public abstract void ThrowNoStackTrace(string message);
+
+    [DoesNotReturn]
+    public abstract void ThrowWithStackTrace(Exception exception);
 }
