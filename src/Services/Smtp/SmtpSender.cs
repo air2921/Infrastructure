@@ -26,7 +26,7 @@ namespace Infrastructure.Services.Smtp;
 public class SmtpSender(
     ILogger<SmtpSender> logger,
     SmtpConfigureOptions configureOptions,
-    SmtpClientWrapper smtpClient) : ISmtpSender<MailDetails>
+    Lazy<SmtpClientWrapper> smtpClient) : ISmtpSender<MailDetails>
 {
 
     /// <summary>
@@ -53,8 +53,7 @@ public class SmtpSender(
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
-            // Sending the email
-            await smtpClient.EmailSendAsync(emailMessage, cancellationToken);
+            await smtpClient.Value.EmailSendAsync(emailMessage, cancellationToken);
         }
         catch (SmtpClientException)
         {
@@ -62,7 +61,6 @@ public class SmtpSender(
         }
         catch (Exception ex)
         {
-            // Logging any other exceptions and rethrowing as a generic SmtpClientException
             logger.LogError(ex.Message, mail.EmailTo);
             throw new SmtpClientException("An error occurred while sending the email.");
         }

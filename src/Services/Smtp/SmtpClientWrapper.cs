@@ -21,7 +21,7 @@ namespace Infrastructure.Services.Smtp;
 /// </remarks>
 public class SmtpClientWrapper : IDisposable
 {
-    private readonly SmtpClient _smtpClient = new();
+    private readonly Lazy<SmtpClient> _smtpClient;
     private readonly ILogger<SmtpClientWrapper> _logger;
 
     private bool _disposed;
@@ -37,16 +37,22 @@ public class SmtpClientWrapper : IDisposable
     {
         _logger = logger;
 
-        try
+        _smtpClient = new Lazy<SmtpClient>(() =>
         {
-            _smtpClient.Connect(configureOptions.Provider, configureOptions.Port, SecureSocketOptions.Auto);
-            _smtpClient.Authenticate(configureOptions.Address, configureOptions.Password);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString(), nameof(SmtpClientWrapper));
-            throw new SmtpClientException("Failed to authenticate or connect to the SMTP server.");
-        }
+            var client = new SmtpClient();
+            try
+            {
+                client.Connect(configureOptions.Provider, configureOptions.Port, SecureSocketOptions.Auto);
+                client.Authenticate(configureOptions.Address, configureOptions.Password);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString(), nameof(SmtpClientWrapper));
+                throw new SmtpClientException("Failed to authenticate or connect to the SMTP server.");
+            }
+
+            return client;
+        });
     }
 
     /// <summary>
@@ -68,7 +74,7 @@ public class SmtpClientWrapper : IDisposable
 
         try
         {
-            await _smtpClient.SendAsync(message, cancellationToken);
+            await _smtpClient.Value.SendAsync(message, cancellationToken);
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
@@ -101,10 +107,12 @@ public class SmtpClientWrapper : IDisposable
         if (_disposed)
             return;
 
-        if (disposing)
-            _smtpClient.Disconnect(true);
+        if (disposing && _smtpClient.IsValueCreated)
+            _smtpClient.Value.Disconnect(true);
 
-        _smtpClient.Dispose();
+        if (_smtpClient.IsValueCreated)
+            _smtpClient.Value.Dispose();
+
         _disposed = true;
     }
 
