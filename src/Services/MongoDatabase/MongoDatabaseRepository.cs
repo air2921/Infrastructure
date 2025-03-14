@@ -26,7 +26,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
     where TDocument : DocumentBase
     where TMongoContext : MongoDatabaseContext
 {
-    private readonly IMongoCollection<TDocument> _collection = context.SetDocument(document);
+    private readonly Lazy<IMongoCollection<TDocument>> _collection = new(() => context.SetDocument(document));
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.
@@ -51,7 +51,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to get range of entities\nCollection name: {document.CollectionName}");
 
-            return await _collection.Find(queryBuilder.Filter is null ? _ => true : queryBuilder.Filter)
+            return await _collection.Value.Find(queryBuilder.Filter is null ? _ => true : queryBuilder.Filter)
                 .Skip(queryBuilder.Skip)
                 .Limit(queryBuilder.Take)
                 .ToListAsync();
@@ -80,7 +80,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to get entity by id {id}\nCollection name: {document.CollectionName}");
 
-            return await _collection.Find(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+            return await _collection.Value.Find(x => x.Id.Equals(id)).FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -106,7 +106,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to get entity by filter\nCollection name: {document.CollectionName}");
 
-            return await _collection.Find(query).FirstOrDefaultAsync();
+            return await _collection.Value.Find(query).FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -133,7 +133,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to insert one entity\nCollection name: {document.CollectionName}");
 
-            await _collection.InsertOneAsync(documentEntity);
+            await _collection.Value.InsertOneAsync(documentEntity);
             return documentEntity.Id;
         }
         catch (Exception ex)
@@ -161,7 +161,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to insert a range of entities\nCollection name: {document.CollectionName}");
 
-            var task = _collection.InsertManyAsync(documentEntities);
+            var task = _collection.Value.InsertManyAsync(documentEntities);
 
             var identifiers = new HashSet<string>();
             identifiers.UnionWith(documentEntities.Select(x => x.Id));
@@ -193,7 +193,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to remove one entity by id {id}\nCollection name: {document.CollectionName}");
 
-            await _collection.DeleteOneAsync(x => x.Id == id);
+            await _collection.Value.DeleteOneAsync(x => x.Id == id);
         }
         catch (Exception ex)
         {
@@ -220,7 +220,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to remove a range of entities by identifiers\nCollection name: {document.CollectionName}");
 
-            var tasks = identifiers.Select(id => _collection.DeleteOneAsync(x => x.Id.Equals(id)));
+            var tasks = identifiers.Select(id => _collection.Value.DeleteOneAsync(x => x.Id.Equals(id)));
             await Task.WhenAll(tasks);
         }
         catch (Exception ex)
@@ -249,7 +249,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to update one entity, entityId {documentEntity.Id}\nCollection name: {document.CollectionName}");
 
-            await _collection.ReplaceOneAsync(x => x.Id.Equals(documentEntity.Id), documentEntity);
+            await _collection.Value.ReplaceOneAsync(x => x.Id.Equals(documentEntity.Id), documentEntity);
         }
         catch (Exception ex)
         {
@@ -280,7 +280,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to update a range of entities\nCollection name: {document.CollectionName}");
 
-            var tasks = documentEntities.Select(documentEntity => _collection.ReplaceOneAsync(x => x.Id.Equals(documentEntity.Id), documentEntity));
+            var tasks = documentEntities.Select(documentEntity => _collection.Value.ReplaceOneAsync(x => x.Id.Equals(documentEntity.Id), documentEntity));
             await Task.WhenAll(tasks);
         }
         catch (Exception ex)

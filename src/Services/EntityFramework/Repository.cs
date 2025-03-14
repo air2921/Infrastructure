@@ -14,10 +14,10 @@ public class Repository<TEntity, TDbContext> :
 {
     #region fields and constructor
 
-    private readonly ILogger<Repository<TEntity, TDbContext>> _logger;
+    private readonly Lazy<ILogger<Repository<TEntity, TDbContext>>> _logger;
     private readonly TDbContext _context;
-    private readonly DbSet<TEntity> _dbSet;
-    private readonly string _tName = typeof(TEntity).FullName ?? typeof(TEntity).Name;
+    private readonly Lazy<DbSet<TEntity>> _dbSet;
+    private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
 
     /// <summary>
     /// Constructor that sets up the DbSet for the entity T.
@@ -27,9 +27,9 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="ArgumentNullException">Thrown if context is null.</exception>
     public Repository(ILogger<Repository<TEntity, TDbContext>> logger, TDbContext context)
     {
-        _logger = logger;
+        _logger = new Lazy<ILogger<Repository<TEntity, TDbContext>>>(() => logger);
         _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = _context.Set<TEntity>();
+        _dbSet = new Lazy<DbSet<TEntity>>(() => _context.Set<TEntity>(), LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     #endregion
@@ -39,13 +39,13 @@ public class Repository<TEntity, TDbContext> :
     /// It is intended to be used only for configuring the loading of related entities.
     /// </summary>
     /// <returns>IQueryable<T></returns>
-    public virtual IQueryable<TEntity> GetQuery() => _dbSet;
+    public virtual IQueryable<TEntity> GetQuery() => _dbSet.Value;
 
     public ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter)
     {
         try
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.Value;
             if (filter is not null)
                 query = query.Where(filter);
 
@@ -54,7 +54,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -66,7 +66,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByIdAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            return await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
+            return await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -74,7 +74,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -86,7 +86,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.Value;
 
             query = query.AsNoTracking();
             query = query.Where(filter);
@@ -99,7 +99,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -111,7 +111,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.Value;
 
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
@@ -134,7 +134,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -146,7 +146,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.Value;
 
             if (builder is null)
                 return await query.ToListAsync(cancellationToken);
@@ -174,7 +174,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -186,7 +186,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.AddAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            await _dbSet.AddAsync(entity, cancellationToken);
+            await _dbSet.Value.AddAsync(entity, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
             return entity;
@@ -197,7 +197,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -209,7 +209,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.AddRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            await _dbSet.AddRangeAsync(entities, cancellationToken);
+            await _dbSet.Value.AddRangeAsync(entities, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
         catch (OperationCanceledException)
@@ -218,7 +218,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -230,10 +230,10 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveByIdAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            var entity = await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
+            var entity = await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
             if (entity is not null)
             {
-                var deletedEntity = _dbSet.Remove(entity).Entity;
+                var deletedEntity = _dbSet.Value.Remove(entity).Entity;
                 await _context.SaveChangesAsync(cancellationToken);
                 return deletedEntity;
             }
@@ -245,7 +245,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -257,14 +257,14 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveByFilterAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.Value;
             query = query.Where(filter);
 
             var entity = await query.FirstOrDefaultAsync(cancellationToken);
             if (entity is null)
                 return null;
 
-            var deletedEntity = _dbSet.Remove(entity).Entity;
+            var deletedEntity = _dbSet.Value.Remove(entity).Entity;
             await _context.SaveChangesAsync(cancellationToken);
             return deletedEntity;
         }
@@ -274,7 +274,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -286,7 +286,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _dbSet.RemoveRange(entities);
+            _dbSet.Value.RemoveRange(entities);
             await _context.SaveChangesAsync(cancellationToken);
             return entities;
         }
@@ -296,7 +296,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -312,12 +312,12 @@ public class Repository<TEntity, TDbContext> :
 
             foreach (var id in identifiers)
             {
-                var entity = await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
+                var entity = await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
                 if (entity is not null)
                     entities.Add(entity);
             }
 
-            _dbSet.RemoveRange(entities);
+            _dbSet.Value.RemoveRange(entities);
             await _context.SaveChangesAsync(cancellationToken);
             return entities;
         }
@@ -327,7 +327,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -339,7 +339,7 @@ public class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _dbSet.Attach(entity);
+            _dbSet.Value.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -351,7 +351,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
@@ -365,7 +365,7 @@ public class Repository<TEntity, TDbContext> :
 
             foreach (var entity in entities)
             {
-                _dbSet.Attach(entity);
+                _dbSet.Value.Attach(entity);
                 _context.Entry(entity).State = EntityState.Modified;
             }
 
@@ -378,7 +378,7 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString(), _tName);
+            _logger.Value.LogError(ex.ToString(), _tName);
             throw new EntityException();
         }
     }
