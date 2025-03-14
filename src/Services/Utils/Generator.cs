@@ -48,7 +48,7 @@ public class Generator : IGenerator
     /// Generates a random numeric code of the specified length.
     /// </summary>
     /// <param name="length">The length of the numeric code to generate.</param>
-    /// <returns>A random numeric code as an integer.</returns>
+    /// <returns>A random numeric code as an string.</returns>
     /// <exception cref="InvalidAgrumentException">Thrown if the length is outside the supported range defined in <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>.</exception>
     /// <example>
     /// <code>
@@ -56,7 +56,7 @@ public class Generator : IGenerator
     /// int code = generator.GenerateCode(6);
     /// </code>
     /// </example>
-    public int GenerateCode(int length)
+    public string GenerateCode(int length)
     {
         if (length < Immutable.MinCodeLength || length >= Immutable.MaxCodeLength)
             throw new InvalidAgrumentException($"Lenght {length} is not supported");
@@ -65,6 +65,6 @@ public class Generator : IGenerator
         for (int i = 0; i < length; i++)
             builder.Append(_rnd.Next(10));
 
-        return int.Parse(builder.ToString());
+        return builder.ToString();
     }
 }
