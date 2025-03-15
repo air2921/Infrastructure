@@ -26,6 +26,9 @@ public class SmtpClientWrapper : IDisposable
 
     private bool _disposed;
 
+    private static readonly Lazy<SmtpClientException> _smtpAuthError = new(() => new("Failed to authenticate or connect to the SMTP server"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<SmtpClientException> _smtpAuthOrSocketError = new(() => new("Error during email sending due to authentication or network issues"), LazyThreadSafetyMode.ExecutionAndPublication);
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SmtpClientWrapper"/> class.
     /// Connects to the SMTP provider and authenticates using the provided configuration options.
@@ -48,7 +51,7 @@ public class SmtpClientWrapper : IDisposable
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString(), nameof(SmtpClientWrapper));
-                throw new SmtpClientException("Failed to authenticate or connect to the SMTP server.");
+                throw _smtpAuthError.Value;
             }
 
             return client;
@@ -79,7 +82,7 @@ public class SmtpClientWrapper : IDisposable
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
             _logger.LogError(ex.ToString(), nameof(EmailSendAsync));
-            throw new SmtpClientException("Error during email sending due to authentication or network issues.");
+            throw _smtpAuthOrSocketError.Value;
         }
         catch (OperationCanceledException)
         {

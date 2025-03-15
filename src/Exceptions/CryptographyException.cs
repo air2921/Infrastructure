@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Exceptions.Global;
 using System.Diagnostics.CodeAnalysis;
+using ZstdSharp;
 
 namespace Infrastructure.Exceptions;
 
@@ -21,10 +22,10 @@ public class CryptographyException : InfrastructureException
     }
 
     [DoesNotReturn]
-    public override void Throw(string message)
+    public static void Throw(string message)
         => throw new CryptographyException(message);
 
-    public override void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
+    public static void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
     {
         if (!condition)
             return;
@@ -32,7 +33,7 @@ public class CryptographyException : InfrastructureException
         throw new CryptographyException(message);
     }
 
-    public override void ThrowIfNull([NotNull] object? param, string message)
+    public static void ThrowIfNull([NotNull] object? param, string message)
     {
         if (param is null)
             throw new CryptographyException(message);

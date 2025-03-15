@@ -38,6 +38,21 @@ public class Repository<TEntity, TDbContext> :
 
     private bool _disposed;
 
+    private static readonly Lazy<EntityException> _operationCancelledError = new(() => new("The operation was cancelled due to waiting too long for completion or due to manual cancellation"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getRangeError = new(() => new("An error occurred while attempting to retrieve a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getCountError = new(() => new("An error occurred while attempting to retrieve count of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getByFilterError = new(() => new("An error occurred while attempting to retrieve an entity using a filter"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getBySingleQueryBuilderError = new(() => new("An error occurred while attempting to retrieve an entity using a single query builder"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getByIdError = new(() => new("An error occurred while attempting to retrieve an entity by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _addError = new(() => new("An error occurred while attempting to add an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _addRangeError = new(() => new("An error occurred while attempting to add a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _deleteByIdError = new(() => new("An error occurred while attempting to delete an entity by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _deleteRangeByIdsError = new(() => new("An error occurred while attempting to delete a range of entities by their IDs"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _deleteRangeByEntitiesError = new(() => new("An error occurred while attempting to delete a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _deleteByFilterError = new(() => new("An error occurred while attempting to delete an entity using a filter"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Repository{TEntity, TDbContext}"/> class.
     /// </summary>
@@ -46,7 +61,7 @@ public class Repository<TEntity, TDbContext> :
     public Repository(ILogger<Repository<TEntity, TDbContext>> logger, TDbContext context)
     {
         _logger = new Lazy<ILogger<Repository<TEntity, TDbContext>>>(() => logger);
-        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _context = context ?? throw new InvalidAgrumentException();
         _dbSet = new Lazy<DbSet<TEntity>>(() => _context.Set<TEntity>(), LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
@@ -98,7 +113,7 @@ public class Repository<TEntity, TDbContext> :
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _getCountError.Value;
         }
         finally
         {
@@ -127,12 +142,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _getByIdError.Value;
         }
         finally
         {
@@ -167,12 +182,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _getByFilterError.Value;
         }
         finally
         {
@@ -216,12 +231,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _getBySingleQueryBuilderError.Value;
         }
         finally
         {
@@ -270,12 +285,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _getRangeError.Value;
         }
         finally
         {
@@ -307,12 +322,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _addError.Value;
         }
         finally
         {
@@ -341,12 +356,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _addRangeError.Value;
         }
         finally
         {
@@ -382,12 +397,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _deleteByIdError.Value;
         }
         finally
         {
@@ -425,12 +440,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _deleteByFilterError.Value;
         }
         finally
         {
@@ -461,12 +476,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _deleteRangeByEntitiesError.Value;
         }
         finally
         {
@@ -506,12 +521,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _deleteRangeByIdsError.Value;
         }
         finally
         {
@@ -544,12 +559,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _updateError.Value;
         }
         finally
         {
@@ -585,12 +600,12 @@ public class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw new EntityException();
+            throw _operationCancelledError.Value;
         }
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw new EntityException();
+            throw _updateRangeError.Value;
         }
         finally
         {

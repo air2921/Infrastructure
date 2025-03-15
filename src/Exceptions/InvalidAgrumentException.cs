@@ -20,11 +20,7 @@ public class InvalidAgrumentException : InfrastructureException
 
     }
 
-    [DoesNotReturn]
-    public override void Throw(string message)
-        => throw new InvalidAgrumentException(message);
-
-    public override void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
+    public static void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
     {
         if (!condition)
             return;
@@ -32,7 +28,7 @@ public class InvalidAgrumentException : InfrastructureException
         throw new InvalidAgrumentException(message);
     }
 
-    public override void ThrowIfNull([NotNull] object? param, string message)
+    public static void ThrowIfNull([NotNull] object? param, string message)
     {
         if (param is null)
             throw new InvalidAgrumentException(message);

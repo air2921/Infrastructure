@@ -18,11 +18,4 @@ public abstract class InfrastructureException : Exception
     {
 
     }
-
-    [DoesNotReturn]
-    public abstract void Throw(string message);
-
-    public abstract void ThrowIf([DoesNotReturnIf(true)] bool condition, string message);
-
-    public abstract void ThrowIfNull([NotNull] object? param, string message);
 }

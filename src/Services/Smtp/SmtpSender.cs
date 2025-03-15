@@ -29,6 +29,8 @@ public class SmtpSender(
     Lazy<SmtpClientWrapper> smtpClient) : ISmtpSender<MailDetails>
 {
 
+    private static readonly Lazy<SmtpClientException> _smtpMailSendingError = new(() => new("An error occurred while sending the email"), LazyThreadSafetyMode.ExecutionAndPublication);
+
     /// <summary>
     /// Asynchronously sends an email using the provided <see cref="MailDetails"/> object.
     /// </summary>
@@ -62,7 +64,7 @@ public class SmtpSender(
         catch (Exception ex)
         {
             logger.LogError(ex.Message, mail.EmailTo);
-            throw new SmtpClientException("An error occurred while sending the email.");
+            throw _smtpMailSendingError.Value;
         }
     }
 }

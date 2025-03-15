@@ -20,11 +20,7 @@ public class DistributedCacheException : InfrastructureException
 
     }
 
-    [DoesNotReturn]
-    public override void Throw(string message)
-        => throw new DistributedCacheException(message);
-
-    public override void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
+    public static void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
     {
         if (!condition)
             return;
@@ -32,7 +28,7 @@ public class DistributedCacheException : InfrastructureException
         throw new DistributedCacheException(message);
     }
 
-    public override void ThrowIfNull([NotNull] object? param, string message)
+    public static void ThrowIfNull([NotNull] object? param, string message)
     {
         if (param is null)
             throw new DistributedCacheException(message);

@@ -28,6 +28,16 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
 {
     private readonly Lazy<IMongoCollection<TDocument>> _collection = new(() => context.SetDocument(document), LazyThreadSafetyMode.ExecutionAndPublication);
 
+    private static readonly Lazy<EntityException> _getRangeError = new(() => new("An error occurred while attempting to retrieve a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getByIdError = new(() => new("An error occurred while attempting to retrieve a document by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _getByFilterError = new(() => new("An error occurred while attempting to retrieve a document using the specified filter"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _addError = new(() => new("An error occurred while attempting to save a document"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _addRangeError = new(() => new("An error occurred while attempting to save a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _removeError = new(() => new("An error occurred while attempting to delete a document"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _removeRangeError = new(() => new("An error occurred while attempting to delete a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update a document"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
+
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.
     /// </summary>
@@ -59,7 +69,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _getRangeError.Value;
         }
     }
 
@@ -85,7 +95,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _getByIdError.Value;
         }
     }
 
@@ -111,7 +121,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _getByFilterError.Value;
         }
     }
 
@@ -139,7 +149,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _addError.Value;
         }
     }
 
@@ -172,7 +182,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _addRangeError.Value;
         }
     }
 
@@ -198,7 +208,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _removeError.Value;
         }
     }
 
@@ -226,7 +236,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _removeRangeError.Value;
         }
     }
 
@@ -254,7 +264,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _updateError.Value;
         }
     }
 
@@ -286,7 +296,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new EntityException();
+            throw _updateRangeError.Value;
         }
     }
 }

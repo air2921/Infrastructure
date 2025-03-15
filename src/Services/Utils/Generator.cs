@@ -19,6 +19,9 @@ public class Generator : IGenerator
 {
     private static readonly Random _rnd = new();
 
+    private static readonly Lazy<InvalidAgrumentException> _guidCombineError = new(() => new($"The allowed number of GUID combinations must be between {Immutable.MinGuidCombineLength} and {Immutable.MaxGuidCombineLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<InvalidAgrumentException> _codeCombineError = new(() => new($"The valid code length must be in the range from {Immutable.MinCodeLength} to {Immutable.MaxCodeLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
+
     /// <summary>
     /// Combines multiple GUIDs into a single string.
     /// </summary>
@@ -35,7 +38,7 @@ public class Generator : IGenerator
     public string GuidCombine(int count, bool useNoHyphensFormat = false)
     {
         if (count < Immutable.MinGuidCombineLength || count >= Immutable.MaxGuidCombineLength)
-            throw new InvalidAgrumentException($"Combine of {count} guid is not supported");
+            throw _guidCombineError.Value;
 
         var builder = new StringBuilder(useNoHyphensFormat ? 32 : 36 * count);
         for (int i = 0; i < count; i++)
@@ -59,7 +62,7 @@ public class Generator : IGenerator
     public string GenerateCode(int length)
     {
         if (length < Immutable.MinCodeLength || length >= Immutable.MaxCodeLength)
-            throw new InvalidAgrumentException($"Lenght {length} is not supported");
+            throw _codeCombineError.Value;
 
         var builder = new StringBuilder(length);
         for (int i = 0; i < length; i++)

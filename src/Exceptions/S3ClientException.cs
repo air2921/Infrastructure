@@ -20,11 +20,7 @@ public class S3ClientException : InfrastructureException
 
     }
 
-    [DoesNotReturn]
-    public override void Throw(string message)
-        => throw new S3ClientException(message);
-
-    public override void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
+    public static void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
     {
         if (!condition)
             return;
@@ -32,7 +28,7 @@ public class S3ClientException : InfrastructureException
         throw new S3ClientException(message);
     }
 
-    public override void ThrowIfNull([NotNull] object? param, string message)
+    public static void ThrowIfNull([NotNull] object? param, string message)
     {
         if (param is null)
             throw new S3ClientException(message);

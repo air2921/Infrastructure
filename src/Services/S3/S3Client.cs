@@ -17,6 +17,11 @@ namespace Infrastructure.Services.S3;
 /// </remarks>
 public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
 {
+    private static readonly Lazy<S3ClientException> _s3SignedUrlError = new(() => new("An error occurred while attempting to create a signed reference to an object"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<S3ClientException> _s3DownloadingError = new(() => new("An error occurred while trying to unload an object from storage"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<S3ClientException> _s3UploadingError = new(() => new("An error occurred while trying to load the object into storage"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<S3ClientException> _s3DeletingError = new(() => new("An error occurred while attempting to delete an object from storage"), LazyThreadSafetyMode.ExecutionAndPublication);
+
     /// <summary>
     /// Generates a pre-signed URL for accessing an S3 object.
     /// </summary>
@@ -47,7 +52,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new S3ClientException();
+            throw _s3SignedUrlError.Value;
         }
     }
 
@@ -79,7 +84,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new S3ClientException();
+            throw _s3DownloadingError.Value;
         }
     }
 
@@ -111,7 +116,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new S3ClientException();
+            throw _s3UploadingError.Value;
         }
     }
 
@@ -141,7 +146,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw new S3ClientException();
+            throw _s3DeletingError.Value;
         }
     }
 }
