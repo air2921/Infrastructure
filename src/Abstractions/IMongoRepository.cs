@@ -16,6 +16,12 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     public Task RemoveRangeAsync(IEnumerable<string> identifiers, CancellationToken cancellationToken = default);
     public Task UpdateSingleAsync(TDocument documentEntity, CancellationToken cancellationToken = default);
     public Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default);
+    public Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    public Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    public Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+    public void BeginTransaction();
+    public void CommitTransaction();
+    public void RollbackTransaction();
 }
 
 public interface IMongoRepository<TMongoContext, TDocument> where TDocument : DocumentBase where TMongoContext : MongoDatabaseContext
@@ -29,4 +35,10 @@ public interface IMongoRepository<TMongoContext, TDocument> where TDocument : Do
     public Task RemoveRangeAsync(IEnumerable<string> identifiers, CancellationToken cancellationToken = default);
     public Task UpdateSingleAsync(TDocument documentEntity, CancellationToken cancellationToken = default);
     public Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default);
+    public Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    public Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    public Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+    public void BeginTransaction();
+    public void CommitTransaction();
+    public void RollbackTransaction();
 }

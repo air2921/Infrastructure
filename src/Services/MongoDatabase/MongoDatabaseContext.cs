@@ -19,9 +19,9 @@ public abstract class MongoDatabaseContext : IDisposable
     private readonly SemaphoreSlim _sessionSemaphore = new(1, 1);
     private bool _disposed = false;
 
-    private static readonly Lazy<EntityException> _operationCancelledError = new(() => new EntityException("Operation was cancelled"));
-    private static readonly Lazy<EntityException> _sessionAlreadyCreated = new(() => new EntityException("Session already created"));
-    private static readonly Lazy<EntityException> _transactionNotStarted = new(() => new EntityException("Transaction is not started"));
+    private static readonly Lazy<EntityException> _operationCancelledError = new(() => new EntityException("Operation was cancelled"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _sessionAlreadyCreated = new(() => new EntityException("Session already created"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _transactionNotStarted = new(() => new EntityException("Transaction is not started"), LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
     /// This constructor lazy initializing the MongoDB client and database
