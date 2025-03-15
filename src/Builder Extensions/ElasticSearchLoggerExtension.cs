@@ -1,10 +1,10 @@
 ﻿using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
-using Serilog.Sinks.Elasticsearch;
-using Serilog;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Sinks.Elasticsearch;
+using System.Reflection;
 
 namespace Infrastructure.Builder_Extensions;
 

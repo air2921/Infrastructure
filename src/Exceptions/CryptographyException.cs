@@ -1,6 +1,5 @@
 ﻿using Infrastructure.Exceptions.Global;
 using System.Diagnostics.CodeAnalysis;
-using ZstdSharp;
 
 namespace Infrastructure.Exceptions;
 

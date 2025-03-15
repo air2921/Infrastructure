@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Infrastructure.Exceptions.Global;
+﻿namespace Infrastructure.Exceptions.Global;
 
 public abstract class InfrastructureException : Exception
 {

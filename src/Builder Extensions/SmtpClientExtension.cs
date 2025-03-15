@@ -5,7 +5,6 @@ using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.Smtp;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Builder_Extensions;
 

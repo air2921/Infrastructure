@@ -26,13 +26,13 @@ public class DilithiumSigner : ISigner, IDisposable
     private delegate int OQS_SIG_signDelegate(IntPtr sig, byte[] signature, out long signature_len, byte[] message, long message_len, byte[] private_key);
     private delegate int OQS_SIG_verifyDelegate(IntPtr sig, byte[] message, long message_len, byte[] signature, long signature_len, byte[] public_key);
 
-    private readonly static OQS_SIG_newDelegate _oqsSigNew;
-    private readonly static OQS_SIG_freeDelegate _oqsSigFree;
-    private readonly static OQS_SIG_keypairDelegate _oqsSigKeypair;
-    private readonly static OQS_SIG_signDelegate _oqsSigSign;
-    private readonly static OQS_SIG_verifyDelegate _oqsSigVerify;
+    private static readonly OQS_SIG_newDelegate _oqsSigNew;
+    private static readonly OQS_SIG_freeDelegate _oqsSigFree;
+    private static readonly OQS_SIG_keypairDelegate _oqsSigKeypair;
+    private static readonly OQS_SIG_signDelegate _oqsSigSign;
+    private static readonly OQS_SIG_verifyDelegate _oqsSigVerify;
 
-    private readonly static string _dllPath = Path.Combine(Path.GetTempPath(), "oqs.dll");
+    private static readonly string _dllPath = Path.Combine(Path.GetTempPath(), "oqs.dll");
     private readonly object _lock = new();
     private bool _disposed = false;
 
