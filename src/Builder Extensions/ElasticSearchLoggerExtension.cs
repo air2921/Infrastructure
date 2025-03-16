@@ -2,6 +2,7 @@
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using System.Reflection;
@@ -22,6 +23,20 @@ public static class ElasticSearchLoggerExtension
     /// <exception cref="InfrastructureConfigurationException">
     /// Thrown when the ElasticSearch configuration is invalid, such as an incorrect connection string.
     /// </exception>
+    /// <remarks>
+    /// This method configures logging services and registers the following components:
+    /// <list type="bullet">
+    ///     <item><description><see cref="ElasticSearchConfigureOptions"/> - Singleton service for storing ElasticSearch configuration.</description></item>
+    ///     <item><description><see cref="Serilog.ILogger"/> - Global logger instance configured with Serilog, including ElasticSearch sink.</description></item>
+    ///     <item><description><see cref="ILogger{TCategoryName}"/> - Logging services integrated with ASP.NET Core's logging infrastructure.</description></item>
+    /// </list>
+    /// Additionally, this method configures the following logging behaviors:
+    /// <list type="bullet">
+    ///     <item><description>Logs are enriched with context properties such as assembly name and environment.</description></item>
+    ///     <item><description>Logs are written to both the console and ElasticSearch.</description></item>
+    ///     <item><description>ElasticSearch index format is set to <c>logs-YYYY</c>, where <c>YYYY</c> is the current year.</description></item>
+    /// </list>
+    /// </remarks>
     public static IInfrastructureBuilder AddElasticSearchLogger(this IInfrastructureBuilder builder, Action<ElasticSearchConfigureOptions> configureOptions)
     {
         var options = new ElasticSearchConfigureOptions();
@@ -50,6 +65,7 @@ public static class ElasticSearchLoggerExtension
         builder.Services.AddLogging(logger =>
         {
             logger.AddSerilog(Log.Logger);
+            logger.AddConsole();
         });
 
         return builder;

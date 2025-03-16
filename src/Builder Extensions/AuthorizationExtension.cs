@@ -22,6 +22,14 @@ public static class AuthorizationExtension
     /// <exception cref="InfrastructureConfigurationException">
     /// Thrown when the authorization options are invalid or misconfigured.
     /// </exception>
+    /// <remarks>
+    /// This method registers the following services for Dependency Injection (DI):
+    /// <list type="bullet">
+    ///     <item><description><see cref="AuthorizationConfigureOptions"/> - Singleton service for storing authorization configuration.</description></item>
+    ///     <item><description><see cref="IPublisher{JsonWebTokenDetails}"/> - Scoped service for publishing JSON Web Token details.</description></item>
+    ///     <item><description><see cref="IPublisher{RefreshDetails}"/> - Scoped service for publishing refresh token details.</description></item>
+    /// </list>
+    /// </remarks>
     public static IInfrastructureBuilder AddAuthorization(this IInfrastructureBuilder builder, Action<AuthorizationConfigureOptions> configureOptions)
     {
         var options = new AuthorizationConfigureOptions();

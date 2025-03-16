@@ -4,6 +4,7 @@ using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.DistributedCache;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Distributed
 
 namespace Infrastructure.Builder_Extensions;
 
@@ -21,6 +22,14 @@ public static class DistributedCacheExtension
     /// <exception cref="InfrastructureConfigurationException">
     /// Thrown when the cache configuration is invalid, such as an incorrect Redis connection string.
     /// </exception>
+    /// <remarks>
+    /// This method registers the following services for Dependency Injection (DI):
+    /// <list type="bullet">
+    ///     <item><description><see cref="CacheConfigureOptions"/> - Singleton service for storing cache configuration.</description></item>
+    ///     <item><description><see cref="IDistributedCache"/> - Singleton service for distributed cache (Redis) provided by <c>AddStackExchangeRedisCache</c>.</description></item>
+    ///     <item><description><see cref="ICacheClient"/> - Scoped service for interacting with the distributed cache.</description></item>
+    /// </list>
+    /// </remarks>
     public static IInfrastructureBuilder AddDistributedCache(this IInfrastructureBuilder builder, Action<CacheConfigureOptions> configureOptions)
     {
         var options = new CacheConfigureOptions();

@@ -25,6 +25,19 @@ public static class S3ClientExtension
     /// <exception cref="InfrastructureConfigurationException">
     /// Thrown when the S3 configuration is invalid, such as incorrect AccessKey, SecretKey, or Region.
     /// </exception>
+    /// <remarks>
+    /// This method registers the following services for Dependency Injection (DI):
+    /// <list type="bullet">
+    ///     <item><description><see cref="S3ConfigureOptions"/> - Singleton service for storing S3 configuration.</description></item>
+    ///     <item><description><see cref="IAmazonS3"/> - Singleton service provided by AWS SDK for interacting with Amazon S3.</description></item>
+    ///     <item><description><see cref="IS3Client"/> - Scoped service for interacting with Amazon S3 using a higher-level abstraction.</description></item>
+    /// </list>
+    /// Additionally, this method performs the following:
+    /// <list type="bullet">
+    ///     <item><description>Validates the S3 configuration (AccessKey, SecretKey, and Region).</description></item>
+    ///     <item><description>Configures AWS credentials and region using <see cref="BasicAWSCredentials"/> and <see cref="RegionEndpoint"/>.</description></item>
+    /// </list>
+    /// </remarks>
     public static IInfrastructureBuilder AddS3Client(this IInfrastructureBuilder builder, Action<S3ConfigureOptions> configureOptions)
     {
         var options = new S3ConfigureOptions();

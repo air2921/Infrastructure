@@ -24,6 +24,22 @@ public static class EntityFrameworkRepositoryExtension
     /// <exception cref="InfrastructureConfigurationException">
     /// Thrown when the database configuration is invalid, such as an incorrect connection string or database type.
     /// </exception>
+    /// <remarks>
+    /// This method registers the following services for Dependency Injection (DI):
+    /// <list type="bullet">
+    ///     <item><description><see cref="EntityFrameworkConfigureOptions"/> - Singleton service for storing Entity Framework configuration.</description></item>
+    ///     <item><description><see cref="ITransactionFactory"/> - Transient service for creating transactions.</description></item>
+    ///     <item><description><see cref="ITransactionFactory{TDbContext}"/> - Transient service for creating transactions specific to <typeparamref name="TDbContext"/>.</description></item>
+    ///     <item><description><see cref="IRepository{TEntity}"/> - Scoped service for interacting with entities of type <typeparamref name="TEntity"/>.</description></item>
+    ///     <item><description><see cref="IRepository{TEntity, TDbContext}"/> - Scoped service for interacting with entities of type <typeparamref name="TEntity"/> using <typeparamref name="TDbContext"/>.</description></item>
+    /// </list>
+    /// Additionally, this method configures the database context based on the specified SQL database type:
+    /// <list type="bullet">
+    ///     <item><description>PostgreSQL: Configures <typeparamref name="TDbContext"/> to use Npgsql with detailed errors and logging.</description></item>
+    ///     <item><description>SQL Server: Configures <typeparamref name="TDbContext"/> to use SQL Server with detailed errors and logging.</description></item>
+    ///     <item><description>SQLite: Configures <typeparamref name="TDbContext"/> to use SQLite with detailed errors and logging.</description></item>
+    /// </list>
+    /// </remarks>
     public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : DbContext
     {
         var options = new EntityFrameworkConfigureOptions();

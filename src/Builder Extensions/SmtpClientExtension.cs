@@ -22,6 +22,18 @@ public static class SmtpClientExtension
     /// <exception cref="InfrastructureConfigurationException">
     /// Thrown when the SMTP configuration is invalid, such as incorrect Provider, Address, Password, or Port.
     /// </exception>
+    /// <remarks>
+    /// This method registers the following services for Dependency Injection (DI):
+    /// <list type="bullet">
+    ///     <item><description><see cref="SmtpConfigureOptions"/> - Singleton service for storing SMTP configuration.</description></item>
+    ///     <item><description><see cref="SmtpClientWrapper"/> - Scoped service for interacting with the SMTP client.</description></item>
+    ///     <item><description><see cref="ISmtpSender{MailDetails}"/> - Scoped service for sending emails using the configured SMTP client.</description></item>
+    /// </list>
+    /// Additionally, this method performs the following:
+    /// <list type="bullet">
+    ///     <item><description>Validates the SMTP configuration (Provider, Address, Password, and Port).</description></item>
+    /// </list>
+    /// </remarks>
     public static IInfrastructureBuilder AddSmtpClient(this IInfrastructureBuilder builder, Action<SmtpConfigureOptions> configureOptions)
     {
         var options = new SmtpConfigureOptions();
