@@ -38,9 +38,9 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
     private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update a document"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
 
-    private readonly Lazy<InsertOneOptions> _insertOneOptions = new(() => new InsertOneOptions());
-    private readonly Lazy<InsertManyOptions> _insertManyOptions = new(() => new InsertManyOptions());
-    private readonly Lazy<ReplaceOptions> _replaceOptions = new(() => new ReplaceOptions());
+    private static readonly Lazy<InsertOneOptions> _insertOneOptions = new(() => new InsertOneOptions());
+    private static readonly Lazy<InsertManyOptions> _insertManyOptions = new(() => new InsertManyOptions());
+    private static readonly Lazy<ReplaceOptions> _replaceOptions = new(() => new ReplaceOptions());
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.

@@ -2,14 +2,39 @@
 
 namespace Infrastructure.Options;
 
-public class S3ConfigureOptions : Validator
+/// <summary>
+/// Class for configuring Amazon S3 settings.
+/// </summary>
+public sealed class S3ConfigureOptions : Validator
 {
+    /// <summary>
+    /// Gets or sets the access key for Amazon S3.
+    /// </summary>
+    /// <value>The access key for Amazon S3.</value>
     public string AccessKey { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the secret key for Amazon S3.
+    /// </summary>
+    /// <value>The secret key for Amazon S3.</value>
     public string SecretKey { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the region for Amazon S3.
+    /// </summary>
+    /// <value>The region for Amazon S3.</value>
     public string Region { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Validates whether the instance is configured correctly.
+    /// </summary>
+    /// <returns><c>true</c> if the configuration is valid; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// The configuration is considered valid if:
+    /// - The <see cref="AccessKey"/> property is not null or empty.
+    /// - The <see cref="SecretKey"/> property is not null or empty.
+    /// - The <see cref="Region"/> property is not null or empty.
+    /// </remarks>
     public override bool IsValidConfigure()
     {
         if (string.IsNullOrWhiteSpace(AccessKey) || string.IsNullOrWhiteSpace(SecretKey) || string.IsNullOrWhiteSpace(Region))

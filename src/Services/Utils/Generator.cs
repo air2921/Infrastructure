@@ -29,12 +29,6 @@ public class Generator : IGenerator
     /// <param name="useNoHyphensFormat">Indicates whether to format the GUIDs without hyphens. Defaults to <c>false</c>.</param>
     /// <returns>A concatenated string of GUIDs.</returns>
     /// <exception cref="InvalidAgrumentException">Thrown if the count of GUIDs is outside the supported range defined in <see cref="Immutable.MinGuidCombineLength"/> and <see cref="Immutable.MaxGuidCombineLength"/>.</exception>
-    /// <example>
-    /// <code>
-    /// var generator = new Generator();
-    /// string combinedGuids = generator.GuidCombine(3, true);
-    /// </code>
-    /// </example>
     public string GuidCombine(int count, bool useNoHyphensFormat = false)
     {
         if (count < Immutable.MinGuidCombineLength || count >= Immutable.MaxGuidCombineLength)
@@ -53,12 +47,6 @@ public class Generator : IGenerator
     /// <param name="length">The length of the numeric code to generate.</param>
     /// <returns>A random numeric code as an string.</returns>
     /// <exception cref="InvalidAgrumentException">Thrown if the length is outside the supported range defined in <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>.</exception>
-    /// <example>
-    /// <code>
-    /// var generator = new Generator();
-    /// int code = generator.GenerateCode(6);
-    /// </code>
-    /// </example>
     public string GenerateCode(int length)
     {
         if (length < Immutable.MinCodeLength || length >= Immutable.MaxCodeLength)

@@ -34,6 +34,14 @@ public abstract class MongoDatabaseContext : IDisposable
     }
 
     /// <summary>
+    /// Finalizes the <see cref="MongoDatabaseContext"/> instance.
+    /// </summary>
+    ~MongoDatabaseContext()
+    {
+        Dispose(false);
+    }
+
+    /// <summary>
     /// Gets or sets the MongoDB database instance.
     /// </summary>
     /// <exception cref="ObjectDisposedException">Thrown if the context has been disposed.</exception>
@@ -218,14 +226,6 @@ public abstract class MongoDatabaseContext : IDisposable
         {
             _sessionSemaphore.Release();
         }
-    }
-
-    /// <summary>
-    /// Finalizes the <see cref="MongoDatabaseContext"/> instance.
-    /// </summary>
-    ~MongoDatabaseContext()
-    {
-        Dispose(false);
     }
 
     /// <summary>

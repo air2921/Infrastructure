@@ -27,12 +27,6 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
     /// <param name="hashType">The hash type to use for enhanced hashing. Defaults to <see cref="HashType.SHA512"/>.</param>
     /// <returns>A hashed string representation of the password.</returns>
     /// <exception cref="CryptographyException">Thrown if an error occurs during hashing.</exception>
-    /// <example>
-    /// <code>
-    /// var hasher = new Hasher(logger);
-    /// string hashedPassword = hasher.Hash("myPassword123");
-    /// </code>
-    /// </example>
     public string Hash(string password, HashType hashType = HashType.SHA512)
     {
         try
@@ -54,12 +48,6 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
     /// <param name="hashType">The hash type used for enhanced verification. Defaults to <see cref="HashType.SHA512"/>.</param>
     /// <returns><c>true</c> if the input matches the hashed string; otherwise, <c>false</c>.</returns>
     /// <exception cref="CryptographyException">Thrown if an error occurs during verification.</exception>
-    /// <example>
-    /// <code>
-    /// var hasher = new Hasher(logger);
-    /// bool isValid = hasher.Verify("myPassword123", hashedPassword);
-    /// </code>
-    /// </example>
     public bool Verify(string input, string src, HashType hashType = HashType.SHA512)
     {
         try

@@ -33,11 +33,6 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>The cached object, or <c>null</c> if the key is not found.</returns>
     /// <exception cref="DistributedCacheException">Thrown if an error occurs during the operation.</exception>
-    /// <example>
-    /// <code>
-    /// var cachedValue = await cacheClient.GetAsync<string>("myKey");
-    /// </code>
-    /// </example>
     public async Task<TResult?> GetAsync<TResult>(string key, CancellationToken cancellationToken = default) where TResult : class
     {
         try
@@ -75,11 +70,6 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     /// <param name="sliding">The sliding expiration time for the cached object.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <exception cref="DistributedCacheException">Thrown if an error occurs during the operation.</exception>
-    /// <example>
-    /// <code>
-    /// await cacheClient.SetAsync("myKey", "myValue", TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(5));
-    /// </code>
-    /// </example>
     public async Task SetAsync<TValue>(string key, TValue value, TimeSpan absolute, TimeSpan sliding, CancellationToken cancellationToken = default) where TValue : notnull
     {
         try
@@ -110,11 +100,6 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     /// <param name="absolute">The absolute expiration time for the cached object.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <exception cref="DistributedCacheException">Thrown if an error occurs during the operation.</exception>
-    /// <example>
-    /// <code>
-    /// await cacheClient.SetAsync("myKey", "myValue", TimeSpan.FromMinutes(10));
-    /// </code>
-    /// </example>
     public async Task SetAsync<TValue>(string key, TValue value, TimeSpan absolute, CancellationToken cancellationToken = default) where TValue : notnull
     {
         try
@@ -141,11 +126,6 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     /// <param name="key">The key associated with the cached object to remove.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <exception cref="DistributedCacheException">Thrown if an error occurs during the operation.</exception>
-    /// <example>
-    /// <code>
-    /// await cacheClient.RemoveAsync("myKey");
-    /// </code>
-    /// </example>
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
         try
@@ -167,11 +147,6 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns><c>true</c> if the key exists in the cache; otherwise, <c>false</c>.</returns>
     /// <exception cref="DistributedCacheException">Thrown if an error occurs during the operation.</exception>
-    /// <example>
-    /// <code>
-    /// bool exists = await cacheClient.IsExistsAsync("myKey");
-    /// </code>
-    /// </example>
     public async Task<bool> IsExistsAsync(string key, CancellationToken cancellationToken = default)
     {
         try

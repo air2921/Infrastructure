@@ -30,11 +30,6 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
     /// <param name="expires">The expiration date and time for the pre-signed URL.</param>
     /// <returns>A pre-signed URL as a <see cref="ValueTask{string}"/>.</returns>
     /// <exception cref="S3ClientException">Thrown if an error occurs while generating the pre-signed URL.</exception>
-    /// <example>
-    /// <code>
-    /// var url = await s3Client.PreSignedUrlAsync("my-bucket", "my-file.txt", DateTime.UtcNow.AddHours(1));
-    /// </code>
-    /// </example>
     public ValueTask<string> PreSignedUrlAsync(string bucket, string key, DateTime expires)
     {
         try
@@ -64,11 +59,6 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>A <see cref="Task{Stream}"/> representing the downloaded object stream.</returns>
     /// <exception cref="S3ClientException">Thrown if an error occurs while downloading the object.</exception>
-    /// <example>
-    /// <code>
-    /// using var stream = await s3Client.DownloadAsync("my-bucket", "my-file.txt");
-    /// </code>
-    /// </example>
     public async Task<Stream> DownloadAsync(string bucket, string key, CancellationToken cancellationToken = default)
     {
         try
@@ -97,11 +87,6 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     /// <exception cref="S3ClientException">Thrown if an error occurs while uploading the object.</exception>
-    /// <example>
-    /// <code>
-    /// await s3Client.UploadAsync(stream, "my-bucket", "my-file.txt");
-    /// </code>
-    /// </example>
     public async Task UploadAsync(Stream stream, string bucket, string key, CancellationToken cancellationToken = default)
     {
         try
@@ -128,11 +113,6 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     /// <exception cref="S3ClientException">Thrown if an error occurs while deleting the object.</exception>
-    /// <example>
-    /// <code>
-    /// await s3Client.RemoveAsync("my-bucket", "my-file.txt");
-    /// </code>
-    /// </example>
     public async Task RemoveAsync(string bucket, string key, CancellationToken cancellationToken = default)
     {
         try

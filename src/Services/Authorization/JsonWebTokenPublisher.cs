@@ -22,25 +22,6 @@ public class JsonWebTokenPublisher(AuthorizationConfigureOptions authorizationOp
     /// </summary>
     /// <param name="details">The details required to generate the JWT, including user ID, role, and additional claims.</param>
     /// <returns>A signed JWT as a string.</returns>
-    /// <example>
-    /// <code>
-    /// var options = new AuthorizationConfigureOptions
-    /// {
-    ///     Issuer = "MyApp",
-    ///     Audience = "MyAppClient",
-    ///     Key = "my-secret-key",
-    ///     Expiration = TimeSpan.FromHours(1)
-    /// };
-    /// var publisher = new JsonWebTokenPublisher(options);
-    /// var jwtDetails = new JsonWebTokenDetails
-    /// {
-    ///     UserId = "12345",
-    ///     Role = "Admin",
-    ///     Claims = new List<Claim> { new Claim("Permission", "Read") }
-    /// };
-    /// var token = publisher.Publish(jwtDetails);
-    /// </code>
-    /// </example>
     public string Publish(JsonWebTokenDetails details)
     {
         var key = new SymmetricSecurityKey(authorizationOptions.Encoding.GetBytes(authorizationOptions.Key));

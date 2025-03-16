@@ -14,11 +14,5 @@ public class RefreshDetails : AuthorizationDetails
     /// Gets or sets the number of GUIDs to combine when generating the refresh token.
     /// This determines the length and complexity of the token.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// var refreshDetails = new RefreshDetails { CombineCount = 5 };
-    /// // This will generate a token by combining 5 GUIDs.
-    /// </code>
-    /// </example>
     public int CombineCount { get; set; } = 3;
 }

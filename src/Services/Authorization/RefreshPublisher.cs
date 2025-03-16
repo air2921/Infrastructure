@@ -14,15 +14,6 @@ public class RefreshPublisher(IGenerator generator) : IPublisher<RefreshDetails>
     /// </summary>
     /// <param name="details">The details required to generate the refresh token, including the number of GUIDs to combine.</param>
     /// <returns>A refresh token as a string, created by combining the specified number of GUIDs.</returns>
-    /// <example>
-    /// <code>
-    /// var generator = new GuidGenerator(); // Assuming GuidGenerator implements IGenerator
-    /// var publisher = new RefreshPublisher(generator);
-    /// var refreshDetails = new RefreshDetails { CombineCount = 3 };
-    /// var refreshToken = publisher.Publish(refreshDetails);
-    /// // refreshToken will be a string combining 3 GUIDs.
-    /// </code>
-    /// </example>
     public string Publish(RefreshDetails details)
         => generator.GuidCombine(details.CombineCount);
 }

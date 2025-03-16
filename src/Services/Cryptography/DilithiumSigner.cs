@@ -125,12 +125,6 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </summary>
     /// <returns>A tuple containing the public key and private key as byte arrays.</returns>
     /// <exception cref="CryptographyException">Thrown if key pair generation fails.</exception>
-    /// <example>
-    /// <code>
-    /// var signer = new DilithiumSigner();
-    /// var (publicKey, privateKey) = signer.GenerateKeyPair();
-    /// </code>
-    /// </example>
     public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -155,12 +149,6 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <param name="privateKey">The private key to use for signing.</param>
     /// <returns>The signature as a byte array.</returns>
     /// <exception cref="CryptographyException">Thrown if signing fails.</exception>
-    /// <example>
-    /// <code>
-    /// var signer = new DilithiumSigner();
-    /// var signature = signer.Sign(message, privateKey);
-    /// </code>
-    /// </example>
     public byte[] Sign(byte[] message, byte[] privateKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -184,12 +172,6 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <param name="signature">The signature to verify as a byte array.</param>
     /// <param name="publicKey">The public key to use for verification.</param>
     /// <returns><c>true</c> if the signature is valid; otherwise, <c>false</c>.</returns>
-    /// <example>
-    /// <code>
-    /// var signer = new DilithiumSigner();
-    /// bool isValid = signer.Verify(message, signature, publicKey);
-    /// </code>
-    /// </example>
     public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);

@@ -37,14 +37,6 @@ public class SmtpSender(
     /// <param name="mail">An object containing the details of the email to send, including recipient, subject, and body.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="SmtpClientException">Thrown if an error occurs while sending the email.</exception>
-    /// <exception cref="ArgumentNullException">Thrown if the <paramref name="mail"/> object is null or contains invalid data.</exception>
-    /// <example>
-    /// <code>
-    /// var smtpSender = new SmtpSender(logger, smtpOptions, smtpClientWrapper);
-    /// var mailDetails = new MailDetails { EmailTo = "example@example.com", Subject = "Test", Entity = "Email body content" };
-    /// await smtpSender.SendMailAsync(mailDetails);
-    /// </code>
-    /// </example>
     public async Task SendMailAsync(MailDetails mail, CancellationToken cancellationToken = default)
     {
         try

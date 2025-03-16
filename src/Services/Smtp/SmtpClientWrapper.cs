@@ -64,13 +64,6 @@ public class SmtpClientWrapper : IDisposable
     /// <param name="message">The email message to send.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
-    /// <exception cref="OperationCanceledException">Thrown if the email sending operation is canceled.</exception>
-    /// <example>
-    /// <code>
-    /// var smtpWrapper = new SmtpClientWrapper(logger, smtpOptions);
-    /// await smtpWrapper.EmailSendAsync(mimeMessage);
-    /// </code>
-    /// </example>
     public async Task EmailSendAsync(MimeMessage message, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
