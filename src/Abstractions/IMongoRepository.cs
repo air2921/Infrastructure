@@ -98,6 +98,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
     public Task BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -105,6 +106,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -112,21 +114,25 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Begins a transaction in MongoDB (synchronous).
     /// </summary>
+    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
     public void BeginTransaction();
 
     /// <summary>
     /// Commits the current MongoDB transaction (synchronous).
     /// </summary>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public void CommitTransaction();
 
     /// <summary>
     /// Rolls back the current MongoDB transaction (synchronous).
     /// </summary>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public void RollbackTransaction();
 }
 
@@ -223,6 +229,7 @@ public interface IMongoRepository<TMongoContext, TDocument> where TDocument : Do
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
     public Task BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -230,6 +237,7 @@ public interface IMongoRepository<TMongoContext, TDocument> where TDocument : Do
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -237,20 +245,24 @@ public interface IMongoRepository<TMongoContext, TDocument> where TDocument : Do
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Begins a transaction in MongoDB (synchronous).
     /// </summary>
+    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
     public void BeginTransaction();
 
     /// <summary>
     /// Commits the current MongoDB transaction (synchronous).
     /// </summary>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public void CommitTransaction();
 
     /// <summary>
     /// Rolls back the current MongoDB transaction (synchronous).
     /// </summary>
+    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
     public void RollbackTransaction();
 }
