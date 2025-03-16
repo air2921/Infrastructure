@@ -17,8 +17,6 @@ namespace Infrastructure.Services.Utils;
 /// </remarks>
 public class Generator : IGenerator
 {
-    private static readonly Random _rnd = new();
-
     private static readonly Lazy<InvalidArgumentException> _guidCombineError = new(() => new($"The allowed number of GUID combinations must be between {Immutable.MinGuidCombineLength} and {Immutable.MaxGuidCombineLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<InvalidArgumentException> _codeCombineError = new(() => new($"The valid code length must be in the range from {Immutable.MinCodeLength} to {Immutable.MaxCodeLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -54,7 +52,7 @@ public class Generator : IGenerator
 
         var builder = new StringBuilder(length);
         for (int i = 0; i < length; i++)
-            builder.Append(_rnd.Next(10));
+            builder.Append(Random.Shared.Next(10));
 
         return builder.ToString();
     }
