@@ -84,6 +84,26 @@ public class SmtpClientWrapper : IDisposable
     }
 
     /// <summary>
+    /// Synchronously sends an email message.
+    /// </summary>
+    /// <param name="message">The email message to send.</param>
+    /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
+    public void EmailSend(MimeMessage message)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        try
+        {
+            _smtpClient.Value.Send(message);
+        }
+        catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
+        {
+            _logger.LogError(ex.ToString(), nameof(EmailSend));
+            throw _smtpAuthOrSocketError.Value;
+        }
+    }
+
+    /// <summary>
     /// Releases the resources used by the <see cref="SmtpClientWrapper"/> class.
     /// </summary>
     /// <remarks>
