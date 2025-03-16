@@ -19,8 +19,8 @@ public class Generator : IGenerator
 {
     private static readonly Random _rnd = new();
 
-    private static readonly Lazy<InvalidAgrumentException> _guidCombineError = new(() => new($"The allowed number of GUID combinations must be between {Immutable.MinGuidCombineLength} and {Immutable.MaxGuidCombineLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<InvalidAgrumentException> _codeCombineError = new(() => new($"The valid code length must be in the range from {Immutable.MinCodeLength} to {Immutable.MaxCodeLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<InvalidArgumentException> _guidCombineError = new(() => new($"The allowed number of GUID combinations must be between {Immutable.MinGuidCombineLength} and {Immutable.MaxGuidCombineLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<InvalidArgumentException> _codeCombineError = new(() => new($"The valid code length must be in the range from {Immutable.MinCodeLength} to {Immutable.MaxCodeLength}"), LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
     /// Combines multiple GUIDs into a single string.
@@ -28,7 +28,7 @@ public class Generator : IGenerator
     /// <param name="count">The number of GUIDs to combine.</param>
     /// <param name="useNoHyphensFormat">Indicates whether to format the GUIDs without hyphens. Defaults to <c>false</c>.</param>
     /// <returns>A concatenated string of GUIDs.</returns>
-    /// <exception cref="InvalidAgrumentException">Thrown if the count of GUIDs is outside the supported range defined in <see cref="Immutable.MinGuidCombineLength"/> and <see cref="Immutable.MaxGuidCombineLength"/>.</exception>
+    /// <exception cref="InvalidArgumentException">Thrown if the count of GUIDs is outside the supported range defined in <see cref="Immutable.MinGuidCombineLength"/> and <see cref="Immutable.MaxGuidCombineLength"/>.</exception>
     public string GuidCombine(int count, bool useNoHyphensFormat = false)
     {
         if (count < Immutable.MinGuidCombineLength || count >= Immutable.MaxGuidCombineLength)
@@ -46,7 +46,7 @@ public class Generator : IGenerator
     /// </summary>
     /// <param name="length">The length of the numeric code to generate.</param>
     /// <returns>A random numeric code as an string.</returns>
-    /// <exception cref="InvalidAgrumentException">Thrown if the length is outside the supported range defined in <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>.</exception>
+    /// <exception cref="InvalidArgumentException">Thrown if the length is outside the supported range defined in <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>.</exception>
     public string GenerateCode(int length)
     {
         if (length < Immutable.MinCodeLength || length >= Immutable.MaxCodeLength)

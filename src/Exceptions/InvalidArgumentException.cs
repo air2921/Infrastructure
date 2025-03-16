@@ -11,56 +11,56 @@ namespace Infrastructure.Exceptions;
 /// that is invalid or does not meet the expected criteria. It provides utility methods for
 /// conditional exception throwing.
 /// </remarks>
-public class InvalidAgrumentException : InfrastructureException
+public class InvalidArgumentException : InfrastructureException
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="InvalidAgrumentException"/> class.
+    /// Initializes a new instance of the <see cref="InvalidArgumentException"/> class.
     /// </summary>
-    public InvalidAgrumentException() : base()
+    public InvalidArgumentException() : base()
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="InvalidAgrumentException"/> class with a specified error message.
+    /// Initializes a new instance of the <see cref="InvalidArgumentException"/> class with a specified error message.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
-    public InvalidAgrumentException(string? message) : base(message)
+    public InvalidArgumentException(string? message) : base(message)
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="InvalidAgrumentException"/> class with a specified error message
+    /// Initializes a new instance of the <see cref="InvalidArgumentException"/> class with a specified error message
     /// and a reference to the inner exception that is the cause of this exception.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
     /// <param name="exception">The exception that is the cause of the current exception, or <c>null</c> if no inner exception is specified.</param>
-    public InvalidAgrumentException(string? message, Exception? exception) : base(message, exception)
+    public InvalidArgumentException(string? message, Exception? exception) : base(message, exception)
     {
     }
 
     /// <summary>
-    /// Throws an <see cref="InvalidAgrumentException"/> if the specified condition is <c>true</c>.
+    /// Throws an <see cref="InvalidArgumentException"/> if the specified condition is <c>true</c>.
     /// </summary>
     /// <param name="condition">The condition to evaluate. If <c>true</c>, an exception is thrown.</param>
     /// <param name="message">The error message that explains the reason for the exception.</param>
-    /// <exception cref="InvalidAgrumentException">Thrown when <paramref name="condition"/> is <c>true</c>.</exception>
+    /// <exception cref="InvalidArgumentException">Thrown when <paramref name="condition"/> is <c>true</c>.</exception>
     public static void ThrowIf([DoesNotReturnIf(true)] bool condition, string message)
     {
         if (!condition)
             return;
 
-        throw new InvalidAgrumentException(message);
+        throw new InvalidArgumentException(message);
     }
 
     /// <summary>
-    /// Throws an <see cref="InvalidAgrumentException"/> if the specified parameter is <c>null</c>.
+    /// Throws an <see cref="InvalidArgumentException"/> if the specified parameter is <c>null</c>.
     /// </summary>
     /// <param name="param">The parameter to check for <c>null</c>.</param>
     /// <param name="message">The error message that explains the reason for the exception.</param>
-    /// <exception cref="InvalidAgrumentException">Thrown when <paramref name="param"/> is <c>null</c>.</exception>
+    /// <exception cref="InvalidArgumentException">Thrown when <paramref name="param"/> is <c>null</c>.</exception>
     public static void ThrowIfNull([NotNull] object? param, string message)
     {
         if (param is null)
-            throw new InvalidAgrumentException(message);
+            throw new InvalidArgumentException(message);
     }
 }

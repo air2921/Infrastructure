@@ -5,6 +5,7 @@ using Infrastructure.Services.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;
+using Infrastructure.Exceptions.Global;
 
 namespace Infrastructure.Builder_Extensions;
 
@@ -20,7 +21,8 @@ public static class EntityFrameworkRepositoryExtension
     /// <param name="builder">The infrastructure builder to which the Entity Framework repository services will be added.</param>
     /// <param name="configureOptions">A delegate that configures the Entity Framework options.</param>
     /// <returns>The updated <see cref="IInfrastructureBuilder"/> with the added Entity Framework repository services.</returns>
-    /// Thrown when the Entity Framework configuration is invalid.
+    /// <exception cref="InfrastructureConfigurationException">
+    /// Thrown when the database configuration is invalid, such as an incorrect connection string or database type.
     /// </exception>
     public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : DbContext
     {
