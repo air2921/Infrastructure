@@ -8,8 +8,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Builder_Extensions;
 
+/// <summary>
+/// Provides extension methods for adding authorization services to an <see cref="IInfrastructureBuilder"/>.
+/// </summary>
 public static class AuthorizationExtension
 {
+    /// <summary>
+    /// Adds authorization services to the <see cref="IInfrastructureBuilder"/>.
+    /// </summary>
+    /// <param name="builder">The infrastructure builder to which the authorization services will be added.</param>
+    /// <param name="configureOptions">A delegate that configures the authorization options.</param>
+    /// <returns>The updated <see cref="IInfrastructureBuilder"/> with the added authorization services.</returns>
+    /// <exception cref="InfrastructureConfigurationException">
+    /// Thrown when the authorization options are invalid or misconfigured.
+    /// </exception>
     public static IInfrastructureBuilder AddAuthorization(this IInfrastructureBuilder builder, Action<AuthorizationConfigureOptions> configureOptions)
     {
         var options = new AuthorizationConfigureOptions();

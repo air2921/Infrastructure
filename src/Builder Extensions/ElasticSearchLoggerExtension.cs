@@ -8,8 +8,20 @@ using System.Reflection;
 
 namespace Infrastructure.Builder_Extensions;
 
+/// <summary>
+/// Provides extension methods for adding ElasticSearch logging services to an <see cref="IInfrastructureBuilder"/>.
+/// </summary>
 public static class ElasticSearchLoggerExtension
 {
+    /// <summary>
+    /// Adds ElasticSearch logging services to the <see cref="IInfrastructureBuilder"/>.
+    /// </summary>
+    /// <param name="builder">The infrastructure builder to which the ElasticSearch logging services will be added.</param>
+    /// <param name="configureOptions">A delegate that configures the ElasticSearch options.</param>
+    /// <returns>The updated <see cref="IInfrastructureBuilder"/> with the added ElasticSearch logging services.</returns>
+    /// <exception cref="InfrastructureConfigurationException">
+    /// Thrown when the ElasticSearch configuration is invalid, such as an incorrect connection string.
+    /// </exception>
     public static IInfrastructureBuilder AddElasticSearchLogger(this IInfrastructureBuilder builder, Action<ElasticSearchConfigureOptions> configureOptions)
     {
         var options = new ElasticSearchConfigureOptions();

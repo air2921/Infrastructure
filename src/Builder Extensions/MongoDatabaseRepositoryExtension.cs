@@ -9,8 +9,21 @@ using System.Collections.Immutable;
 
 namespace Infrastructure.Builder_Extensions;
 
+/// <summary>
+/// Provides extension methods for adding MongoDB repository services to an <see cref="IInfrastructureBuilder"/>.
+/// </summary>
 public static class MongoDatabaseRepositoryExtension
 {
+    /// <summary>
+    /// Adds MongoDB repository services to the <see cref="IInfrastructureBuilder"/>.
+    /// </summary>
+    /// <typeparam name="TMongoContext">The type of the MongoDB context used by the repository.</typeparam>
+    /// <param name="builder">The infrastructure builder to which the MongoDB repository services will be added.</param>
+    /// <param name="configureOptions">A delegate that configures the MongoDB database options.</param>
+    /// <returns>The updated <see cref="IInfrastructureBuilder"/> with the added MongoDB repository services.</returns>
+    /// <exception cref="InfrastructureConfigurationException">
+    /// Thrown when the MongoDB configuration is invalid, such as an incorrect connection string or database.
+    /// </exception>
     public static IInfrastructureBuilder AddMongoRepository<TMongoContext>(this IInfrastructureBuilder builder, Action<MongoDatabaseConfigureOptions> configureOptions) where TMongoContext : MongoDatabaseContext
     {
         var options = new MongoDatabaseConfigureOptions();
