@@ -72,7 +72,8 @@ internal static class SqlDatabaseExtension
         {
             options.UseNpgsql(connection)
             .EnableDetailedErrors(true)
-            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information)
+            .EnableServiceProviderCaching();
         });
 
         return builder;
@@ -98,7 +99,8 @@ internal static class SqlDatabaseExtension
         {
             options.UseSqlServer(connection)
             .EnableDetailedErrors(true)
-            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information)
+            .EnableServiceProviderCaching();
         });
 
         return builder;
@@ -124,7 +126,8 @@ internal static class SqlDatabaseExtension
         {
             options.UseSqlite(connection)
             .EnableDetailedErrors(true)
-            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information)
+            .EnableServiceProviderCaching();
         });
 
         return builder;
