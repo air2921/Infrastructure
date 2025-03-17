@@ -49,15 +49,16 @@ public static class S3ClientExtension
         if (!options.IsValidConfigure())
             throw new InfrastructureConfigurationException("Invalid S3 configuration. Please check AccessKey, SecretKey, and Region.", nameof(options));
 
-        var awsOptions = new AWSOptions
+        var s3Config = new AmazonS3Config
         {
-            Credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey),
-            Region = RegionEndpoint.GetBySystemName(options.Region)
+            ServiceURL = options.Endpoint,
+            ForcePathStyle = true,
+            UseHttp = options.Endpoint?.StartsWith("http://") == true,
         };
 
-        builder.Services.AddAWSService<IAmazonS3>();
-        builder.Services.AddDefaultAWSOptions(awsOptions);
+        var awsCredentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
 
+        builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(awsCredentials, s3Config));
         builder.Services.AddScoped<IS3Client, S3Client>();
 
         return builder;

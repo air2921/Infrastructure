@@ -64,7 +64,7 @@ public class SmtpClientWrapper : IDisposable
     /// <param name="message">The email message to send.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
-    public async Task EmailSendAsync(MimeMessage message, CancellationToken cancellationToken = default)
+    public async Task SendAsync(MimeMessage message, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -74,7 +74,7 @@ public class SmtpClientWrapper : IDisposable
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
-            _logger.LogError(ex.ToString(), nameof(EmailSendAsync));
+            _logger.LogError(ex.ToString(), nameof(SendAsync));
             throw _smtpAuthOrSocketError.Value;
         }
         catch (OperationCanceledException)
@@ -88,7 +88,7 @@ public class SmtpClientWrapper : IDisposable
     /// </summary>
     /// <param name="message">The email message to send.</param>
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
-    public void EmailSend(MimeMessage message)
+    public void Send(MimeMessage message)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -98,7 +98,7 @@ public class SmtpClientWrapper : IDisposable
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
-            _logger.LogError(ex.ToString(), nameof(EmailSend));
+            _logger.LogError(ex.ToString(), nameof(Send));
             throw _smtpAuthOrSocketError.Value;
         }
     }

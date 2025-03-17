@@ -40,7 +40,7 @@ public class SmtpSender(
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
-            await smtpClient.Value.EmailSendAsync(emailMessage, cancellationToken);
+            await smtpClient.Value.SendAsync(emailMessage, cancellationToken);
         }
         catch (SmtpClientException)
         {
@@ -68,7 +68,7 @@ public class SmtpSender(
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
-            smtpClient.Value.EmailSend(emailMessage);
+            smtpClient.Value.Send(emailMessage);
         }
         catch (SmtpClientException)
         {

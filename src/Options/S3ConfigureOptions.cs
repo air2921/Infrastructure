@@ -26,6 +26,16 @@ public sealed class S3ConfigureOptions : Validator
     public string Region { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the endpoint for the S3 storage provider.
+    /// </summary>
+    /// <value>The endpoint for the S3 storage provider.</value>
+    /// <remarks>
+    /// This property is required for Yandex Object Storage and should be set to the provider's endpoint (e.g., "https://storage.yandexcloud.net").
+    /// For Amazon S3, this property is optional and can be left null.
+    /// </remarks>
+    public string Endpoint { get; set; } = null!;
+
+    /// <summary>
     /// Validates whether the instance is configured correctly.
     /// </summary>
     /// <returns><c>true</c> if the configuration is valid; otherwise, <c>false</c>.</returns>
@@ -37,7 +47,7 @@ public sealed class S3ConfigureOptions : Validator
     /// </remarks>
     public override bool IsValidConfigure()
     {
-        if (string.IsNullOrWhiteSpace(AccessKey) || string.IsNullOrWhiteSpace(SecretKey) || string.IsNullOrWhiteSpace(Region))
+        if (string.IsNullOrWhiteSpace(AccessKey) || string.IsNullOrWhiteSpace(SecretKey) || string.IsNullOrWhiteSpace(Region) || string.IsNullOrWhiteSpace(Endpoint))
             return false;
 
         return true;
