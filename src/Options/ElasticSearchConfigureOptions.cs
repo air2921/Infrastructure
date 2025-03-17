@@ -12,7 +12,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// Gets or sets the connection string for Elasticsearch.
     /// </summary>
     /// <value>The connection string for Elasticsearch.</value>
-    public string Connection { get; set; } = string.Empty;
+    public string Connection { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the configuration settings for Elasticsearch.

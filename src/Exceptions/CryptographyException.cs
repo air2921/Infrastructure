@@ -16,7 +16,7 @@ namespace Infrastructure.Exceptions;
 /// <param name="message">The error message that explains the reason for the exception.</param>
 public class CryptographyException(string? message) : InfrastructureException(message)
 {
-    private static readonly HashSet<CryptographyException> _errors =  [];
+    private static readonly HashSet<CryptographyException> _errors = [];
 
     /// <summary>
     /// Throws a <see cref="CryptographyException"/> if the specified condition is <c>true</c>.

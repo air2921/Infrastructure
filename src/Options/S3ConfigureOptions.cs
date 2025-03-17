@@ -11,19 +11,19 @@ public sealed class S3ConfigureOptions : Validator
     /// Gets or sets the access key for Amazon S3.
     /// </summary>
     /// <value>The access key for Amazon S3.</value>
-    public string AccessKey { get; set; } = string.Empty;
+    public string AccessKey { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the secret key for Amazon S3.
     /// </summary>
     /// <value>The secret key for Amazon S3.</value>
-    public string SecretKey { get; set; } = string.Empty;
+    public string SecretKey { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the region for Amazon S3.
     /// </summary>
     /// <value>The region for Amazon S3.</value>
-    public string Region { get; set; } = string.Empty;
+    public string Region { get; set; } = null!;
 
     /// <summary>
     /// Validates whether the instance is configured correctly.

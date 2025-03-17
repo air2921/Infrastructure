@@ -11,25 +11,25 @@ public sealed class SmtpConfigureOptions : Validator
     /// Gets or sets the SMTP provider (e.g., Gmail, Outlook, etc.).
     /// </summary>
     /// <value>The SMTP provider.</value>
-    public string Provider { get; set; } = string.Empty;
+    public string Provider { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the sender's display name for emails.
     /// </summary>
     /// <value>The sender's display name.</value>
-    public string SenderName { get; set; } = string.Empty;
+    public string SenderName { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the email address used for sending emails.
     /// </summary>
     /// <value>The email address.</value>
-    public string Address { get; set; } = string.Empty;
+    public string Address { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password for the email account.
     /// </summary>
     /// <value>The email account password.</value>
-    public string Password { get; set; } = string.Empty;
+    public string Password { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the port number for the SMTP server.

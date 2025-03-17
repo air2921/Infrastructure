@@ -63,7 +63,7 @@ public sealed class CacheConfigureOptions : Validator
     /// Gets or sets the connection string.
     /// </summary>
     /// <value>The connection string.</value>
-    public string Connection { get; set; } = string.Empty;
+    public string Connection { get; set; } = null!;
 
     /// <summary>
     /// Validates whether the instance is configured correctly.

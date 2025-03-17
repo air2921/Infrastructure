@@ -12,7 +12,7 @@ public sealed class EntityFrameworkConfigureOptions : Validator
     /// Gets or sets the connection string for the database.
     /// </summary>
     /// <value>The connection string for the database.</value>
-    public string Connection { get; set; } = string.Empty;
+    public string Connection { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the SQL database configuration.
