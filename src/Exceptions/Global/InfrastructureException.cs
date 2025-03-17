@@ -13,7 +13,7 @@ public abstract class InfrastructureException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="InfrastructureException"/> class.
     /// </summary>
-    public InfrastructureException() : base()
+    private InfrastructureException() : base()
     {
     }
 
@@ -22,16 +22,6 @@ public abstract class InfrastructureException : Exception
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
     public InfrastructureException(string? message) : base(message)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="InfrastructureException"/> class with a specified error message
-    /// and a reference to the inner exception that is the cause of this exception.
-    /// </summary>
-    /// <param name="message">The error message that explains the reason for the exception.</param>
-    /// <param name="exception">The exception that is the cause of the current exception, or <c>null</c> if no inner exception is specified.</param>
-    public InfrastructureException(string? message, Exception? exception) : base(message, exception)
     {
     }
 }

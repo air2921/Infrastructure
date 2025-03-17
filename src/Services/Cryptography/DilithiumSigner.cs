@@ -97,7 +97,7 @@ public class DilithiumSigner : ISigner, IDisposable
         catch (Exception ex)
         {
             Console.WriteLine("Error during initialization: " + ex.ToString());
-            throw new CryptographyException(ex.Message, ex);
+            throw new CryptographyException(ex.Message);
         }
     }
 

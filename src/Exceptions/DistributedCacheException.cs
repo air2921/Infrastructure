@@ -8,37 +8,21 @@ namespace Infrastructure.Exceptions;
 /// </summary>
 /// <remarks>
 /// This exception is used to handle errors specific to distributed caching, such as connection failures,
-/// serialization issues, or cache key conflicts. It provides utility methods for conditional exception throwing.
+/// serialization issues, or cache key conflicts. It provides utility methods for conditional exception throwing,
+/// ensuring that exceptions are thrown only when necessary and preventing redundant exception creation.
 /// </remarks>
-public class DistributedCacheException : InfrastructureException
+/// <remarks>
+/// Initializes a new instance of the <see cref="DistributedCacheException"/> class with a specified error message.
+/// </remarks>
+/// <param name="message">The error message that explains the reason for the exception.</param>
+public class DistributedCacheException(string? message) : InfrastructureException(message)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DistributedCacheException"/> class.
-    /// </summary>
-    public DistributedCacheException() : base()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DistributedCacheException"/> class with a specified error message.
-    /// </summary>
-    /// <param name="message">The error message that explains the reason for the exception.</param>
-    public DistributedCacheException(string? message) : base(message)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DistributedCacheException"/> class with a specified error message
-    /// and a reference to the inner exception that is the cause of this exception.
-    /// </summary>
-    /// <param name="message">The error message that explains the reason for the exception.</param>
-    /// <param name="exception">The exception that is the cause of the current exception, or <c>null</c> if no inner exception is specified.</param>
-    public DistributedCacheException(string? message, Exception? exception) : base(message, exception)
-    {
-    }
+    private static readonly HashSet<DistributedCacheException> _errors = [];
 
     /// <summary>
     /// Throws a <see cref="DistributedCacheException"/> if the specified condition is <c>true</c>.
+    /// This method helps to conditionally throw the exception based on the provided condition.
+    /// If an exception with the same message has already been thrown, it will be reused.
     /// </summary>
     /// <param name="condition">The condition to evaluate. If <c>true</c>, an exception is thrown.</param>
     /// <param name="message">The error message that explains the reason for the exception.</param>
@@ -48,18 +32,61 @@ public class DistributedCacheException : InfrastructureException
         if (!condition)
             return;
 
-        throw new DistributedCacheException(message);
+        var error = _errors.FirstOrDefault(x => x.Message == message);
+        if (error is not null)
+            throw error;
+
+        error = new DistributedCacheException(message);
+        _errors.Add(error);
+
+        throw error;
     }
 
     /// <summary>
     /// Throws a <see cref="DistributedCacheException"/> if the specified parameter is <c>null</c>.
+    /// This method allows you to throw an exception when an important parameter is found to be <c>null</c>.
+    /// If an exception with the same message has already been thrown, it will be reused.
     /// </summary>
     /// <param name="param">The parameter to check for <c>null</c>.</param>
     /// <param name="message">The error message that explains the reason for the exception.</param>
     /// <exception cref="DistributedCacheException">Thrown when <paramref name="param"/> is <c>null</c>.</exception>
     public static void ThrowIfNull([NotNull] object? param, string message)
     {
-        if (param is null)
-            throw new DistributedCacheException(message);
+        if (param is not null)
+            return;
+
+        var error = _errors.FirstOrDefault(x => x.Message == message);
+        if (error is not null)
+            throw error;
+
+        error = new DistributedCacheException(message);
+        _errors.Add(error);
+
+        throw error;
     }
+
+    /// <summary>
+    /// Compares the current <see cref="DistributedCacheException"/> object with another object.
+    /// Two <see cref="DistributedCacheException"/> objects are considered equal if they have the same message.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current exception.</param>
+    /// <returns><c>true</c> if the current exception is equal to the specified object; otherwise, <c>false</c>.</returns>
+    public override bool Equals(object? obj)
+    {
+        if (obj is not DistributedCacheException other)
+            return false;
+
+        if (Message != other.Message)
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Gets the hash code for the current <see cref="DistributedCacheException"/> object.
+    /// The hash code is based on the exception's message.
+    /// </summary>
+    /// <returns>The hash code for the current <see cref="DistributedCacheException"/>.</returns>
+    public override int GetHashCode()
+        => HashCode.Combine(Message);
 }

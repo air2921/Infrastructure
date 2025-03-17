@@ -61,7 +61,7 @@ public class Repository<TEntity, TDbContext> :
     public Repository(ILogger<Repository<TEntity, TDbContext>> logger, TDbContext context)
     {
         _logger = new Lazy<ILogger<Repository<TEntity, TDbContext>>>(() => logger);
-        _context = context ?? throw new InvalidArgumentException();
+        _context = context ?? throw new InvalidArgumentException("Database context cannot be null");
         _dbSet = new Lazy<DbSet<TEntity>>(() => _context.Set<TEntity>(), LazyThreadSafetyMode.ExecutionAndPublication);
     }
 

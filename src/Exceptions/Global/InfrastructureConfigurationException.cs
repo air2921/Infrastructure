@@ -12,7 +12,7 @@ public sealed class InfrastructureConfigurationException : ArgumentException
     /// <summary>
     /// Initializes a new instance of the <see cref="InfrastructureConfigurationException"/> class.
     /// </summary>
-    public InfrastructureConfigurationException() : base()
+    private InfrastructureConfigurationException() : base()
     {
     }
 
