@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Configuration;
+using Infrastructure.Enums;
 
 namespace Infrastructure.Options;
 
@@ -35,7 +36,7 @@ public sealed class SmtpConfigureOptions : Validator
     /// Gets or sets the port number for the SMTP server.
     /// </summary>
     /// <value>The SMTP server port.</value>
-    public int Port { get; set; }
+    public SmtpPort Port { get; set; }
 
     /// <summary>
     /// Validates whether the instance is configured correctly.
@@ -47,30 +48,11 @@ public sealed class SmtpConfigureOptions : Validator
     /// - The <see cref="Address"/> property is not null or empty.
     /// - The <see cref="Password"/> property is not null or empty.
     /// - The <see cref="SenderName"/> property is not null or empty.
-    /// - The <see cref="Port"/> property is a valid SMTP port (25, 2525, 465, or 587).
     /// </remarks>
     public override bool IsValidConfigure()
     {
         if (string.IsNullOrWhiteSpace(Provider) || string.IsNullOrWhiteSpace(Address) ||
-            string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(SenderName) || !IsValidPort(Port))
-            return false;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Validates whether the specified port is a valid SMTP port.
-    /// </summary>
-    /// <param name="port">The port number to validate.</param>
-    /// <returns><c>true</c> if the port is valid; otherwise, <c>false</c>.</returns>
-    /// <remarks>
-    /// Valid SMTP ports are: 25, 2525, 465, and 587.
-    /// </remarks>
-    private bool IsValidPort(int port)
-    {
-        int[] ports = [25, 2525, 465, 587];
-
-        if (!ports.Contains(port))
+            string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(SenderName))
             return false;
 
         return true;
