@@ -1,6 +1,6 @@
-﻿using Infrastructure.Services.EntityFramework.Builder;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Builder;
 using Infrastructure.Services.EntityFramework.Entity;
-using Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

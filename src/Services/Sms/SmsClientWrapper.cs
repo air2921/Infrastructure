@@ -41,13 +41,15 @@ public class SmsClientWrapper
     /// <remarks>
     /// This method sends the provided SMS message asynchronously. It uses the Twilio API to send the message to the specified phone number.
     /// </remarks>
-    public async Task SendAsync(string phone, string message, CancellationToken cancellationToken = default)
+    public async Task SendAsync(string phone, string message)
     {
-        _ = await MessageResource.CreateAsync(
-            body: message,
-            from: new PhoneNumber(_options.PhoneNumber),
-            to: new PhoneNumber(phone)
-        );
+        var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
+        {
+            From = new PhoneNumber(_options.PhoneNumber),
+            Body = message,
+        };
+
+        _ = await MessageResource.CreateAsync(messageOptions);
     }
 
     /// <summary>
@@ -61,10 +63,12 @@ public class SmsClientWrapper
     /// </remarks>
     public void Send(string phone, string message)
     {
-        _ = MessageResource.Create(
-            body: message,
-            from: new PhoneNumber(_options.PhoneNumber),
-            to: new PhoneNumber(phone)
-        );
+        var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
+        {
+            From = new PhoneNumber(_options.PhoneNumber),
+            Body = message
+        };
+
+        _ = MessageResource.Create(messageOptions);
     }
 }

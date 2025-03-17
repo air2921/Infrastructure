@@ -1,11 +1,11 @@
 ﻿using Infrastructure.Abstractions;
 using Infrastructure.Configuration;
+using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;
-using Infrastructure.Exceptions.Global;
 
 namespace Infrastructure.Builder_Extensions;
 
