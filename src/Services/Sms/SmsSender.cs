@@ -35,6 +35,7 @@ public class SmsSender(
     /// This method sends an SMS message synchronously using the provided <see cref="SmsClientWrapper"/>. If any error occurs while sending the SMS,
     /// it logs the error and throws a <see cref="SmsClientException"/>.
     /// </remarks>
+    /// <exception cref="SmsClientException">Thrown when an error occurs during the SMS sending process.</exception>
     public void SendSms(SmsDetails sms)
     {
         try
@@ -57,6 +58,7 @@ public class SmsSender(
     /// This method sends an SMS message asynchronously using the provided <see cref="SmsClientWrapper"/>. If any error occurs while sending the SMS,
     /// it logs the error and throws a <see cref="SmsClientException"/>.
     /// </remarks>
+    /// <exception cref="SmsClientException">Thrown when an error occurs during the SMS sending process.</exception>
     public async Task SendSmsAsync(SmsDetails sms)
     {
         try
