@@ -1,7 +1,7 @@
-﻿using Infrastructure.Services.MongoDatabase;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Services.MongoDatabase;
 using Infrastructure.Services.MongoDatabase.Builder;
 using Infrastructure.Services.MongoDatabase.Document;
-using Infrastructure.Exceptions;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Abstractions;

@@ -3,8 +3,8 @@ using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.DistributedCache;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Builder_Extensions;
 
