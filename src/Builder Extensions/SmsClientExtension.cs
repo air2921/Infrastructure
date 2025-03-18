@@ -43,8 +43,7 @@ public static class SmsClientExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid Twilio configuration. Please check configuration", nameof(options));
+        options.EnsureSuccessValidation("Invalid Twilio configuration. Please check configuration");
 
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<SmsClientWrapper>();

@@ -48,6 +48,8 @@ public static class EntityFrameworkRepositoryExtension
         if (!options.IsEnable)
             return builder;
 
+        options.EnsureSuccessValidation("Invalid database configuration, check connection string");
+
         builder.AddDatabaseContext<TDbContext>(options);
 
         builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();

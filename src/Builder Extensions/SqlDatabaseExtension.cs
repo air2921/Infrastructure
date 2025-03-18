@@ -39,8 +39,7 @@ internal static class SqlDatabaseExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid Database configuration. Please check connection or SqlType", nameof(options));
+        options.EnsureSuccessValidation("Invalid Database configuration. Please check connection or SqlType");
 
         if (options.Database == Enums.SqlDatabase.PostgreSql)
             return builder.AddPostgreSql<TDbContext>(options.Connection);

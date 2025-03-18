@@ -25,7 +25,7 @@ public class JsonWebTokenPublisher(AuthorizationConfigureOptions authorizationOp
     public string Publish(JsonWebTokenDetails details)
     {
         var key = new SymmetricSecurityKey(authorizationOptions.Encoding.GetBytes(authorizationOptions.Key));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var credentials = new SigningCredentials(key, authorizationOptions.Algorithm);
 
         var claims = new List<Claim>
         {

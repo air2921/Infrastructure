@@ -45,8 +45,7 @@ public static class ElasticSearchLoggerExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid ElasticSearch configuration. Please check connection", nameof(options.Connection));
+        options.EnsureSuccessValidation("Invalid ElasticSearch configuration. Please check connection");
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()

@@ -42,8 +42,7 @@ public static class SmtpClientExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid SMTP configuration. Please check Provider, Address, Password and Port.", nameof(options));
+        options.EnsureSuccessValidation("Invalid SMTP configuration. Please check Provider, Address, Password and Port");
 
         builder.Services.AddSingleton(options);
         builder.Services.AddScoped<SmtpClientWrapper>();

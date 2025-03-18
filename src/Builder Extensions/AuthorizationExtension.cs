@@ -38,8 +38,7 @@ public static class AuthorizationExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid auth options, check your configuration");
+        options.EnsureSuccessValidation("Invalid auth options, check your configuration");
 
         builder.Services.AddSingleton(options);
         builder.Services.AddScoped<IPublisher<JsonWebTokenDetails>, JsonWebTokenPublisher>();

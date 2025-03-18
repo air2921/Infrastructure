@@ -46,8 +46,7 @@ public static class S3ClientExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid S3 configuration. Please check AccessKey, SecretKey, and Region.", nameof(options));
+        options.EnsureSuccessValidation("Invalid S3 configuration. Please check AccessKey, SecretKey, and Region");
 
         var s3Config = new AmazonS3Config
         {

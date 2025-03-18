@@ -38,8 +38,7 @@ public static class DistributedCacheExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid Redis configuration. Please check the connection string.", nameof(options.Connection));
+        options.EnsureSuccessValidation("Invalid Redis configuration. Please check the connection string");
 
         builder.Services.AddStackExchangeRedisCache(cache =>
         {

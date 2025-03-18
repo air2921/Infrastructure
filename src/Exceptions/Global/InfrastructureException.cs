@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Exceptions.Global;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Infrastructure.Exceptions.Global;
 
 /// <summary>
 /// Represents the base class for all custom exceptions in the infrastructure layer.

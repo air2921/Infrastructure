@@ -46,8 +46,7 @@ public static class MongoDatabaseRepositoryExtension
         if (!options.IsEnable)
             return builder;
 
-        if (!options.IsValidConfigure())
-            throw new InfrastructureConfigurationException("Invalid Mongodb configuration. Please check connection or database", nameof(options));
+        options.EnsureSuccessValidation("Invalid Mongodb configuration. Please check connection or database");
 
         builder.Services.AddSingleton(options);
         builder.Services.AddScoped<TMongoContext>();
