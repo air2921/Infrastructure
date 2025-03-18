@@ -1,10 +1,7 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Options;
 using Infrastructure.Services.MongoDatabase.Document;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using Serilog;
-using System.Threading;
 
 namespace Infrastructure.Services.MongoDatabase;
 
