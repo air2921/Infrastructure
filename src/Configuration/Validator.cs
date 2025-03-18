@@ -29,7 +29,7 @@ public abstract class Validator
     /// <remarks>
     /// This method calls the <see cref="IsValidConfigure"/> method to check if the configuration is valid.
     /// If the configuration is invalid, it throws an <see cref="InfrastructureConfigurationException"/>
-    /// with the message "Invalid options configuration".
+    /// with the message "Invalid configuration options".
     /// </remarks>
     public virtual void EnsureSuccessValidation(string? message = null)
     {

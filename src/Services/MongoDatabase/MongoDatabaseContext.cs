@@ -1,7 +1,10 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Options;
 using Infrastructure.Services.MongoDatabase.Document;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using Serilog;
+using System.Threading;
 
 namespace Infrastructure.Services.MongoDatabase;
 
@@ -92,6 +95,12 @@ public abstract class MongoDatabaseContext : IDisposable
             _session = _client.Value.StartSession();
             _session.StartTransaction();
         }
+        catch (Exception ex)
+        {
+            _session?.Dispose();
+            _session = null;
+            throw new EntityException(ex.Message);
+        }
         finally
         {
             _sessionSemaphore.Release();
@@ -111,12 +120,16 @@ public abstract class MongoDatabaseContext : IDisposable
                 throw _transactionNotStarted.Value;
 
             _session.CommitTransaction();
-            _session.Dispose();
-            _session = null;
+        }
+        catch (Exception ex)
+        {
+            throw new EntityException(ex.Message);
         }
         finally
         {
+            _session?.Dispose();
             _sessionSemaphore.Release();
+            _session = null;
         }
     }
 
@@ -136,9 +149,15 @@ public abstract class MongoDatabaseContext : IDisposable
             _session.Dispose();
             _session = null;
         }
+        catch (Exception ex)
+        {
+            throw new EntityException(ex.Message);
+        }
         finally
         {
+            _session?.Dispose();
             _sessionSemaphore.Release();
+            _session = null;
         }
     }
 
@@ -162,7 +181,15 @@ public abstract class MongoDatabaseContext : IDisposable
         }
         catch (OperationCanceledException)
         {
+            _session?.Dispose();
+            _session = null;
             throw _operationCancelledError.Value;
+        }
+        catch (Exception ex)
+        {
+            _session?.Dispose();
+            _session = null;
+            throw new EntityException(ex.Message);
         }
         finally
         {
@@ -186,16 +213,20 @@ public abstract class MongoDatabaseContext : IDisposable
                 throw _transactionNotStarted.Value;
 
             await _session.CommitTransactionAsync(cancellationToken);
-            _session.Dispose();
-            _session = null;
         }
         catch (OperationCanceledException)
         {
             throw _operationCancelledError.Value;
         }
+        catch (Exception ex)
+        {
+            throw new EntityException(ex.Message);
+        }
         finally
         {
+            _session?.Dispose();
             _sessionSemaphore.Release();
+            _session = null;
         }
     }
 
@@ -215,16 +246,20 @@ public abstract class MongoDatabaseContext : IDisposable
                 throw _transactionNotStarted.Value;
 
             await _session.AbortTransactionAsync(cancellationToken);
-            _session.Dispose();
-            _session = null;
         }
         catch (OperationCanceledException)
         {
             throw _operationCancelledError.Value;
         }
+        catch (Exception ex)
+        {
+            throw new EntityException(ex.Message);
+        }
         finally
         {
+            _session?.Dispose();
             _sessionSemaphore.Release();
+            _session = null;
         }
     }
 
