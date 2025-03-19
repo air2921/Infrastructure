@@ -8,7 +8,7 @@ using MimeKit;
 namespace Infrastructure.Services.Smtp;
 
 /// <summary>
-/// A class responsible for sending emails using an SMTP client. This class implements the <see cref="ISmtpSender{MailDetails}"/> interface to send emails asynchronously.
+/// A class responsible for sending emails using an SMTP client. This class implements the <see cref="ISender{MailDetails}"/> interface to send emails asynchronously.
 /// </summary>
 /// <param name="logger">A logger for tracking errors and operations performed by this class.</param>
 /// <param name="configureOptions">Configuration options containing SMTP provider settings like the sender's name and address.</param>
@@ -20,7 +20,7 @@ namespace Infrastructure.Services.Smtp;
 public class SmtpSender(
     ILogger<SmtpSender> logger,
     SmtpConfigureOptions configureOptions,
-    Lazy<SmtpClientWrapper> smtpClient) : ISmtpSender<MailDetails>
+    Lazy<SmtpClientWrapper> smtpClient) : ISender<MailDetails>
 {
     private static readonly Lazy<SmtpClientException> _smtpMailSendingError = new(() => new("An error occurred while sending the email"), LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -30,13 +30,13 @@ public class SmtpSender(
     /// <param name="mail">An object containing the details of the email to send, including recipient, subject, and body.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="SmtpClientException">Thrown if an error occurs while sending the email.</exception>
-    public async Task SendMailAsync(MailDetails mail, CancellationToken cancellationToken = default)
+    public async Task SendAsync(MailDetails mail, CancellationToken cancellationToken = default)
     {
         try
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(configureOptions.SenderName, configureOptions.Address));
-            emailMessage.To.Add(new MailboxAddress(mail.UsernameTo, mail.EmailTo));
+            emailMessage.To.Add(new MailboxAddress(mail.UsernameTo, mail.To));
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
@@ -48,7 +48,7 @@ public class SmtpSender(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message, mail.EmailTo);
+            logger.LogError(ex.Message, mail);
             throw _smtpMailSendingError.Value;
         }
     }
@@ -58,13 +58,13 @@ public class SmtpSender(
     /// </summary>
     /// <param name="mail">An object containing the details of the email to send, including recipient, subject, and body.</param>
     /// <exception cref="SmtpClientException">Thrown if an error occurs while sending the email.</exception>
-    public void SendMail(MailDetails mail)
+    public void Send(MailDetails mail)
     {
         try
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(configureOptions.SenderName, configureOptions.Address));
-            emailMessage.To.Add(new MailboxAddress(mail.UsernameTo, mail.EmailTo));
+            emailMessage.To.Add(new MailboxAddress(mail.UsernameTo, mail.To));
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
@@ -76,7 +76,7 @@ public class SmtpSender(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message, mail.EmailTo);
+            logger.LogError(ex.Message, mail);
             throw _smtpMailSendingError.Value;
         }
     }

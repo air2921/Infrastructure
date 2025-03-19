@@ -27,7 +27,7 @@ public static class SmsClientExtension
     /// <list type="bullet">
     ///     <item><description><see cref="TwilioConfigureOptions"/> - Singleton service for storing Twilio configuration.</description></item>
     ///     <item><description><see cref="SmsClientWrapper"/> - Singleton service for interacting with the Twilio client.</description></item>
-    ///     <item><description><see cref="ISmsSender{SmsDetails}"/> - Scoped service for sending SMS messages using the configured Twilio client.</description></item>
+    ///     <item><description><see cref="ISender{SmsDetails}"/> - Scoped service for sending SMS messages using the configured Twilio client.</description></item>
     /// </list>
     /// Additionally, this method performs the following:
     /// <list type="bullet">
@@ -47,7 +47,7 @@ public static class SmsClientExtension
 
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<SmsClientWrapper>();
-        builder.Services.AddScoped<ISmsSender<SmsDetails>, SmsSender>();
+        builder.Services.AddScoped<ISender<SmsDetails>, SmsSender>();
 
         return builder;
     }

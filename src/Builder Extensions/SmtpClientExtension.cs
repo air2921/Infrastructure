@@ -27,7 +27,7 @@ public static class SmtpClientExtension
     /// <list type="bullet">
     ///     <item><description><see cref="SmtpConfigureOptions"/> - Singleton service for storing SMTP configuration.</description></item>
     ///     <item><description><see cref="SmtpClientWrapper"/> - Scoped service for interacting with the SMTP client.</description></item>
-    ///     <item><description><see cref="ISmtpSender{MailDetails}"/> - Scoped service for sending emails using the configured SMTP client.</description></item>
+    ///     <item><description><see cref="ISender{MailDetails}"/> - Scoped service for sending emails using the configured SMTP client.</description></item>
     /// </list>
     /// Additionally, this method performs the following:
     /// <list type="bullet">
@@ -46,7 +46,7 @@ public static class SmtpClientExtension
 
         builder.Services.AddSingleton(options);
         builder.Services.AddScoped<SmtpClientWrapper>();
-        builder.Services.AddScoped<ISmtpSender<MailDetails>, SmtpSender>();
+        builder.Services.AddScoped<ISender<MailDetails>, SmtpSender>();
 
         return builder;
     }
