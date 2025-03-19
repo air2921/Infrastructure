@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Configuration;
+using Infrastructure.Enums;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
@@ -41,11 +42,11 @@ internal static class SqlDatabaseExtension
 
         options.EnsureSuccessValidation("Invalid Database configuration. Please check connection or SqlType");
 
-        if (options.Database == Enums.SqlDatabase.PostgreSql)
+        if (options.Database == SqlDatabase.PostgreSql)
             return builder.AddPostgreSql<TDbContext>(options.Connection);
-        if (options.Database == Enums.SqlDatabase.SqlServer)
+        if (options.Database == SqlDatabase.SqlServer)
             return builder.AddSqlServer<TDbContext>(options.Connection);
-        if (options.Database == Enums.SqlDatabase.SqlLite)
+        if (options.Database == SqlDatabase.SqlLite)
             return builder.AddSqlLite<TDbContext>(options.Connection);
 
         throw new InfrastructureConfigurationException("Unknown Sql database", nameof(options.Database));
