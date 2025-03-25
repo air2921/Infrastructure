@@ -18,7 +18,12 @@ namespace Infrastructure.Services.Cryptography;
 public class DilithiumSigner : ISigner, IDisposable
 {
     private static IntPtr _oqsLibraryHandle;
+    private static readonly object _libraryLock = new();
+    private static readonly bool _libraryInitialized = false;
+
     private IntPtr _sig;
+    private readonly object _instanceLock = new();
+    private bool _disposed = false;
 
     private delegate IntPtr OQS_SIG_newDelegate(string alg_name);
     private delegate void OQS_SIG_freeDelegate(IntPtr sig);
@@ -26,15 +31,14 @@ public class DilithiumSigner : ISigner, IDisposable
     private delegate int OQS_SIG_signDelegate(IntPtr sig, byte[] signature, out long signature_len, byte[] message, long message_len, byte[] private_key);
     private delegate int OQS_SIG_verifyDelegate(IntPtr sig, byte[] message, long message_len, byte[] signature, long signature_len, byte[] public_key);
 
-    private static readonly OQS_SIG_newDelegate _oqsSigNew;
-    private static readonly OQS_SIG_freeDelegate _oqsSigFree;
-    private static readonly OQS_SIG_keypairDelegate _oqsSigKeypair;
-    private static readonly OQS_SIG_signDelegate _oqsSigSign;
-    private static readonly OQS_SIG_verifyDelegate _oqsSigVerify;
+    private static readonly OQS_SIG_newDelegate _oqsSigNew = null!;
+    private static readonly OQS_SIG_freeDelegate _oqsSigFree = null!;
+    private static readonly OQS_SIG_keypairDelegate _oqsSigKeypair = null!;
+    private static readonly OQS_SIG_signDelegate _oqsSigSign = null!;
+    private static readonly OQS_SIG_verifyDelegate _oqsSigVerify = null!;
 
     private static readonly string _dllPath = Path.Combine(Path.GetTempPath(), "oqs.dll");
-    private readonly object _lock = new();
-    private bool _disposed = false;
+    private static int _instanceCount = 0;
 
     private const string ResourceName = "Infrastructure.Assembly.oqs.dll";
     private const string AlgorithmName = "Dilithium3";
@@ -42,79 +46,86 @@ public class DilithiumSigner : ISigner, IDisposable
     private const int PrivateKeyLength = 4000;
     private const int SignatureLength = 3293;
 
-
     private static readonly Lazy<CryptographyException> _readingResourceError = new(() => new($"{ResourceName} is not found"));
     private static readonly Lazy<CryptographyException> _loadingError = new(() => new("Failed to load oqs.dll"));
-    private static readonly Lazy<CryptographyException> _initializationError = new (() => new("Failed to initialize Dilithium"));
+    private static readonly Lazy<CryptographyException> _initializationError = new(() => new("Failed to initialize Dilithium"));
     private static readonly Lazy<CryptographyException> _generateKeyPairError = new(() => new("An error occurred while attempting to generate a key pair"));
     private static readonly Lazy<CryptographyException> _signingError = new(() => new("An error occurred while attempting to sign a message"));
 
     /// <summary>
     /// Static constructor to initialize the OQS library and resolve required functions.
     /// </summary>
-    /// <exception cref="CryptographyException">Thrown if the OQS library fails to load or initialize.</exception>
     static DilithiumSigner()
     {
-        try
+        lock (_libraryLock)
         {
-            Console.WriteLine($"Loading {ResourceName}...");
+            if (!_libraryInitialized)
+            {
+                try
+                {
+                    Console.WriteLine($"Loading {ResourceName}...");
 
-            using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName) ??
-                throw _readingResourceError.Value;
+                    using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName) ??
+                        throw _readingResourceError.Value;
 
-            using (var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true))
-                assemblyStream.CopyTo(fileStream);
+                    using (var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true))
+                        assemblyStream.CopyTo(fileStream);
 
-            _oqsLibraryHandle = NativeLibrary.Load(_dllPath);
-            if (_oqsLibraryHandle == IntPtr.Zero)
-                throw _loadingError.Value;
+                    _oqsLibraryHandle = NativeLibrary.Load(_dllPath);
+                    if (_oqsLibraryHandle == IntPtr.Zero)
+                        throw _loadingError.Value;
 
-            Console.WriteLine("Resolving OQS_SIG_new...");
-            _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
-                NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_new")
-            );
+                    Console.WriteLine("Resolving OQS_SIG_new...");
+                    _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
+                        NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_new")
+                    );
 
-            Console.WriteLine("Resolving OQS_SIG_free...");
-            _oqsSigFree = Marshal.GetDelegateForFunctionPointer<OQS_SIG_freeDelegate>(
-                NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_free")
-            );
+                    Console.WriteLine("Resolving OQS_SIG_free...");
+                    _oqsSigFree = Marshal.GetDelegateForFunctionPointer<OQS_SIG_freeDelegate>(
+                        NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_free")
+                    );
 
-            Console.WriteLine("Resolving OQS_SIG_keypair...");
-            _oqsSigKeypair = Marshal.GetDelegateForFunctionPointer<OQS_SIG_keypairDelegate>(
-                NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_keypair")
-            );
+                    Console.WriteLine("Resolving OQS_SIG_keypair...");
+                    _oqsSigKeypair = Marshal.GetDelegateForFunctionPointer<OQS_SIG_keypairDelegate>(
+                        NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_keypair")
+                    );
 
-            Console.WriteLine("Resolving OQS_SIG_sign...");
-            _oqsSigSign = Marshal.GetDelegateForFunctionPointer<OQS_SIG_signDelegate>(
-                NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_sign")
-            );
+                    Console.WriteLine("Resolving OQS_SIG_sign...");
+                    _oqsSigSign = Marshal.GetDelegateForFunctionPointer<OQS_SIG_signDelegate>(
+                        NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_sign")
+                    );
 
-            Console.WriteLine("Resolving OQS_SIG_verify...");
-            _oqsSigVerify = Marshal.GetDelegateForFunctionPointer<OQS_SIG_verifyDelegate>(
-                NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_verify")
-            );
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error during initialization: " + ex.ToString());
-            throw new CryptographyException(ex.Message);
+                    Console.WriteLine("Resolving OQS_SIG_verify...");
+                    _oqsSigVerify = Marshal.GetDelegateForFunctionPointer<OQS_SIG_verifyDelegate>(
+                        NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_verify")
+                    );
+
+                    _libraryInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error during initialization: " + ex.ToString());
+                    throw new CryptographyException(ex.Message);
+                }
+            }
         }
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DilithiumSigner"/> class.
     /// </summary>
-    /// <exception cref="CryptographyException">Thrown if the Dilithium algorithm fails to initialize.</exception>
     public DilithiumSigner()
     {
-        _sig = _oqsSigNew(AlgorithmName);
-        if (_sig == IntPtr.Zero)
-            throw _initializationError.Value;
+        lock (_instanceLock)
+        {
+            _sig = _oqsSigNew(AlgorithmName);
+            if (_sig == IntPtr.Zero)
+                throw _initializationError.Value;
+
+            Interlocked.Increment(ref _instanceCount);
+        }
     }
 
-    /// <summary>
-    /// Finalizer to ensure resources are released if <see cref="Dispose()"/> is not called.
-    /// </summary>
     ~DilithiumSigner()
     {
         Dispose(false);
@@ -123,13 +134,11 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <summary>
     /// Generates a public/private key pair using the Dilithium algorithm.
     /// </summary>
-    /// <returns>A tuple containing the public key and private key as byte arrays.</returns>
-    /// <exception cref="CryptographyException">Thrown if key pair generation fails.</exception>
     public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        lock (_lock)
+        lock (_instanceLock)
         {
             byte[] publicKey = new byte[PublicKeyLength];
             byte[] privateKey = new byte[PrivateKeyLength];
@@ -145,15 +154,11 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <summary>
     /// Signs a message using the provided private key.
     /// </summary>
-    /// <param name="message">The message to sign as a byte array.</param>
-    /// <param name="privateKey">The private key to use for signing.</param>
-    /// <returns>The signature as a byte array.</returns>
-    /// <exception cref="CryptographyException">Thrown if signing fails.</exception>
     public byte[] Sign(byte[] message, byte[] privateKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        lock (_lock)
+        lock (_instanceLock)
         {
             byte[] signature = new byte[SignatureLength];
 
@@ -168,15 +173,11 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <summary>
     /// Verifies a message's signature using the provided public key.
     /// </summary>
-    /// <param name="message">The original message as a byte array.</param>
-    /// <param name="signature">The signature to verify as a byte array.</param>
-    /// <param name="publicKey">The public key to use for verification.</param>
-    /// <returns><c>true</c> if the signature is valid; otherwise, <c>false</c>.</returns>
     public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        lock (_lock)
+        lock (_instanceLock)
         {
             int result = _oqsSigVerify(_sig, message, message.Length, signature, signature.Length, publicKey);
             return result == 0;
@@ -192,30 +193,38 @@ public class DilithiumSigner : ISigner, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// Releases the unmanaged resources used by the <see cref="DilithiumSigner"/> and optionally releases the managed resources.
-    /// </summary>
-    /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
             return;
 
-        if (_sig != IntPtr.Zero)
+        lock (_instanceLock)
         {
-            _oqsSigFree(_sig);
-            _sig = IntPtr.Zero;
+            if (_sig != IntPtr.Zero)
+            {
+                _oqsSigFree(_sig);
+                _sig = IntPtr.Zero;
+            }
+
+            if (Interlocked.Decrement(ref _instanceCount) == 0 && _oqsLibraryHandle != IntPtr.Zero)
+            {
+                NativeLibrary.Free(_oqsLibraryHandle);
+                _oqsLibraryHandle = IntPtr.Zero;
+
+                if (File.Exists(_dllPath))
+                {
+                    try
+                    {
+                        File.Delete(_dllPath);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine($"Failed to delete {_dllPath}: {ex.Message}");
+                    }
+                }
+            }
+
+            _disposed = true;
         }
-
-        if (_oqsLibraryHandle != IntPtr.Zero)
-        {
-            NativeLibrary.Free(_oqsLibraryHandle);
-            _oqsLibraryHandle = IntPtr.Zero;
-        }
-
-        if (File.Exists(_dllPath))
-            File.Delete(_dllPath);
-
-        _disposed = true;
     }
 }

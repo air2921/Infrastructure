@@ -44,12 +44,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
                 return null;
 
             if (typeof(TResult) == typeof(string))
-            {
-                if (cacheObj is null)
-                    return null;
-
-                return (TResult?)cacheObj;
-            }
+                return cacheObj as TResult;
 
             return JsonSerializer.Deserialize<TResult>((string)cacheObj);
         }
@@ -151,11 +146,11 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     {
         try
         {
-            var value = await cache.GetAsync(key, cancellationToken);
+            var value = await cache.GetAsync(key, cancellationToken).ConfigureAwait(false);
             if (value is null)
                 return false;
 
-            return true;
+            return false;
         }
         catch (Exception ex)
         {

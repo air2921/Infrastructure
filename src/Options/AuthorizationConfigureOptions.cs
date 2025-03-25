@@ -7,24 +7,27 @@ using System.Text;
 namespace Infrastructure.Options;
 
 /// <summary>
-/// Class for configuring authorization settings.
+/// Configures settings for authorization processes, including token encoding, algorithm selection,
+/// expiration time, signing key, issuer, and audience.
 /// </summary>
 /// <remarks>
-/// This class provides configuration options for authorization processes, including token encoding,
-/// algorithm selection, expiration time, signing key, issuer, and audience.
+/// This class provides a centralized way to configure and validate settings required for authorization,
+/// such as token generation and validation. It ensures that the provided configuration is valid and
+/// adheres to security best practices.
 /// </remarks>
 public sealed class AuthorizationConfigureOptions : Validator
 {
-    private readonly IEnumerable<string> _algs;
+    private static readonly IEnumerable<string> _algs;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AuthorizationConfigureOptions"/> class.
+    /// Initializes static members of the <see cref="AuthorizationConfigureOptions"/> class.
     /// </summary>
     /// <remarks>
-    /// During initialization, the constructor retrieves all available algorithms from the
-    /// <see cref="SecurityAlgorithms"/> class using reflection.
+    /// During static initialization, the constructor retrieves all available algorithms from the
+    /// <see cref="SecurityAlgorithms"/> class using reflection. These algorithms are used to validate
+    /// the <see cref="Algorithm"/> property during configuration validation.
     /// </remarks>
-    public AuthorizationConfigureOptions()
+    static AuthorizationConfigureOptions()
     {
         var fields = typeof(SecurityAlgorithms).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                                            .Where(f => f.IsLiteral && !f.IsInitOnly);
@@ -34,50 +37,66 @@ public sealed class AuthorizationConfigureOptions : Validator
     }
 
     /// <summary>
-    /// Gets or sets the encoding used for authorization processes. Defaults to UTF-8.
+    /// Gets or sets the encoding used for authorization processes. Defaults to <see cref="Encoding.UTF8"/>.
     /// </summary>
-    /// <value>The encoding used for authorization.</value>
+    /// <value>
+    /// The encoding used for authorization token generation and validation.
+    /// </value>
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
     /// <summary>
-    /// Gets or sets the algorithm used for authorization processes.
+    /// Gets or sets the algorithm used for authorization token signing and validation.
     /// </summary>
-    /// <value>The algorithm used for authorization.</value>
+    /// <value>
+    /// The algorithm used for authorization. Must be one of the supported algorithms from <see cref="SecurityAlgorithms"/>.
+    /// </value>
     public string Algorithm { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the expiration time for authorization tokens. Defaults to 30 minutes.
     /// </summary>
-    /// <value>The expiration time for authorization tokens.</value>
+    /// <value>
+    /// The expiration time for authorization tokens. Must be greater than 15 minutes (900 seconds).
+    /// </value>
     public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(30);
 
     /// <summary>
     /// Gets or sets the key used for signing authorization tokens.
     /// </summary>
-    /// <value>The key used for signing authorization tokens.</value>
+    /// <value>
+    /// The signing key used for token generation and validation. Must not be null or empty.
+    /// </value>
     public string Key { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the issuer of the authorization tokens.
     /// </summary>
-    /// <value>The issuer of the authorization tokens.</value>
+    /// <value>
+    /// The issuer of the authorization tokens. Must not be null or empty.
+    /// </value>
     public string Issuer { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the audience of the authorization tokens.
     /// </summary>
-    /// <value>The audience of the authorization tokens.</value>
+    /// <value>
+    /// The audience of the authorization tokens. Must not be null or empty.
+    /// </value>
     public string Audience { get; set; } = null!;
 
     /// <summary>
-    /// Validates whether the instance is configured correctly.
+    /// Validates whether the current configuration is valid.
     /// </summary>
-    /// <returns><c>true</c> if the configuration is valid; otherwise, <c>false</c>.</returns>
+    /// <returns>
+    /// <c>true</c> if the configuration is valid; otherwise, <c>false</c>.
+    /// </returns>
     /// <remarks>
     /// The configuration is considered valid if:
-    /// - The <see cref="Key"/>, <see cref="Issuer"/>, and <see cref="Audience"/> properties are not null or empty.
-    /// - The <see cref="Expiration"/> is greater than 15 minutes (900 seconds).
-    /// - The <see cref="Algorithm"/> is one of the supported algorithms.
+    /// <list type="bullet">
+    ///   <item><description>The <see cref="Key"/>, <see cref="Issuer"/>, and <see cref="Audience"/> properties are not null or empty.</description></item>
+    ///   <item><description>The <see cref="Expiration"/> is greater than 15 minutes (900 seconds).</description></item>
+    ///   <item><description>The <see cref="Algorithm"/> is one of the supported algorithms from <see cref="SecurityAlgorithms"/>.</description></item>
+    /// </list>
     /// </remarks>
     public override bool IsValidConfigure()
     {

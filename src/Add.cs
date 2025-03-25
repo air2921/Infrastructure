@@ -21,7 +21,7 @@ public static class AddInfrastructureBuilder
     /// </remarks>
     public static IInfrastructureBuilder AddInfrastructure(this IServiceCollection services)
     {
-        services.AddScoped<IGenerator, Generator>();
+        services.AddScoped<IRandomizer, Randomizer>();
 
         return new InfrastructureBuilder(services);
     }
