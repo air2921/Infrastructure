@@ -146,7 +146,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     {
         try
         {
-            var value = await cache.GetAsync(key, cancellationToken).ConfigureAwait(false);
+            var value = await cache.GetStringAsync(key, cancellationToken).ConfigureAwait(false);
             if (value is null)
                 return false;
 
