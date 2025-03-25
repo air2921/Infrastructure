@@ -21,4 +21,7 @@ public static class Immutable
 
     public const int MinGuidCombineLength = 1;
     public const int MaxGuidCombineLength = 10;
+
+    public const string ReadebleChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    public const string HexChars = "0123456789ABCDEF";
 }

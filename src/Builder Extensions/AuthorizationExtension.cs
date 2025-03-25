@@ -26,8 +26,8 @@ public static class AuthorizationExtension
     /// This method registers the following services for Dependency Injection (DI):
     /// <list type="bullet">
     ///     <item><description><see cref="AuthorizationConfigureOptions"/> - Singleton service for storing authorization configuration.</description></item>
-    ///     <item><description><see cref="IPublisher{JsonWebTokenDetails}"/> - Scoped service for publishing JSON Web Token details.</description></item>
-    ///     <item><description><see cref="IPublisher{RefreshDetails}"/> - Scoped service for publishing refresh token details.</description></item>
+    ///     <item><description><see cref="ITokenIssuer{TAuthorization}"/> - Scoped service for publishing JSON Web Token details.</description></item>
+    ///     <item><description><see cref="ITokenIssuer{RefreshDetails}"/> - Scoped service for publishing refresh token details.</description></item>
     /// </list>
     /// </remarks>
     public static IInfrastructureBuilder AddAuthorization(this IInfrastructureBuilder builder, Action<AuthorizationConfigureOptions> configureOptions)
@@ -41,8 +41,8 @@ public static class AuthorizationExtension
         options.EnsureSuccessValidation("Invalid auth options, check your configuration");
 
         builder.Services.AddSingleton(options);
-        builder.Services.AddScoped<IPublisher<JsonWebTokenDetails>, JsonWebTokenPublisher>();
-        builder.Services.AddScoped<IPublisher<RefreshDetails>, RefreshPublisher>();
+        builder.Services.AddScoped<ITokenIssuer<JsonWebTokenDetails>, JsonWebTokenIssuer>();
+        builder.Services.AddScoped<ITokenIssuer<RefreshDetails>, RefreshIssuer>();
 
         return builder;
     }
