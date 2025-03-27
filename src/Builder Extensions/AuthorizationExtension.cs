@@ -26,7 +26,7 @@ public static class AuthorizationExtension
     /// This method registers the following services for Dependency Injection (DI):
     /// <list type="bullet">
     ///     <item><description><see cref="AuthorizationConfigureOptions"/> - Singleton service for storing authorization configuration.</description></item>
-    ///     <item><description><see cref="ITokenIssuer{TAuthorization}"/> - Scoped service for publishing JSON Web Token details.</description></item>
+    ///     <item><description><see cref="ITokenIssuer{JsonWebTokenDetails}"/> - Scoped service for publishing JSON Web Token details.</description></item>
     ///     <item><description><see cref="ITokenIssuer{RefreshDetails}"/> - Scoped service for publishing refresh token details.</description></item>
     /// </list>
     /// </remarks>
