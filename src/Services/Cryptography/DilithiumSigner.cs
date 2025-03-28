@@ -40,7 +40,7 @@ public class DilithiumSigner : ISigner, IDisposable
 
     private IntPtr _sig;
     private readonly object _instanceLock = new();
-    private bool _disposed = false;
+    private volatile bool _disposed = false;
 
     private delegate IntPtr OQS_SIG_newDelegate(string alg_name);
     private delegate void OQS_SIG_freeDelegate(IntPtr sig);

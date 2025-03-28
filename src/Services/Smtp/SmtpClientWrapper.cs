@@ -24,7 +24,7 @@ public class SmtpClientWrapper : IDisposable
     private readonly Lazy<SmtpClient> _smtpClient;
     private readonly ILogger<SmtpClientWrapper> _logger;
 
-    private bool _disposed;
+    private volatile bool _disposed;
 
     private static readonly Lazy<SmtpClientException> _smtpAuthError = new(() => new("Failed to authenticate or connect to the SMTP server"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<SmtpClientException> _smtpAuthOrSocketError = new(() => new("Error during email sending due to authentication or network issues"), LazyThreadSafetyMode.ExecutionAndPublication);

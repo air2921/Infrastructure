@@ -26,7 +26,7 @@ public class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     /// other session-dependent operations. The session should be disposed when no
     /// longer needed to free up server resources.
     /// </remarks>
-    public IClientSessionHandle BeginSession()
+    public IClientSession BeginSession()
         => context.StartSession();
 
     /// <summary>
@@ -39,6 +39,6 @@ public class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     /// other session-dependent operations. The session should be disposed when no
     /// longer needed to free up server resources.
     /// </remarks>
-    public async Task<IClientSessionHandle> BeginSessionAsync(CancellationToken cancellationToken = default)
+    public async Task<IClientSession> BeginSessionAsync(CancellationToken cancellationToken = default)
         => await context.StartSessionAsync(cancellationToken);
 }

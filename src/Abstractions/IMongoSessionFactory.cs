@@ -24,7 +24,7 @@ public interface IMongoSessionFactory
     /// The caller is responsible for disposing the session when it's no longer needed to free up server resources.
     /// </para>
     /// </remarks>
-    public IClientSessionHandle BeginSession();
+    public IClientSession BeginSession();
 
     /// <summary>
     /// Begins a new asynchronous MongoDB client session.
@@ -39,7 +39,7 @@ public interface IMongoSessionFactory
     /// The caller is responsible for disposing the session when it's no longer needed to free up server resources.
     /// </para>
     /// </remarks>
-    public Task<IClientSessionHandle> BeginSessionAsync(CancellationToken cancellationToken = default);
+    public Task<IClientSession> BeginSessionAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>
