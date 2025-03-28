@@ -40,7 +40,7 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
 
     private static readonly Lazy<InsertOneOptions> _insertOneOptions = new(() => new InsertOneOptions());
     private static readonly Lazy<InsertManyOptions> _insertManyOptions = new(() => new InsertManyOptions());
-    private static readonly Lazy<ReplaceOptions> _replaceOptions = new(() => new ReplaceOptions());
+    private static readonly Lazy<ReplaceOptions> _replaceOptions = new(() => new ReplaceOptions() { IsUpsert = false });
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.
@@ -236,7 +236,10 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to update one entity, entityId {documentEntity.Id}\nCollection name: {document.CollectionName}");
 
-            await _collection.Value.ReplaceOneAsync(x => x.Id.Equals(documentEntity.Id), documentEntity, _replaceOptions.Value, cancellationToken);
+            documentEntity.UpdatedAt = DateTimeOffset.UtcNow;
+
+            var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
+            await _collection.Value.ReplaceOneAsync(filter, documentEntity, _replaceOptions.Value, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -258,8 +261,19 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to update a range of entities\nCollection name: {document.CollectionName}");
 
-            var tasks = documentEntities.Select(documentEntity => _collection.Value.ReplaceOneAsync(x => x.Id.Equals(documentEntity.Id), documentEntity, _replaceOptions.Value, cancellationToken));
-            await Task.WhenAll(tasks);
+            var bulkOps = new List<WriteModel<TDocument>>();
+
+            foreach (var documentEntity in documentEntities)
+            {
+                documentEntity.UpdatedAt = DateTimeOffset.UtcNow;
+
+                var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
+                var replaceOne = new ReplaceOneModel<TDocument>(filter, documentEntity) { IsUpsert = false };
+                bulkOps.Add(replaceOne);
+            }
+
+            if (bulkOps.Count != 0)
+                await _collection.Value.BulkWriteAsync(bulkOps, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {

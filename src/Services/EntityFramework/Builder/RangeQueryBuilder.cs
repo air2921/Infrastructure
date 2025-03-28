@@ -8,7 +8,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <para>This class is designed to assist with pagination and custom queries for entities of type <typeparamref name="TEntity"/>.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to query.</typeparam>
-public class RangeQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
+public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
 {
     private RangeQueryBuilder()
     {

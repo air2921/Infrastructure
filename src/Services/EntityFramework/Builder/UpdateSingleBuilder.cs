@@ -7,7 +7,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <para>This class provides a way to specify an entity to be updated and optionally track who performed the update.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
-public class UpdateSingleBuilder<TEntity> : EntityBase
+public class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
 {
     private UpdateSingleBuilder()
     {

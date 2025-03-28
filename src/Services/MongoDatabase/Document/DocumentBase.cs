@@ -1,26 +1,49 @@
-﻿namespace Infrastructure.Services.MongoDatabase.Document;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Infrastructure.Services.MongoDatabase.Document;
 
 /// <summary>
 /// An abstract base class for all entities stored in a MongoDB collection.
-/// This class provides a common structure for documents, including a unique identifier
-/// and a mechanism to specify the collection name for each derived document type.
+/// Provides common document structure with audit fields and collection name specification.
 /// </summary>
 /// <remarks>
-/// All entities that should be stored in MongoDB must inherit from this class
-/// and implement the <see cref="CollectionName"/> property to specify the collection name.
+/// All MongoDB entities should inherit from this class and implement:
+/// 1. CollectionName - to specify MongoDB collection name
+/// 2. Any additional entity-specific properties
 /// </remarks>
 public abstract class DocumentBase
 {
     /// <summary>
-    /// Gets or sets the unique identifier for the document.
-    /// The ID is automatically initialized with a new GUID as a string when the document is created.
+    /// Unique document identifier (Primary Key)
+    /// Automatically initialized with new ObjectId converted to string
     /// </summary>
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonElement("_id")]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     /// <summary>
-    /// Gets the name of the MongoDB collection where the document is stored.
-    /// This property must be implemented by derived classes to specify the collection name.
+    /// Document creation timestamp in UTC
     /// </summary>
+    [BsonElement("created_at")]
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// Document last modification timestamp in UTC
+    /// Null if never modified
+    /// </summary>
+    [BsonElement("updated_at")]
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+    [BsonIgnoreIfNull]
+    public DateTimeOffset? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Name of the MongoDB collection where documents of this type are stored
+    /// Must be implemented by derived classes
+    /// </summary>
+    [BsonIgnore]
     public abstract string CollectionName { get; }
 }
 

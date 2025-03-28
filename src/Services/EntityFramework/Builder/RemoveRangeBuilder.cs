@@ -8,7 +8,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// Provides flexible ways to specify entities for removal either by entity instances or their identifiers.
 /// </summary>
 /// <typeparam name="TEntity">The type of entities to remove, must inherit from EntityBase.</typeparam>
-public class RemoveRangeBuilder<TEntity> : EntityBase where TEntity : EntityBase
+public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
 {
     private RemoveRangeBuilder()
     {

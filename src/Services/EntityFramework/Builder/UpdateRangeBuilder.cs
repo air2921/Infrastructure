@@ -6,7 +6,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// Fluent builder for configuring bulk entity updates with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to update, must inherit from EntityBase</typeparam>
-public class UpdateRangeBuilder<TEntity> : EntityBase where TEntity : EntityBase
+public class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
 {
     private UpdateRangeBuilder()
     {

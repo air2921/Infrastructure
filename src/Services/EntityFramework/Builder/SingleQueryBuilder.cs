@@ -7,7 +7,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// A builder class for constructing queries to retrieve a single entity with various options.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
-public class SingleQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
+public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
 {
     private SingleQueryBuilder()
     {
