@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Database;
 using Infrastructure.Exceptions;
 using Infrastructure.Services.MongoDatabase.Builder;
 using Infrastructure.Services.MongoDatabase.Document;

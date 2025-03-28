@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Cryptography;
 using Infrastructure.Configuration;
 using Infrastructure.Services.Cryptography;
 using Microsoft.Extensions.DependencyInjection;

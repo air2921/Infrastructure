@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Cryptography;
 
 /// <summary>
 /// Defines methods for generating public/private key pairs, signing messages, and verifying signatures.

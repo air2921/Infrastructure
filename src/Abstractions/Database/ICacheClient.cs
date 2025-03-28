@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Database;
 
 /// <summary>
 /// Interface for interacting with a distributed cache, providing methods for storing, retrieving, and managing cached data.

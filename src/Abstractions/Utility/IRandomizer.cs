@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Utility;
 
 /// <summary>
 /// Interface for generating GUID combinations and random codes.

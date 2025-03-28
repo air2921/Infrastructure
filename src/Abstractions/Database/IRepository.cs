@@ -4,7 +4,7 @@ using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Database;
 
 /// <summary>
 /// Represents a generic repository pattern for performing CRUD operations on entities of type <typeparamref name="TEntity"/>.

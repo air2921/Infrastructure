@@ -1,6 +1,6 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using Infrastructure.Abstractions;
+using Infrastructure.Abstractions.Database;
 using Infrastructure.Exceptions;
 using Microsoft.Extensions.Logging;
 

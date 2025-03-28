@@ -4,7 +4,7 @@ using Infrastructure.Services.MongoDatabase.Builder;
 using Infrastructure.Services.MongoDatabase.Document;
 using System.Linq.Expressions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Database;
 
 /// <summary>
 /// Represents a repository for interacting with MongoDB for a specific document type.
@@ -99,7 +99,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
 /// </summary>
 /// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoDatabaseContext"/>.</typeparam>
 /// <typeparam name="TDocument">The type of document the repository will handle, which must inherit from <see cref="DocumentBase"/>.</typeparam>
-public interface IMongoRepository<TMongoContext, TDocument> : 
+public interface IMongoRepository<TMongoContext, TDocument> :
     IMongoRepository<TDocument>
     where TDocument : DocumentBase
     where TMongoContext : MongoDatabaseContext

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Utility;
 using Infrastructure.Data_Transfer_Object.Authorization;
 
 namespace Infrastructure.Services.Authorization;

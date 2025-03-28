@@ -1,5 +1,5 @@
 ﻿using BCrypt.Net;
-using Infrastructure.Abstractions;
+using Infrastructure.Abstractions.Cryptography;
 using Infrastructure.Exceptions;
 using Microsoft.Extensions.Logging;
 

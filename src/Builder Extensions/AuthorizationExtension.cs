@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Utility;
 using Infrastructure.Configuration;
 using Infrastructure.Data_Transfer_Object.Authorization;
 using Infrastructure.Exceptions.Global;

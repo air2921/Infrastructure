@@ -1,7 +1,7 @@
 ﻿using BCrypt.Net;
 using Infrastructure.Exceptions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Cryptography;
 
 /// <summary>
 /// Interface for hashing passwords and verifying hashed strings.

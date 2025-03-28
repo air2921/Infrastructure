@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Database;
 
 /// <summary>
 /// Defines methods for interacting with an S3-compatible storage service.

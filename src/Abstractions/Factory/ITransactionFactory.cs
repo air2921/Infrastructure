@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Factory;
 
 /// <summary>
 /// Defines a contract for creating and managing database transactions.

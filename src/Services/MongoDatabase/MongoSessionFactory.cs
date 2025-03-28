@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Factory;
 using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDatabase;

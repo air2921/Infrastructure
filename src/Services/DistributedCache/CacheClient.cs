@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Database;
 using Infrastructure.Exceptions;
 using Infrastructure.Options;
 using Microsoft.Extensions.Caching.Distributed;

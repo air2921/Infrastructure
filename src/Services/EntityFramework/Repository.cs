@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Database;
 using Infrastructure.Enums;
 using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Builder;

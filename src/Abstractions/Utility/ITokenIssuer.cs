@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Data_Transfer_Object.Authorization;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Utility;
 
 /// <summary>
 /// Represents a publisher for generating authorization tokens, such as JWT and refresh tokens.

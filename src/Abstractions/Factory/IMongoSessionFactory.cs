@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Services.MongoDatabase;
 using MongoDB.Driver;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Factory;
 
 /// <summary>
 /// Provides a factory interface for creating MongoDB client sessions.
