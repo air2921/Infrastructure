@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Exteranal_Services;
 using Infrastructure.Configuration;
 using Infrastructure.Data_Transfer_Object;
 using Infrastructure.Exceptions.Global;

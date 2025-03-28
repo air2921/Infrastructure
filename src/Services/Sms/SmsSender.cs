@@ -1,4 +1,4 @@
-﻿using Infrastructure.Abstractions;
+﻿using Infrastructure.Abstractions.Exteranal_Services;
 using Infrastructure.Data_Transfer_Object.Sms;
 using Infrastructure.Exceptions;
 using Microsoft.Extensions.Logging;

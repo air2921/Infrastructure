@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Data_Transfer_Object.Base;
 
-namespace Infrastructure.Abstractions;
+namespace Infrastructure.Abstractions.Exteranal_Services;
 
 /// <summary>
 /// Interface for message senders.
