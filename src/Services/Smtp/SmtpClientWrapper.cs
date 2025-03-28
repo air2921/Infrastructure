@@ -104,17 +104,6 @@ public class SmtpClientWrapper : IDisposable
     }
 
     /// <summary>
-    /// Releases the resources used by the <see cref="SmtpClientWrapper"/> class.
-    /// </summary>
-    /// <remarks>
-    /// This method will disconnect the SMTP client and clean up any resources it holds.
-    /// </remarks>
-    ~SmtpClientWrapper()
-    {
-        Dispose(false);
-    }
-
-    /// <summary>
     /// Disposes the <see cref="SmtpClientWrapper"/> class, releasing any resources used by the class.
     /// </summary>
     /// <param name="disposing">Indicates whether the method is called from the Dispose method (true) or from the finalizer (false).</param>

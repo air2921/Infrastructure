@@ -65,21 +65,6 @@ public class Repository<TEntity, TDbContext> :
         _dbSet = new Lazy<DbSet<TEntity>>(() => _context.Set<TEntity>(), LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
-    /// <summary>
-    /// Finalizes an instance of the <see cref="Repository{TEntity, TDbContext}"/> class.
-    /// <para>This destructor is called by the garbage collector when the object is being finalized.</para>
-    /// </summary>
-    /// <remarks>
-    /// The finalizer ensures that unmanaged resources are released if the <see cref="Dispose()"/> method 
-    /// was not called explicitly. It calls the <see cref="Dispose(bool)"/> method with <c>false</c> to release 
-    /// only unmanaged resources. Managed resources are not disposed in this case, as they are assumed to have 
-    /// already been released by the <see cref="Dispose()"/> method.
-    /// </remarks>
-    ~Repository()
-    {
-        Dispose(false);
-    }
-
     #endregion
 
     /// <summary>

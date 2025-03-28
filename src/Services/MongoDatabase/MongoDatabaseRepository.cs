@@ -55,7 +55,23 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
         {
             logger.LogInformation($"Received request to get range of entities\nCollection name: {document.CollectionName}");
 
-            return await _collection.Value.Find(queryBuilder.Filter is null ? _ => true : queryBuilder.Filter)
+            var findOptions = new FindOptions<TDocument>
+            {
+                Skip = queryBuilder.Skip,
+                Limit = queryBuilder.Take
+            };
+
+            var findFluent = _collection.Value.Find(
+                queryBuilder.Filter ?? Builders<TDocument>.Filter.Empty);
+
+            if (queryBuilder.OrderExpression is not null)
+            {
+                findFluent = queryBuilder.OrderByDesc
+                    ? findFluent.Sort(Builders<TDocument>.Sort.Descending(queryBuilder.OrderExpression))
+                    : findFluent.Sort(Builders<TDocument>.Sort.Ascending(queryBuilder.OrderExpression));
+            }
+
+            return await findFluent
                 .Skip(queryBuilder.Skip)
                 .Limit(queryBuilder.Take)
                 .ToListAsync(cancellationToken);
@@ -251,49 +267,4 @@ public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext con
             throw _updateRangeError.Value;
         }
     }
-
-    /// <summary>
-    /// Starts a new transaction asynchronously. This method delegates the call to the underlying <see cref="MongoDatabaseContext"/>.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
-    public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
-        => await context.BeginTransactionAsync(cancellationToken);
-
-    /// <summary>
-    /// Commits the current transaction asynchronously. This method delegates the call to the underlying <see cref="MongoDatabaseContext"/>.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
-        => await context.CommitTransactionAsync(cancellationToken);
-
-    /// <summary>
-    /// Rolls back the current transaction asynchronously. This method delegates the call to the underlying <see cref="MongoDatabaseContext"/>.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
-        => await context.RollbackTransactionAsync(cancellationToken);
-
-    /// <summary>
-    /// Starts a new transaction. This method delegates the call to the underlying <see cref="MongoDatabaseContext"/>.
-    /// </summary>
-    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
-    public virtual void BeginTransaction()
-        => context.BeginTransaction();
-
-    /// <summary>
-    /// Commits the current transaction. This method delegates the call to the underlying <see cref="MongoDatabaseContext"/>.
-    /// </summary>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual void CommitTransaction()
-        => context.CommitTransaction();
-
-    /// <summary>
-    /// Rolls back the current transaction. This method delegates the call to the underlying <see cref="MongoDatabaseContext"/>.
-    /// </summary>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual void RollbackTransaction()
-        => context.RollbackTransaction();
 }

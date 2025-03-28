@@ -1,5 +1,4 @@
-﻿using Infrastructure.Exceptions;
-using Infrastructure.Options;
+﻿using Infrastructure.Options;
 using Infrastructure.Services.MongoDatabase.Document;
 using MongoDB.Driver;
 
@@ -9,22 +8,21 @@ namespace Infrastructure.Services.MongoDatabase;
 /// An abstract base class representing a MongoDB database context.
 /// This class provides access to a MongoDB database and manages the lifecycle of the MongoDB client.
 /// This class is responsible for initializing the MongoDB client and database, and it implements <see cref="IDisposable"/>
-/// to ensure proper cleanup of resources. It also provides a method to retrieve a document set for a specific document type.
+/// to ensure proper cleanup of resources. It also provides methods to retrieve document collections and manage database sessions.
+/// </summary>
+/// <remarks>
+/// The context manages MongoDB client and database instances using lazy initialization,
+/// and provides transactional support through session management.
 /// </remarks>
 public abstract class MongoDatabaseContext : IDisposable
 {
     private readonly Lazy<MongoClient> _client;
     private readonly Lazy<IMongoDatabase> _database;
-    private IClientSessionHandle? _session;
-    private readonly SemaphoreSlim _sessionSemaphore = new(1, 1);
     private bool _disposed = false;
 
-    private static readonly Lazy<EntityException> _operationCancelledError = new(() => new("Operation was cancelled"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _sessionAlreadyCreated = new(() => new("Session already created"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _transactionNotStarted = new(() => new("Transaction is not started"), LazyThreadSafetyMode.ExecutionAndPublication);
-
     /// <summary>
-    /// This constructor lazy initializing the MongoDB client and database
+    /// Initializes a new instance of the <see cref="MongoDatabaseContext"/> class with the specified configuration options.
+    /// The MongoDB client and database are initialized lazily when first accessed.
     /// </summary>
     /// <param name="configureOptions">Configuration options for connecting to the MongoDB database.</param>
     protected MongoDatabaseContext(MongoDatabaseConfigureOptions configureOptions)
@@ -34,15 +32,7 @@ public abstract class MongoDatabaseContext : IDisposable
     }
 
     /// <summary>
-    /// Finalizes the <see cref="MongoDatabaseContext"/> instance.
-    /// </summary>
-    ~MongoDatabaseContext()
-    {
-        Dispose(false);
-    }
-
-    /// <summary>
-    /// Gets or sets the MongoDB database instance.
+    /// Gets the MongoDB database instance.
     /// </summary>
     /// <exception cref="ObjectDisposedException">Thrown if the context has been disposed.</exception>
     public IMongoDatabase Database
@@ -78,186 +68,34 @@ public abstract class MongoDatabaseContext : IDisposable
         => Database.GetCollection<TDocument>(document.CollectionName);
 
     /// <summary>
-    /// Starts a new transaction.
+    /// Starts a new client session with the default options for this MongoDB context.
     /// </summary>
-    /// <exception cref="EntityException">Thrown if a transaction is already in progress.</exception>
-    public virtual void BeginTransaction()
+    /// <returns>A <see cref="IClientSessionHandle"/> representing the new session.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the context has been disposed.</exception>
+    /// <remarks>
+    /// This synchronous method is typically used for transactions and other session-dependent operations.
+    /// The session should be disposed when no longer needed to free up resources.
+    /// </remarks>
+    public virtual IClientSessionHandle StartSession()
     {
-        _sessionSemaphore.Wait();
-        try
-        {
-            if (_session is not null)
-                throw _sessionAlreadyCreated.Value;
-
-            _session = _client.Value.StartSession();
-            _session.StartTransaction();
-        }
-        catch (Exception ex)
-        {
-            _session?.Dispose();
-            _session = null;
-            throw new EntityException(ex.Message);
-        }
-        finally
-        {
-            _sessionSemaphore.Release();
-        }
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return _client.Value.StartSession(null, default);
     }
 
     /// <summary>
-    /// Commits the current transaction.
+    /// Asynchronously starts a new client session with the default options for this MongoDB context.
     /// </summary>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual void CommitTransaction()
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation and returns a <see cref="IClientSessionHandle"/> when completed.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the context has been disposed.</exception>
+    /// <remarks>
+    /// This asynchronous method is typically used for transactions and other session-dependent operations.
+    /// The session should be disposed when no longer needed to free up resources.
+    /// </remarks>
+    public virtual async Task<IClientSessionHandle> StartSessionAsync(CancellationToken cancellationToken = default)
     {
-        _sessionSemaphore.Wait();
-        try
-        {
-            if (_session is null || !_session.IsInTransaction)
-                throw _transactionNotStarted.Value;
-
-            _session.CommitTransaction();
-        }
-        catch (Exception ex)
-        {
-            throw new EntityException(ex.Message);
-        }
-        finally
-        {
-            _session?.Dispose();
-            _sessionSemaphore.Release();
-            _session = null;
-        }
-    }
-
-    /// <summary>
-    /// Rolls back the current transaction.
-    /// </summary>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual void RollbackTransaction()
-    {
-        _sessionSemaphore.Wait();
-        try
-        {
-            if (_session is null || !_session.IsInTransaction)
-                throw _transactionNotStarted.Value;
-
-            _session.AbortTransaction();
-            _session.Dispose();
-            _session = null;
-        }
-        catch (Exception ex)
-        {
-            throw new EntityException(ex.Message);
-        }
-        finally
-        {
-            _session?.Dispose();
-            _sessionSemaphore.Release();
-            _session = null;
-        }
-    }
-
-    /// <summary>
-    /// Starts a new transaction asynchronously. This method ensures thread-safe access to the session
-    /// by using a semaphore to prevent concurrent access. If a session is already created, an
-    /// <see cref="EntityException"/> is thrown.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <exception cref="EntityException">Thrown if a session is already created or a transaction is already in progress.</exception>
-    public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        await _sessionSemaphore.WaitAsync(cancellationToken);
-        try
-        {
-            if (_session is not null)
-                throw _sessionAlreadyCreated.Value;
-
-            _session = await _client.Value.StartSessionAsync(new ClientSessionOptions(), cancellationToken);
-            _session.StartTransaction();
-        }
-        catch (OperationCanceledException)
-        {
-            _session?.Dispose();
-            _session = null;
-            throw _operationCancelledError.Value;
-        }
-        catch (Exception ex)
-        {
-            _session?.Dispose();
-            _session = null;
-            throw new EntityException(ex.Message);
-        }
-        finally
-        {
-            _sessionSemaphore.Release();
-        }
-    }
-
-    /// <summary>
-    /// Commits the current transaction asynchronously. This method ensures thread-safe access to the session
-    /// by using a semaphore to prevent concurrent access. If no transaction is in progress, an
-    /// <see cref="EntityException"/> is thrown.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        await _sessionSemaphore.WaitAsync(cancellationToken);
-        try
-        {
-            if (_session is null || !_session.IsInTransaction)
-                throw _transactionNotStarted.Value;
-
-            await _session.CommitTransactionAsync(cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            throw _operationCancelledError.Value;
-        }
-        catch (Exception ex)
-        {
-            throw new EntityException(ex.Message);
-        }
-        finally
-        {
-            _session?.Dispose();
-            _sessionSemaphore.Release();
-            _session = null;
-        }
-    }
-
-    /// <summary>
-    /// Rolls back the current transaction asynchronously. This method ensures thread-safe access to the session
-    /// by using a semaphore to prevent concurrent access. If no transaction is in progress, an
-    /// <see cref="EntityException"/> is thrown.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <exception cref="EntityException">Thrown if no transaction is in progress.</exception>
-    public virtual async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        await _sessionSemaphore.WaitAsync(cancellationToken);
-        try
-        {
-            if (_session is null || !_session.IsInTransaction)
-                throw _transactionNotStarted.Value;
-
-            await _session.AbortTransactionAsync(cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            throw _operationCancelledError.Value;
-        }
-        catch (Exception ex)
-        {
-            throw new EntityException(ex.Message);
-        }
-        finally
-        {
-            _session?.Dispose();
-            _sessionSemaphore.Release();
-            _session = null;
-        }
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return await _client.Value.StartSessionAsync(null, cancellationToken);
     }
 
     /// <summary>
@@ -282,22 +120,6 @@ public abstract class MongoDatabaseContext : IDisposable
         {
             if (_client.IsValueCreated)
                 _client.Value.Dispose();
-
-            _sessionSemaphore.Wait();
-            try
-            {
-                if (_session is not null)
-                {
-                    _session.Dispose();
-                    _session = null;
-                }
-            }
-            finally
-            {
-                _sessionSemaphore.Release();
-            }
-
-            _sessionSemaphore.Dispose();
         }
 
         _disposed = true;
