@@ -20,7 +20,7 @@ public class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     /// <summary>
     /// Begins a new synchronous MongoDB session.
     /// </summary>
-    /// <returns>An <see cref="IClientSessionHandle"/> representing the new session.</returns>
+    /// <returns>An <see cref="IClientSession"/> representing the new session.</returns>
     /// <remarks>
     /// This method creates a new client session that can be used for transactions or
     /// other session-dependent operations. The session should be disposed when no
@@ -33,7 +33,7 @@ public class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     /// Begins a new asynchronous MongoDB session.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation and returns an <see cref="IClientSessionHandle"/> when completed.</returns>
+    /// <returns>A task that represents the asynchronous operation and returns an <see cref="IClientSession"/> when completed.</returns>
     /// <remarks>
     /// This async method creates a new client session that can be used for transactions or
     /// other session-dependent operations. The session should be disposed when no
