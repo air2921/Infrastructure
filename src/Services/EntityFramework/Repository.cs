@@ -50,6 +50,8 @@ public class Repository<TEntity, TDbContext> :
     private static readonly Lazy<EntityException> _deleteByFilterError = new(() => new("An error occurred while attempting to delete an entity using a filter"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _restoreError = new(() => new("An error occurred while attempting to restore a soft-deleted entity"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _restoreRangeError = new(() => new("An error occurred while attempting to restore a range of soft-deleted entities"), LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Repository{TEntity, TDbContext}"/> class.
@@ -183,6 +185,9 @@ public class Repository<TEntity, TDbContext> :
 
             IQueryable<TEntity> query = _dbSet.Value;
 
+            if (builder.IgnoreDefaultQuerySettings)
+                query = query.IgnoreQueryFilters();
+
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
 
@@ -234,6 +239,9 @@ public class Repository<TEntity, TDbContext> :
 
             if (builder is null)
                 return await query.ToListAsync(cancellationToken);
+
+            if (builder.IgnoreDefaultQuerySettings)
+                query = query.IgnoreQueryFilters();
 
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
@@ -502,7 +510,7 @@ public class Repository<TEntity, TDbContext> :
     /// <item><description>Marks all entity properties as modified for the update</description></item>
     /// </list>
     /// </remarks>
-    public async Task<TEntity?> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
+    public async Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 
@@ -581,6 +589,100 @@ public class Repository<TEntity, TDbContext> :
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
             throw _updateRangeError.Value;
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously restores a soft-deleted entity in the repository.
+    /// <para>Sets IsDeleted to false and updates the UpdatedAt timestamp.</para>
+    /// <para>Thread-safe method with write lock protection.</para>
+    /// </summary>
+    /// <param name="entity">The entity to restore. Must not be null.</param>
+    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
+    /// <returns>The restored entity with updated properties.</returns>
+    /// <exception cref="EntityException">Thrown when an error occurs during the restore operation.</exception>
+    /// <remarks>
+    /// This method will:
+    /// <list type="bullet">
+    ///   <item><description>Mark the entity as not deleted (IsDeleted = false)</description></item>
+    ///   <item><description>Update the UpdatedAt timestamp to current UTC time</description></item>
+    ///   <item><description>Change entity state to Modified</description></item>
+    ///   <item><description>Persist changes to the database</description></item>
+    /// </list>
+    /// </remarks>
+    public async Task<TEntity> RestoreAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        _lock.EnterWriteLock();
+
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RestoreAwait));
+            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
+
+            _context.Restore(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return entity;
+        }
+        catch (OperationCanceledException)
+        {
+            throw _operationCancelledError.Value;
+        }
+        catch (Exception ex)
+        {
+            _logger.Value.LogError(ex.ToString(), _tName.Value);
+            throw _restoreError.Value;
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously restores multiple soft-deleted entities in the repository.
+    /// <para>Batch operation that efficiently restores all provided entities.</para>
+    /// <para>Thread-safe method with write lock protection.</para>
+    /// </summary>
+    /// <param name="entities">The collection of entities to restore. Must not be null or contain null elements.</param>
+    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
+    /// <returns>The collection of restored entities with updated properties.</returns>
+    /// <exception cref="EntityException">Thrown when an error occurs during the restore operation.</exception>
+    /// <remarks>
+    /// This method will for each entity:
+    /// <list type="bullet">
+    ///   <item><description>Mark the entity as not deleted (IsDeleted = false)</description></item>
+    ///   <item><description>Update the UpdatedAt timestamp to current UTC time</description></item>
+    ///   <item><description>Change entity state to Modified</description></item>
+    /// </list>
+    /// All changes are persisted in a single database transaction.
+    /// </remarks>
+    public async Task<IEnumerable<TEntity>> RestoreRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        _lock.EnterWriteLock();
+
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RestoreRangeAwait));
+            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
+
+            _context.RestoreRange(entities);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return entities;
+        }
+        catch (OperationCanceledException)
+        {
+            throw _operationCancelledError.Value;
+        }
+        catch (Exception ex)
+        {
+            _logger.Value.LogError(ex.ToString(), _tName.Value);
+            throw _restoreRangeError.Value;
         }
         finally
         {

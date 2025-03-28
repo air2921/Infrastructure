@@ -15,6 +15,8 @@ public static class Immutable
     public const int RemoveByFilterAwait = 20;
     public const int UpdateAwait = 20;
     public const int UpdateRangeAwait = 60;
+    public const int RestoreAwait = 20;
+    public const int RestoreRangeAwait = 60;
 
     public const int MinCodeLength = 1;
     public const int MaxCodeLength = 10;

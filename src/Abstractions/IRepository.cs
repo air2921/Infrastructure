@@ -116,7 +116,7 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>The updated entity, or <c>null</c> if the update failed.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
-    Task<TEntity?> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously updates a collection of entities based on the specified builder parameters.
@@ -127,6 +127,33 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     /// <returns>A collection of updated entities.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
     Task<IEnumerable<TEntity?>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Asynchronously restores a soft-deleted entity in the repository.
+    /// <para>Sets IsDeleted to false and updates the UpdatedAt timestamp.</para>
+    /// <para>Thread-safe method with write lock protection.</para>
+    /// </summary>
+    /// <param name="entity">The entity to restore. Must not be null.</param>
+    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
+    /// <returns>The restored entity with updated properties.</returns>
+    /// <exception cref="EntityException">Thrown when an error occurs during the restore operation.</exception>
+    /// <remarks>
+    /// </remarks>
+    public Task<TEntity> RestoreAsync(TEntity entity, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Asynchronously restores multiple soft-deleted entities in the repository.
+    /// <para>Batch operation that efficiently restores all provided entities.</para>
+    /// <para>Thread-safe method with write lock protection.</para>
+    /// </summary>
+    /// <param name="entities">The collection of entities to restore. Must not be null or contain null elements.</param>
+    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
+    /// <returns>The collection of restored entities with updated properties.</returns>
+    /// <exception cref="EntityException">Thrown when an error occurs during the restore operation.</exception>
+    /// <remarks>
+    /// All changes are persisted in a single database transaction.
+    /// </remarks>
+    public Task<IEnumerable<TEntity>> RestoreRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

@@ -17,6 +17,14 @@ public class SingleQueryBuilder<TEntity> : EntityBase
     public Expression<Func<TEntity, bool>>? Filter { get; init; }
 
     /// <summary>
+    /// Indicates whether the query should ignore default query filters (like soft-delete filters).
+    /// <para>When set to <c>true</c>, the query will include all entities regardless of default query filters.
+    /// Useful for accessing soft-deleted entities or bypassing other global filters.</para>
+    /// <para>Defaults to <c>false</c>, meaning default query filters will be applied.</para>
+    /// </summary>
+    public bool IgnoreDefaultQuerySettings { get; set; }
+
+    /// <summary>
     /// An expression for sorting entities.
     /// <para>This expression specifies the property by which the entities should be ordered.</para>
     /// </summary>
