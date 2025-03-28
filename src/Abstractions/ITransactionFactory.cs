@@ -26,18 +26,6 @@ public interface ITransactionFactory
 /// Defines a contract for creating and managing database transactions for a specific <typeparamref name="TDbContext"/>.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the database context.</typeparam>
-public interface ITransactionFactory<TDbContext> where TDbContext : DbContext
+public interface ITransactionFactory<TDbContext> : ITransactionFactory where TDbContext : DbContext
 {
-    /// <summary>
-    /// Begins a new database transaction.
-    /// </summary>
-    /// <returns>The transaction object.</returns>
-    public IDbContextTransaction Begin();
-
-    /// <summary>
-    /// Asynchronously begins a new database transaction.
-    /// </summary>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation. The task result is the transaction object.</returns>
-    public Task<IDbContextTransaction> BeginAsync(CancellationToken cancellationToken = default);
 }

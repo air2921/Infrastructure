@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Abstractions;
+using Infrastructure.Enums;
 using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Builder;
 using Infrastructure.Services.EntityFramework.Entity;
@@ -15,12 +16,10 @@ namespace Infrastructure.Services.EntityFramework;
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity being managed by the repository. It must inherit from <see cref="EntityBase"/>.</typeparam>
 /// <typeparam name="TDbContext">The type of the database context. It must inherit from <see cref="DbContext"/>.</typeparam>
-/// <param name="logger">A logger instance to log errors and other repository-related activities.</param>
-/// <param name="context">An instance of the database context to interact with the underlying database.</param>
 /// <remarks>
 /// This repository class provides methods for querying, adding, updating, and deleting entities in a database.
 /// It uses asynchronous operations to ensure non-blocking behavior and supports cancellation through <see cref="CancellationToken"/>.
-/// Operations are performed in a thread-safe manner using a <see cref="SemaphoreSlim"/> to avoid race conditions during database access.
+/// Operations are performed in a thread-safe manner using a <see cref="ReaderWriterLockSlim"/> to avoid race conditions during database access.
 /// </remarks>
 public class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
@@ -34,7 +33,7 @@ public class Repository<TEntity, TDbContext> :
     private readonly Lazy<DbSet<TEntity>> _dbSet;
     private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
 
-    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
 
     private bool _disposed;
 
@@ -87,8 +86,19 @@ public class Repository<TEntity, TDbContext> :
     /// <para>Thread-safe method.</para>
     /// </summary>
     /// <returns>An <see cref="IQueryable{TEntity}"/> representing the entity set.</returns>
-    public virtual IQueryable<TEntity> GetQuery() 
-        => _dbSet.Value;
+    public virtual IQueryable<TEntity> GetQuery()
+    {
+        _lock.EnterReadLock();
+
+        try
+        {
+            return _dbSet.Value;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
 
     /// <summary>
     /// Asynchronously retrieves the count of entities that match the specified filter.
@@ -99,7 +109,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the count operation.</exception>
     public ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter)
     {
-        _semaphore.Wait();
+        _lock.EnterReadLock();
 
         try
         {
@@ -117,7 +127,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitReadLock();
         }
     }
 
@@ -131,7 +141,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
     public async Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterReadLock();
 
         try
         {
@@ -151,47 +161,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
-        }
-    }
-
-
-    /// <summary>
-    /// Asynchronously retrieves the first entity that matches the specified filter.
-    /// <para>Thread-safe method.</para>
-    /// </summary>
-    /// <param name="filter">The filter expression to apply to the entity set.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The first entity that matches the filter, or <c>null</c> if not found.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
-    public async Task<TEntity?> GetByFilterAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
-    {
-        await _semaphore.WaitAsync(cancellationToken);
-
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.GetByFilterAwait));
-            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
-
-            IQueryable<TEntity> query = _dbSet.Value;
-
-            query = query.AsNoTracking();
-            query = query.Where(filter);
-
-            return await query.FirstOrDefaultAsync(cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            throw _operationCancelledError.Value;
-        }
-        catch (Exception ex)
-        {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _getByFilterError.Value;
-        }
-        finally
-        {
-            _semaphore.Release();
+            _lock.ExitReadLock();
         }
     }
 
@@ -205,7 +175,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
     public async Task<TEntity?> GetByFilterAsync(SingleQueryBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterReadLock();
 
         try
         {
@@ -240,7 +210,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitReadLock();
         }
     }
 
@@ -254,7 +224,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
     public async Task<IEnumerable<TEntity>> GetRangeAsync(RangeQueryBuilder<TEntity>? builder, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterReadLock();
 
         try
         {
@@ -294,7 +264,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitReadLock();
         }
     }
 
@@ -308,7 +278,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the add operation.</exception>
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
@@ -331,7 +301,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
@@ -344,7 +314,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the add operation.</exception>
     public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
@@ -365,7 +335,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
@@ -379,7 +349,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
     public async Task<TEntity?> DeleteByIdAsync(object id, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
@@ -406,7 +376,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
@@ -420,7 +390,7 @@ public class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
     public async Task<TEntity?> DeleteByFilterAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
@@ -449,75 +419,58 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
     /// <summary>
-    /// Asynchronously deletes a range of entities from the database.
+    /// Asynchronously deletes a range of entities based on the specified builder parameters.
     /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="entities">A collection of entities to delete.</param>
+    /// <param name="builder">The builder containing entities or identifiers to delete and removal mode.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>A collection of the deleted entities.</returns>
+    /// <returns>The collection of deleted entities.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
-    public async Task<IEnumerable<TEntity>> DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// The deletion mode is determined by the <see cref="RemoveRangeBuilder{TEntity}.RemoveByMode"/> property:
+    /// <list type="bullet">
+    /// <item><description>If mode is <see cref="RemoveByMode.Entities"/>, deletes the entities directly</description></item>
+    /// <item><description>If mode is <see cref="RemoveByMode.Identifiers"/>, first fetches entities by their identifiers before deletion</description></item>
+    /// </list>
+    /// </remarks>
+    public async Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _dbSet.Value.RemoveRange(entities);
-            await _context.SaveChangesAsync(cancellationToken);
-            return entities;
-        }
-        catch (OperationCanceledException)
-        {
-            throw _operationCancelledError.Value;
-        }
-        catch (Exception ex)
-        {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _deleteRangeByEntitiesError.Value;
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously deletes a range of entities identified by a collection of identifiers.
-    /// <para>Thread-safe method.</para>
-    /// </summary>
-    /// <param name="identifiers">A collection of identifiers for the entities to delete.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>A collection of the deleted entities.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
-    public async Task<IEnumerable<TEntity>> DeleteRangeAsync(IEnumerable<object> identifiers, CancellationToken cancellationToken = default)
-    {
-        await _semaphore.WaitAsync(cancellationToken);
-
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RemoveRangeAwait));
-            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
-
-            var entities = new List<TEntity>();
-
-            foreach (var id in identifiers)
+            if (builder.RemoveByMode == RemoveByMode.Entities)
             {
-                var entity = await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
-                if (entity is not null)
-                    entities.Add(entity);
+                _context.RemoveRange(builder.Entities);
+                await _context.SaveChangesAsync(cancellationToken);
+                return builder.Entities;
             }
 
-            _dbSet.Value.RemoveRange(entities);
-            await _context.SaveChangesAsync(cancellationToken);
-            return entities;
+            if (builder.RemoveByMode == RemoveByMode.Identifiers)
+            {
+                var entities = new List<TEntity>();
+
+                foreach (var id in builder.Identifiers)
+                {
+                    var entity = await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
+                    if (entity is not null)
+                        entities.Add(entity);
+                }
+
+                _context.RemoveRange(entities);
+                await _context.SaveChangesAsync(cancellationToken);
+                return entities;
+            }
+
+            throw _deleteRangeByIdsError.Value;
         }
         catch (OperationCanceledException)
         {
@@ -530,26 +483,39 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
     /// <summary>
-    /// Asynchronously updates an entity in the database.
-    /// <para>Thread-safe method.</para>
+    /// Asynchronously updates a single entity based on the specified builder parameters.
+    /// <para>Thread-safe method that automatically sets update tracking fields.</para>
     /// </summary>
-    /// <param name="entity">The entity to update.</param>
+    /// <param name="builder">The builder containing the entity to update and optional user information.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The updated entity, or <c>null</c> if the update fails.</returns>
+    /// <returns>The updated entity, or <c>null</c> if the update failed.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
-    public async Task<TEntity?> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// This method automatically:
+    /// <list type="bullet">
+    /// <item><description>Sets the <c>UpdatedBy</c> field to the builder's <see cref="UpdateSingleBuilder{TEntity}.UpdatedByUser"/> value</description></item>
+    /// <item><description>Sets the <c>UpdatedAt</c> field to the current UTC timestamp</description></item>
+    /// <item><description>Marks all entity properties as modified for the update</description></item>
+    /// </list>
+    /// </remarks>
+    public async Task<TEntity?> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
+
+            var entity = builder.Entity;
+
+            entity.UpdatedBy = builder.UpdatedByUser;
+            entity.UpdatedAt = DateTimeOffset.UtcNow;
 
             _dbSet.Value.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
@@ -568,35 +534,47 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
     /// <summary>
-    /// Asynchronously updates a range of entities in the database.
-    /// <para>Thread-safe method.</para>
+    /// Asynchronously updates a collection of entities based on the specified builder parameters.
+    /// <para>Thread-safe method that automatically sets update tracking fields for all entities.</para>
     /// </summary>
-    /// <param name="entities">A collection of entities to update.</param>
+    /// <param name="builder">The builder containing entities to update and optional user information.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>A collection of the updated entities.</returns>
+    /// <returns>A collection of updated entities.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
-    public async Task<IEnumerable<TEntity?>> UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// This method performs the following operations for each entity:
+    /// <list type="bullet">
+    /// <item><description>Sets the <c>UpdatedBy</c> field to the builder's <see cref="UpdateRangeBuilder{TEntity}.UpdatedByUser"/> value</description></item>
+    /// <item><description>Sets the <c>UpdatedAt</c> field to the current UTC timestamp</description></item>
+    /// <item><description>Marks all entity properties as modified for the update</description></item>
+    /// </list>
+    /// All updates are performed in a single transaction.
+    /// </remarks>
+    public async Task<IEnumerable<TEntity?>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken);
+        _lock.EnterWriteLock();
 
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.UpdateRangeAwait));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            foreach (var entity in entities)
+            foreach (var entity in builder.Entities)
             {
+                entity.UpdatedBy = builder.UpdatedByUser;
+                entity.UpdatedAt = DateTimeOffset.UtcNow;
+
                 _dbSet.Value.Attach(entity);
                 _context.Entry(entity).State = EntityState.Modified;
             }
 
             await _context.SaveChangesAsync(cancellationToken);
-            return entities;
+            return builder.Entities;
         }
         catch (OperationCanceledException)
         {
@@ -609,7 +587,7 @@ public class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _semaphore.Release();
+            _lock.ExitWriteLock();
         }
     }
 
@@ -634,8 +612,7 @@ public class Repository<TEntity, TDbContext> :
 
         if (disposing)
         {
-            // Release managed resources
-            _semaphore.Dispose();
+            _lock.Dispose();
         }
 
         _disposed = true;
