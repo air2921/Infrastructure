@@ -3,6 +3,7 @@ using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.EntityFramework;
+using Infrastructure.Services.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;
@@ -40,7 +41,7 @@ public static class EntityFrameworkRepositoryExtension
     ///     <item><description>SQLite: Configures <typeparamref name="TDbContext"/> to use SQLite with detailed errors and logging.</description></item>
     /// </list>
     /// </remarks>
-    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : DbContext
+    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : InfrastructureDbContext
     {
         var options = new EntityFrameworkConfigureOptions();
         configureOptions.Invoke(options);

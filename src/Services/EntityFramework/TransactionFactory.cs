@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Abstractions;
+using Infrastructure.Services.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -14,7 +15,7 @@ namespace Infrastructure.Services.EntityFramework;
 /// </remarks>
 /// <param name="dbContext">The database context to be used for the transaction.</param>
 public class TransactionFactory<TDbContext>(TDbContext dbContext) : ITransactionFactory, ITransactionFactory<TDbContext>
-    where TDbContext : DbContext
+    where TDbContext : InfrastructureDbContext
 {
     /// <summary>
     /// Begins a new database transaction synchronously.
