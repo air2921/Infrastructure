@@ -31,8 +31,8 @@ public static class MongoDatabaseRepositoryExtension
     ///     <item><description><typeparamref name="TMongoContext"/> - Scoped service for interacting with the MongoDB database context.</description></item>
     ///     <item><description><see cref="IMongoSessionFactory"/> - Scoped service for creating MongoDB sessions.</description></item>
     ///     <item><description><see cref="IMongoSessionFactory{TMongoContext}"/> - Scoped service for creating MongoDB sessions with specific context.</description></item>
-    ///     <item><description><see cref="IMongoRepository{TDocument}"/> - Scoped service for interacting with documents of type <typeparamref name="TDocument"/>.</description></item>
-    ///     <item><description><see cref="IMongoRepository{TMongoContext, TDocument}"/> - Scoped service for interacting with documents of type <typeparamref name="TDocument"/> using <typeparamref name="TMongoContext"/>.</description></item>
+    ///     <item><description><see cref="IMongoRepository{TDocument}"/> - Transient service for interacting with documents of type <typeparamref name="TDocument"/>.</description></item>
+    ///     <item><description><see cref="IMongoRepository{TMongoContext, TDocument}"/> - Transient service for interacting with documents of type <typeparamref name="TDocument"/> using <typeparamref name="TMongoContext"/>.</description></item>
     /// </list>
     /// Additionally, this method performs the following:
     /// <list type="bullet">
@@ -55,8 +55,8 @@ public static class MongoDatabaseRepositoryExtension
         builder.Services.AddSingleton(options);
         builder.Services.AddScoped<TMongoContext>();
 
-        builder.Services.AddScoped<IMongoSessionFactory, MongoSessionFactory<TMongoContext>>();
-        builder.Services.AddScoped<IMongoSessionFactory<TMongoContext>, MongoSessionFactory<TMongoContext>>();
+        builder.Services.AddTransient<IMongoSessionFactory, MongoSessionFactory<TMongoContext>>();
+        builder.Services.AddTransient<IMongoSessionFactory<TMongoContext>, MongoSessionFactory<TMongoContext>>();
 
         var mongoContextType = typeof(TMongoContext);
         var documentTypes = mongoContextType.GetProperties()
