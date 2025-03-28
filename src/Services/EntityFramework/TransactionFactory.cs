@@ -28,6 +28,6 @@ public class TransactionFactory<TDbContext>(TDbContext dbContext) : ITransaction
     /// </summary>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>A task that represents the asynchronous operation. The task result is a new <see cref="IDbContextTransaction"/>.</returns>
-    public async Task<IDbContextTransaction> BeginAsync(CancellationToken cancellationToken = default)
-        => await dbContext.Database.BeginTransactionAsync(cancellationToken);
+    public Task<IDbContextTransaction> BeginAsync(CancellationToken cancellationToken = default)
+        => dbContext.Database.BeginTransactionAsync(cancellationToken);
 }
