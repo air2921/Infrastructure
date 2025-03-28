@@ -3,7 +3,7 @@ using Infrastructure.Configuration;
 using Infrastructure.Services.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure;
+namespace Infrastructure.Builder_Extensions;
 
 /// <summary>
 /// Adds infrastructure services to the service collection.
