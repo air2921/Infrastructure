@@ -10,6 +10,11 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of the entity to query.</typeparam>
 public class RangeQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
 {
+    private RangeQueryBuilder()
+    {
+        
+    }
+
     /// <summary>
     /// An expression for filtering entities based on a condition.
     /// </summary>

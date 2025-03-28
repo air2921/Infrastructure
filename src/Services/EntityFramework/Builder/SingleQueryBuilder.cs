@@ -9,6 +9,11 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
 public class SingleQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
 {
+    private SingleQueryBuilder()
+    {
+        
+    }
+
     /// <summary>
     /// Filter expression for the query.
     /// </summary>

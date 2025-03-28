@@ -9,6 +9,11 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
 public class UpdateSingleBuilder<TEntity> : EntityBase
 {
+    private UpdateSingleBuilder()
+    {
+        
+    }
+
     /// <summary>
     /// The entity to be updated.
     /// <para>This property contains the entity instance with its updated property values that need to be persisted.</para>
