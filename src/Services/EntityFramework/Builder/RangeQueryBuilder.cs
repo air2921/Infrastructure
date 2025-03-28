@@ -51,6 +51,11 @@ public class RangeQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
     public int Take { get; private set; } = 1000;
 
     /// <summary>
+    /// Creates a new instance of RangeQueryBuilder with default settings.
+    /// </summary>
+    public static RangeQueryBuilder<TEntity> Create() => new();
+
+    /// <summary>
     /// Sets the filter expression for the query.
     /// </summary>
     /// <param name="filter">The filter expression.</param>
@@ -124,9 +129,4 @@ public class RangeQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
         Take = take;
         return this;
     }
-
-    /// <summary>
-    /// Creates a new instance of RangeQueryBuilder with default settings.
-    /// </summary>
-    public static RangeQueryBuilder<TEntity> Create() => new();
 }
