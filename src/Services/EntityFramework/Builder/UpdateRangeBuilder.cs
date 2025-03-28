@@ -3,21 +3,67 @@
 namespace Infrastructure.Services.EntityFramework.Builder;
 
 /// <summary>
-/// A class that helps build parameters for updating a range of entities.
-/// <para>This class provides a way to specify which entities should be updated and optionally track who performed the update.</para>
+/// Fluent builder for configuring bulk entity updates with optional audit tracking
 /// </summary>
-/// <typeparam name="TEntity">The type of the entities to update.</typeparam>
-public class UpdateRangeBuilder<TEntity> : EntityBase
+/// <typeparam name="TEntity">Type of entity to update, must inherit from EntityBase</typeparam>
+public class UpdateRangeBuilder<TEntity> : EntityBase where TEntity : EntityBase
 {
     /// <summary>
-    /// The collection of entities to be updated.
-    /// <para>This collection contains the entity instances with their updated property values that need to be persisted.</para>
+    /// Collection of entities to be updated
     /// </summary>
-    public IEnumerable<TEntity> Entities { get; set; } = [];
+    public IReadOnlyCollection<TEntity> Entities { get; private set; } = [];
 
     /// <summary>
-    /// The identifier or name of the user who performed the update (optional).
-    /// <para>This property can be used for audit purposes to track who made changes to the entities.</para>
+    /// Identifier of the user who performed the update (for auditing)
     /// </summary>
-    public string? UpdatedByUser { get; set; }
+    public string? UpdatedByUser { get; private set; }
+
+    /// <summary>
+    /// Creates a new builder instance
+    /// </summary>
+    public static UpdateRangeBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Sets the entities to be updated
+    /// </summary>
+    /// <param name="entities">Collection of entities</param>
+    /// <returns>Current builder instance</returns>
+    public UpdateRangeBuilder<TEntity> WithEntities(IEnumerable<TEntity> entities)
+    {
+        Entities = entities?.ToList() ?? throw new ArgumentNullException(nameof(entities));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets a single entity to be updated
+    /// </summary>
+    /// <param name="entity">Entity to update</param>
+    /// <returns>Current builder instance</returns>
+    public UpdateRangeBuilder<TEntity> WithEntity(TEntity entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        Entities = [entity];
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the user who performed the update
+    /// </summary>
+    /// <param name="user">User identifier/name</param>
+    /// <returns>Current builder instance</returns>
+    public UpdateRangeBuilder<TEntity> WithUpdatedBy(string? user)
+    {
+        UpdatedByUser = user;
+        return this;
+    }
+
+    /// <summary>
+    /// Validates the builder configuration
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no entities are specified for update</exception>
+    public void Validate()
+    {
+        if (Entities.Count == 0)
+            throw new InvalidOperationException("No entities specified for update");
+    }
 }

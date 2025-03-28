@@ -4,57 +4,106 @@ using Infrastructure.Services.EntityFramework.Entity;
 namespace Infrastructure.Services.EntityFramework.Builder;
 
 /// <summary>
-/// A class that helps build parameters for removing a range of entities.
-/// <para>This class provides flexible ways to specify which entities should be removed - either by providing the entities directly or their identifiers.</para>
+/// A builder class for configuring parameters to remove a range of entities.
+/// Provides flexible ways to specify entities for removal either by entity instances or their identifiers.
 /// </summary>
-/// <typeparam name="TEntity">The type of the entities to remove.</typeparam>
-public class RemoveRangeBuilder<TEntity> : EntityBase
+/// <typeparam name="TEntity">The type of entities to remove, must inherit from EntityBase.</typeparam>
+public class RemoveRangeBuilder<TEntity> : EntityBase where TEntity : EntityBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="RemoveRangeBuilder{TEntity}"/> class.
-    /// <para>The constructor automatically sets the <see cref="RemoveBy"/> mode based on which collections (<see cref="Entities"/> or <see cref="Identifiers"/>) are populated.</para>
+    /// Collection of entities to be removed directly.
     /// </summary>
-    public RemoveRangeBuilder()
+    public IEnumerable<TEntity> Entities { get; private set; } = [];
+
+    /// <summary>
+    /// Collection of entity identifiers for entities to be removed.
+    /// </summary>
+    public IEnumerable<object> Identifiers { get; private set; } = [];
+
+    /// <summary>
+    /// Specifies the removal mode (by entities or identifiers).
+    /// </summary>
+    public RemoveByMode RemoveByMode { get; private set; }
+
+    /// <summary>
+    /// Creates a new instance of RemoveRangeBuilder.
+    /// </summary>
+    public static RemoveRangeBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Sets the entities to be removed directly.
+    /// </summary>
+    /// <param name="entities">Collection of entities to remove.</param>
+    /// <returns>The current builder instance.</returns>
+    public RemoveRangeBuilder<TEntity> WithEntities(IEnumerable<TEntity> entities)
     {
-        RemoveByMode = GetDefaultRemoveByMode();
+        Entities = entities?.ToList() ?? throw new ArgumentNullException(nameof(entities));
+        RemoveByMode = RemoveByMode.Entities;
+        return this;
     }
 
     /// <summary>
-    /// The collection of entities to be removed.
-    /// <para>This collection is used when the removal should be performed using entity instances directly.</para>
+    /// Sets a single entity to be removed.
     /// </summary>
-    public IEnumerable<TEntity> Entities { get; set; } = [];
-
-    /// <summary>
-    /// The collection of identifiers for entities to be removed.
-    /// <para>This collection is used when the removal should be performed using entity identifiers rather than full entity instances.</para>
-    /// </summary>
-    public IEnumerable<object> Identifiers { get; set; } = [];
-
-    /// <summary>
-    /// Specifies the mode by which entities should be removed.
-    /// <para>Determines whether the removal will use <see cref="Entities"/> or <see cref="Identifiers"/>.</para>
-    /// </summary>
-    public RemoveByMode RemoveByMode { get; set; }
-
-    /// <summary>
-    /// Determines the default removal mode based on which collections are populated.
-    /// <para>If <see cref="Entities"/> contains items, defaults to <see cref="RemoveByMode.Entities"/>.
-    /// If <see cref="Identifiers"/> contains items, defaults to <see cref="RemoveByMode.Identifiers"/>.
-    /// Otherwise defaults to <see cref="RemoveByMode.Entities"/>.</para>
-    /// </summary>
-    /// <returns>The determined <see cref="RemoveByMode"/>.</returns>
-    private RemoveByMode GetDefaultRemoveByMode()
+    /// <param name="entity">The entity to remove.</param>
+    /// <returns>The current builder instance.</returns>
+    public RemoveRangeBuilder<TEntity> WithEntity(TEntity entity)
     {
-        bool hasEntities = Entities.Any();
-        bool hasIdentifiers = Identifiers.Any();
+        ArgumentNullException.ThrowIfNull(entity);
+        Entities = [entity];
+        RemoveByMode = RemoveByMode.Entities;
+        return this;
+    }
 
-        if (hasEntities)
-            return RemoveByMode.Entities;
+    /// <summary>
+    /// Sets the identifiers of entities to be removed.
+    /// </summary>
+    /// <param name="identifiers">Collection of entity identifiers.</param>
+    /// <returns>The current builder instance.</returns>
+    public RemoveRangeBuilder<TEntity> WithIdentifiers(IEnumerable<object> identifiers)
+    {
+        Identifiers = identifiers?.ToList() ?? throw new ArgumentNullException(nameof(identifiers));
+        RemoveByMode = RemoveByMode.Identifiers;
+        return this;
+    }
 
-        if (hasIdentifiers)
-            return RemoveByMode.Identifiers;
+    /// <summary>
+    /// Sets a single entity identifier to be removed.
+    /// </summary>
+    /// <param name="identifier">The entity identifier to remove.</param>
+    /// <returns>The current builder instance.</returns>
+    public RemoveRangeBuilder<TEntity> WithIdentifier(object identifier)
+    {
+        ArgumentNullException.ThrowIfNull(identifier);
+        Identifiers = [identifier];
+        RemoveByMode = RemoveByMode.Identifiers;
+        return this;
+    }
 
-        return RemoveByMode.Entities;
+    /// <summary>
+    /// Explicitly sets the removal mode.
+    /// </summary>
+    /// <param name="mode">The removal mode to use.</param>
+    /// <returns>The current builder instance.</returns>
+    public RemoveRangeBuilder<TEntity> WithRemoveMode(RemoveByMode mode)
+    {
+        if (!Enum.IsDefined(typeof(RemoveByMode), mode))
+            throw new ArgumentOutOfRangeException(nameof(mode));
+
+        RemoveByMode = mode;
+        return this;
+    }
+
+    /// <summary>
+    /// Validates the builder configuration.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when configuration is invalid.</exception>
+    public void Validate()
+    {
+        if (RemoveByMode == RemoveByMode.Entities && !Entities.Any())
+            throw new InvalidOperationException("No entities specified for Entities removal mode");
+
+        if (RemoveByMode == RemoveByMode.Identifiers && !Identifiers.Any())
+            throw new InvalidOperationException("No identifiers specified for Identifiers removal mode");
     }
 }

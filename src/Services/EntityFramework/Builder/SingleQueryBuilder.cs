@@ -4,53 +4,125 @@ using System.Linq.Expressions;
 namespace Infrastructure.Services.EntityFramework.Builder;
 
 /// <summary>
-/// A class that helps build queries for retrieving a single entity, with options for filtering, sorting, and including related entities.
-/// <para>This class is designed for fetching a single entity with customizable query parameters.</para>
+/// A builder class for constructing queries to retrieve a single entity with various options.
 /// </summary>
-/// <typeparam name="TEntity">The type of the entity to query.</typeparam>
-public class SingleQueryBuilder<TEntity> : EntityBase
+/// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
+public class SingleQueryBuilder<TEntity> : EntityBase where TEntity : EntityBase
 {
     /// <summary>
-    /// An expression for filtering entities based on a condition.
-    /// <para>This expression is used to filter the entities that meet the specified condition.</para>
+    /// Filter expression for the query.
     /// </summary>
-    public Expression<Func<TEntity, bool>>? Filter { get; init; }
+    public Expression<Func<TEntity, bool>>? Filter { get; private set; }
 
     /// <summary>
-    /// Indicates whether the query should ignore default query filters (like soft-delete filters).
-    /// <para>When set to <c>true</c>, the query will include all entities regardless of default query filters.
-    /// Useful for accessing soft-deleted entities or bypassing other global filters.</para>
-    /// <para>Defaults to <c>false</c>, meaning default query filters will be applied.</para>
+    /// Whether to ignore default query filters.
     /// </summary>
-    public bool IgnoreDefaultQuerySettings { get; set; }
+    public bool IgnoreDefaultQuerySettings { get; private set; }
 
     /// <summary>
-    /// An expression for sorting entities.
-    /// <para>This expression specifies the property by which the entities should be ordered.</para>
+    /// Ordering expression for the query.
     /// </summary>
-    public Expression<Func<TEntity, object?>>? OrderExpression { get; init; }
+    public Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
 
     /// <summary>
-    /// A query for including related entities (e.g., using the <see cref="Queryable.Include"/> method).
-    /// <para>This query can be used to eagerly load related entities in the result set.</para>
+    /// Include query for related entities.
     /// </summary>
-    public IQueryable<TEntity>? IncludeQuery { get; init; }
+    public IQueryable<TEntity>? IncludeQuery { get; private set; }
 
     /// <summary>
-    /// Indicates whether the <see cref="Queryable.AsNoTracking"/> method should be used to disable change tracking.
-    /// <para>If set to <c>true</c>, the query will not track changes to the entities, which may improve performance.</para>
+    /// Whether to disable change tracking.
     /// </summary>
-    public bool AsNoTracking { get; set; } = false;
+    public bool AsNoTracking { get; private set; }
 
     /// <summary>
-    /// Indicates whether entities should be sorted in descending order (default is descending).
-    /// <para>If set to <c>true</c>, the results will be ordered in descending order; otherwise, they will be in ascending order.</para>
+    /// Whether to sort in descending order.
     /// </summary>
-    public bool OrderByDesc { get; set; } = true;
+    public bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
-    /// Indicates whether it is necessary to take the first entity from the collection.
-    /// <para>If set to <c>true</c>, the first entity from the collection will be returned, otherwise the last one. The default is <c>true</c>.</para>
+    /// Whether to take the first entity (true) or last entity (false).
     /// </summary>
-    public bool TakeFirst { get; set; } = true;
+    public bool TakeFirst { get; private set; } = true;
+
+    /// <summary>
+    /// Creates a new instance of SingleQueryBuilder.
+    /// </summary>
+    public static SingleQueryBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Sets the filter expression for the query.
+    /// </summary>
+    /// <param name="filter">The filter expression.</param>
+    public SingleQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
+    {
+        Filter = filter ?? throw new ArgumentNullException(nameof(filter));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets whether to ignore default query filters.
+    /// </summary>
+    /// <param name="ignore">True to ignore default filters.</param>
+    public SingleQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
+    {
+        IgnoreDefaultQuerySettings = ignore;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the ordering for the query.
+    /// </summary>
+    /// <param name="orderExpression">The ordering expression.</param>
+    /// <param name="descending">True for descending order.</param>
+    public SingleQueryBuilder<TEntity> WithOrdering(
+        Expression<Func<TEntity, object?>> orderExpression,
+        bool descending = true)
+    {
+        OrderExpression = orderExpression ?? throw new ArgumentNullException(nameof(orderExpression));
+        OrderByDesc = descending;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the include query for related entities.
+    /// </summary>
+    /// <param name="includeQuery">The include query.</param>
+    public SingleQueryBuilder<TEntity> WithIncludes(IQueryable<TEntity> includeQuery)
+    {
+        IncludeQuery = includeQuery ?? throw new ArgumentNullException(nameof(includeQuery));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets whether to disable change tracking.
+    /// </summary>
+    /// <param name="noTracking">True to disable tracking.</param>
+    public SingleQueryBuilder<TEntity> WithNoTracking(bool noTracking = true)
+    {
+        AsNoTracking = noTracking;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets whether to take the first entity (true) or last entity (false).
+    /// </summary>
+    /// <param name="takeFirst">True to take first entity, false for last.</param>
+    public SingleQueryBuilder<TEntity> WithTakeFirst(bool takeFirst = true)
+    {
+        TakeFirst = takeFirst;
+        return this;
+    }
+
+    /// <summary>
+    /// Validates the builder configuration.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when configuration is invalid.</exception>
+    public void Validate()
+    {
+        if (Filter is null && OrderExpression is null)
+        {
+            throw new InvalidOperationException(
+                "Either Filter or OrderExpression must be specified for single entity query");
+        }
+    }
 }

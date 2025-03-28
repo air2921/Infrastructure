@@ -3,7 +3,6 @@ using Infrastructure.Abstractions;
 using Infrastructure.Exceptions;
 using Microsoft.Extensions.Logging;
 
-
 namespace Infrastructure.Services.Cryptography;
 
 /// <summary>
