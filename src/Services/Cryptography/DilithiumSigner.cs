@@ -40,7 +40,7 @@ public class DilithiumSigner : ISigner, IDisposable
 
     private IntPtr _sig;
     private readonly object _instanceLock = new();
-    private volatile bool _disposed = false;
+    private volatile bool disposed = false;
 
     private delegate IntPtr OQS_SIG_newDelegate(string alg_name);
     private delegate void OQS_SIG_freeDelegate(IntPtr sig);
@@ -246,7 +246,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
 
         lock (_instanceLock)
         {
@@ -280,7 +280,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     public byte[] Sign(byte[] message, byte[] privateKey)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
 
         lock (_instanceLock)
         {
@@ -311,7 +311,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
 
         lock (_instanceLock)
         {
@@ -386,12 +386,12 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (disposed)
             return;
 
         lock (_instanceLock)
         {
-            if (_disposed)
+            if (disposed)
                 return;
 
             if (_sig != IntPtr.Zero)
@@ -416,7 +416,7 @@ public class DilithiumSigner : ISigner, IDisposable
                 }
             }
 
-            _disposed = true;
+            disposed = true;
         }
     }
 }

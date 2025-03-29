@@ -36,7 +36,7 @@ public class Repository<TEntity, TDbContext> :
 
     private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
 
-    private bool _disposed;
+    private bool disposed;
 
     private static readonly Lazy<EntityException> _operationCancelledError = new(() => new("The operation was cancelled due to waiting too long for completion or due to manual cancellation"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _getRangeError = new(() => new("An error occurred while attempting to retrieve a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
@@ -691,7 +691,7 @@ public class Repository<TEntity, TDbContext> :
     /// </remarks>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (disposed)
             return;
 
         if (disposing)
@@ -699,7 +699,7 @@ public class Repository<TEntity, TDbContext> :
             _lock.Dispose();
         }
 
-        _disposed = true;
+        disposed = true;
     }
 
     /// <summary>

@@ -18,7 +18,7 @@ public abstract class MongoDatabaseContext : IDisposable
 {
     private readonly Lazy<MongoClient> _client;
     private readonly Lazy<IMongoDatabase> _database;
-    private volatile bool _disposed = false;
+    private volatile bool disposed = false;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MongoDatabaseContext"/> class with the specified configuration options.
@@ -39,7 +39,7 @@ public abstract class MongoDatabaseContext : IDisposable
     {
         get
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ObjectDisposedException.ThrowIf(disposed, this);
             return _database.Value;
         }
     }
@@ -78,7 +78,7 @@ public abstract class MongoDatabaseContext : IDisposable
     /// </remarks>
     public virtual IClientSession StartSession()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
         return _client.Value.StartSession(null, default);
     }
 
@@ -94,7 +94,7 @@ public abstract class MongoDatabaseContext : IDisposable
     /// </remarks>
     public virtual async Task<IClientSession> StartSessionAsync(CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
         return await _client.Value.StartSessionAsync(null, cancellationToken);
     }
 
@@ -113,7 +113,7 @@ public abstract class MongoDatabaseContext : IDisposable
     /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (disposed)
             return;
 
         if (disposing)
@@ -122,6 +122,6 @@ public abstract class MongoDatabaseContext : IDisposable
                 _client.Value.Dispose();
         }
 
-        _disposed = true;
+        disposed = true;
     }
 }

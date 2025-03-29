@@ -24,7 +24,7 @@ public class SmtpClientWrapper : IDisposable
     private readonly Lazy<SmtpClient> _smtpClient;
     private readonly ILogger<SmtpClientWrapper> _logger;
 
-    private volatile bool _disposed;
+    private volatile bool disposed;
 
     private static readonly Lazy<SmtpClientException> _smtpAuthError = new(() => new("Failed to authenticate or connect to the SMTP server"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<SmtpClientException> _smtpAuthOrSocketError = new(() => new("Error during email sending due to authentication or network issues"), LazyThreadSafetyMode.ExecutionAndPublication);
@@ -66,7 +66,7 @@ public class SmtpClientWrapper : IDisposable
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
     public async Task SendAsync(MimeMessage message, CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
 
         try
         {
@@ -90,7 +90,7 @@ public class SmtpClientWrapper : IDisposable
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
     public void Send(MimeMessage message)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this);
 
         try
         {
@@ -109,7 +109,7 @@ public class SmtpClientWrapper : IDisposable
     /// <param name="disposing">Indicates whether the method is called from the Dispose method (true) or from the finalizer (false).</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (disposed)
             return;
 
         if (disposing && _smtpClient.IsValueCreated)
@@ -118,7 +118,7 @@ public class SmtpClientWrapper : IDisposable
         if (_smtpClient.IsValueCreated)
             _smtpClient.Value.Dispose();
 
-        _disposed = true;
+        disposed = true;
     }
 
     /// <summary>
