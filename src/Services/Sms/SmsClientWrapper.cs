@@ -13,25 +13,9 @@ namespace Infrastructure.Services.Sms;
 /// This class wraps around the Twilio API client to offer a more manageable interface for sending SMS messages.
 /// The wrapper supports both synchronous and asynchronous message sending operations, while also ensuring proper client initialization.
 /// </remarks>
-public class SmsClientWrapper
+/// <param name="options">The configuration options containing Twilio username, password, Account SID, and phone number.</param>
+public class SmsClientWrapper(TwilioConfigureOptions options)
 {
-    private readonly TwilioConfigureOptions _options;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SmsClientWrapper"/> class.
-    /// This method initializes the Twilio client with the provided configuration options, including the username, password, and Account SID.
-    /// </summary>
-    /// <param name="options">The configuration options containing Twilio username, password, Account SID, and phone number.</param>
-    /// <remarks>
-    /// The Twilio client is initialized using the provided credentials to establish a connection with the Twilio service.
-    /// This method does not send any messages, but prepares the client for message sending operations.
-    /// </remarks>
-    public SmsClientWrapper(TwilioConfigureOptions options)
-    {
-        _options = options;
-        TwilioClient.Init(options.Username, options.Password, options.AccountSid);
-    }
-
     /// <summary>
     /// Asynchronously sends an SMS message.
     /// </summary>
@@ -41,15 +25,15 @@ public class SmsClientWrapper
     /// <remarks>
     /// This method sends the provided SMS message asynchronously. It uses the Twilio API to send the message to the specified phone number.
     /// </remarks>
-    public async Task SendAsync(string phone, string message)
+    public Task SendAsync(string phone, string message)
     {
         var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
         {
-            From = new PhoneNumber(_options.PhoneNumber),
+            From = new PhoneNumber(options.PhoneNumber),
             Body = message,
         };
 
-        _ = await MessageResource.CreateAsync(messageOptions);
+        return MessageResource.CreateAsync(messageOptions);
     }
 
     /// <summary>
@@ -65,10 +49,10 @@ public class SmsClientWrapper
     {
         var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
         {
-            From = new PhoneNumber(_options.PhoneNumber),
+            From = new PhoneNumber(options.PhoneNumber),
             Body = message
         };
 
-        _ = MessageResource.Create(messageOptions);
+        MessageResource.Create(messageOptions);
     }
 }

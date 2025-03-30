@@ -70,7 +70,7 @@ public class SmtpClientWrapper : IDisposable
 
         try
         {
-            await _smtpClient.Value.SendAsync(message, cancellationToken);
+            await _smtpClient.Value.SendAsync(message, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {

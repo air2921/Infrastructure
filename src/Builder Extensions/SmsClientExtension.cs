@@ -5,6 +5,7 @@ using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.Sms;
 using Microsoft.Extensions.DependencyInjection;
+using Twilio;
 
 namespace Infrastructure.Builder_Extensions;
 
@@ -44,6 +45,7 @@ public static class SmsClientExtension
             return builder;
 
         options.EnsureSuccessValidation("Invalid Twilio configuration. Please check configuration");
+        TwilioClient.Init(options.Username, options.Password, options.AccountSid);
 
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<SmsClientWrapper>();
