@@ -11,6 +11,9 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of entities to remove, must inherit from EntityBase.</typeparam>
 public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
 {
+    /// <summary>
+    /// Private constructor to enforce use of factory method.
+    /// </summary>
     private RemoveRangeBuilder()
     {
         

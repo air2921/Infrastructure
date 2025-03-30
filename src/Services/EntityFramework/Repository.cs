@@ -46,7 +46,7 @@ public class Repository<TEntity, TDbContext> :
     private static readonly Lazy<EntityException> _addError = new(() => new("An error occurred while attempting to add an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _addRangeError = new(() => new("An error occurred while attempting to add a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _deleteByIdError = new(() => new("An error occurred while attempting to delete an entity by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _deleteRangeByIdsError = new(() => new("An error occurred while attempting to delete a range of entities by their IDs"), LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<EntityException> _deleteRangeError = new(() => new("An error occurred while attempting to delete a range of entities by their IDs"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _deleteByFilterError = new(() => new("An error occurred while attempting to delete an entity using a filter"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
     private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
@@ -170,11 +170,11 @@ public class Repository<TEntity, TDbContext> :
 
             IQueryable<TEntity> query = _dbSet.Value;
 
-            if (builder.IgnoreDefaultQuerySettings)
-                query = query.IgnoreQueryFilters();
-
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
+
+            if (builder.IgnoreDefaultQuerySettings)
+                query = query.IgnoreQueryFilters();
 
             if (builder.AsNoTracking)
                 query = query.AsNoTracking();
@@ -225,11 +225,11 @@ public class Repository<TEntity, TDbContext> :
             if (builder is null)
                 return await query.ToListAsync(cancellationToken);
 
-            if (builder.IgnoreDefaultQuerySettings)
-                query = query.IgnoreQueryFilters();
-
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
+
+            if (builder.IgnoreDefaultQuerySettings)
+                query = query.IgnoreQueryFilters();
 
             if (builder.AsNoTracking)
                 query = query.AsNoTracking();
@@ -462,7 +462,7 @@ public class Repository<TEntity, TDbContext> :
                 return entities;
             }
 
-            throw _deleteRangeByIdsError.Value;
+            throw _deleteRangeError.Value;
         }
         catch (OperationCanceledException)
         {
@@ -471,7 +471,7 @@ public class Repository<TEntity, TDbContext> :
         catch (Exception ex)
         {
             _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _deleteRangeByIdsError.Value;
+            throw _deleteRangeError.Value;
         }
         finally
         {

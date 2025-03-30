@@ -10,6 +10,9 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
 public class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
 {
+    /// <summary>
+    /// Private constructor to enforce use of factory method.
+    /// </summary>
     private UpdateSingleBuilder()
     {
         

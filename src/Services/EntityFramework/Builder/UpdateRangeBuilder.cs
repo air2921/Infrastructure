@@ -8,6 +8,9 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">Type of entity to update, must inherit from EntityBase</typeparam>
 public class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
 {
+    /// <summary>
+    /// Private constructor to enforce use of factory method.
+    /// </summary>
     private UpdateRangeBuilder()
     {
         

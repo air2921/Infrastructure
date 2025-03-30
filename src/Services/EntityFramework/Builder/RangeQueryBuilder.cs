@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -11,9 +12,17 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of the entity to query.</typeparam>
 public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
 {
+    /// <summary>
+    /// A flag indicating whether to ignore builder constraints (like maximum take limit).
+    /// This should be used with caution as it bypasses safety checks.
+    /// </summary>
+    private bool ignoreBuilderConstraints = false;
+
+    /// <summary>
+    /// Private constructor to enforce use of factory method.
+    /// </summary>
     private RangeQueryBuilder()
     {
-        
     }
 
     /// <summary>
@@ -34,7 +43,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// A query for including related entities.
     /// </summary>
-    public IQueryable<TEntity>? IncludeQuery { get; private set; }
+    public IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
 
     /// <summary>
     /// Indicates whether change tracking should be disabled.
@@ -54,12 +63,24 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// The number of entities to take.
     /// </summary>
-    public int Take { get; private set; } = 1000;
+    public int Take { get; private set; } = 100;
 
     /// <summary>
     /// Creates a new instance of RangeQueryBuilder with default settings.
     /// </summary>
     public static RangeQueryBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Disables builder constraints (like maximum take limit).
+    /// This method should be used with caution as it bypasses safety checks.
+    /// </summary>
+    /// <returns>The current builder instance.</returns>
+    [Obsolete("Do not use disabling builder restrictions unless it is done intentionally")]
+    public RangeQueryBuilder<TEntity> WithIgnoreBuilderConstraints()
+    {
+        ignoreBuilderConstraints = true;
+        return this;
+    }
 
     /// <summary>
     /// Sets the filter expression for the query.
@@ -103,7 +124,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// </summary>
     /// <param name="includeQuery">The include query.</param>
     /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithIncludes(IQueryable<TEntity> includeQuery)
+    public RangeQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
         IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without expression is not allowed");
         return this;
@@ -134,7 +155,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
         if (take <= 0)
             throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param less or zero is not allowed");
 
-        if (take > 1000)
+        if (take > 1000 && !ignoreBuilderConstraints)
             throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param more than 1000 is not allowed");
 
         Skip = skip;

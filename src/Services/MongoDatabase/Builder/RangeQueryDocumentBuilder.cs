@@ -1,4 +1,6 @@
-﻿using Infrastructure.Services.MongoDatabase.Document;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Builder;
+using Infrastructure.Services.MongoDatabase.Document;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Services.MongoDatabase.Builder;
@@ -17,7 +19,13 @@ namespace Infrastructure.Services.MongoDatabase.Builder;
 public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeQueryDocumentBuilder{TDocument}"/> class.
+    /// A flag indicating whether to ignore builder constraints (like maximum take limit).
+    /// This should be used with caution as it bypasses safety checks.
+    /// </summary>
+    private bool ignoreBuilderConstraints = false;
+
+    /// <summary>
+    /// Private constructor to enforce use of factory method.
     /// </summary>
     private RangeQueryDocumentBuilder()
     {
@@ -31,12 +39,12 @@ public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
     /// <summary>
     /// Gets the number of documents to skip in the query result.
     /// </summary>
-    public int Skip { get; private set; }
+    public int Skip { get; private set; } = 0;
 
     /// <summary>
     /// Gets the number of documents to take (limit) in the query result.
     /// </summary>
-    public int Take { get; private set; } = 1000;
+    public int Take { get; private set; } = 100;
 
     /// <summary>
     /// Gets the sorting expression for the query results.
@@ -55,14 +63,26 @@ public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
     public static RangeQueryDocumentBuilder<TDocument> Create() => new();
 
     /// <summary>
+    /// Disables builder constraints (like maximum take limit).
+    /// This method should be used with caution as it bypasses safety checks.
+    /// </summary>
+    /// <returns>The current builder instance.</returns>
+    [Obsolete("Do not use disabling builder restrictions unless it is done intentionally")]
+    public RangeQueryDocumentBuilder<TDocument> WithIgnoreBuilderConstraints()
+    {
+        ignoreBuilderConstraints = true;
+        return this;
+    }
+
+    /// <summary>
     /// Sets the filter expression for the query.
     /// </summary>
     /// <param name="filter">The filter expression to apply.</param>
     /// <returns>The current builder instance with updated filter.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when filter is null.</exception>
+    /// <exception cref="InvalidArgumentException">Thrown when filter is null.</exception>
     public RangeQueryDocumentBuilder<TDocument> WithFilter(Expression<Func<TDocument, bool>> filter)
     {
-        Filter = filter ?? throw new ArgumentNullException(nameof(filter));
+        Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without f expression is not allowed");
         return this;
     }
 
@@ -72,13 +92,19 @@ public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
     /// <param name="skip">Number of documents to skip.</param>
     /// <param name="take">Number of documents to take.</param>
     /// <returns>The current builder instance with updated pagination settings.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">
+    /// <exception cref="InvalidArgumentException">
     /// Thrown when skip is negative or take is not positive.
     /// </exception>
     public RangeQueryDocumentBuilder<TDocument> WithPagination(int skip, int take)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(skip);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(take);
+        if (skip < 0)
+            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(skip)} param less than zero is not allowed");
+
+        if (take <= 0)
+            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param less or zero is not allowed");
+
+        if (take > 1000 && !ignoreBuilderConstraints)
+            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param more than 1000 is not allowed");
 
         Skip = skip;
         Take = take;
@@ -91,12 +117,12 @@ public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
     /// <param name="orderBy">The expression to sort by.</param>
     /// <param name="descending">Whether to sort in descending order (default: true).</param>
     /// <returns>The current builder instance with updated sorting settings.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when orderBy is null.</exception>
+    /// <exception cref="InvalidArgumentException">Thrown when orderBy is null.</exception>
     public RangeQueryDocumentBuilder<TDocument> WithOrdering(
         Expression<Func<TDocument, object>> orderBy,
         bool descending = true)
     {
-        OrderExpression = orderBy ?? throw new ArgumentNullException(nameof(orderBy));
+        OrderExpression = orderBy ?? throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
         OrderByDesc = descending;
         return this;
     }

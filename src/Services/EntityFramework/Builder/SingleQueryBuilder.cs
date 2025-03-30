@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
@@ -10,6 +11,9 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
 public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
 {
+    /// <summary>
+    /// Private constructor to enforce use of factory method.
+    /// </summary>
     private SingleQueryBuilder()
     {
         
@@ -33,7 +37,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Include query for related entities.
     /// </summary>
-    public IQueryable<TEntity>? IncludeQuery { get; private set; }
+    public IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
 
     /// <summary>
     /// Whether to disable change tracking.
@@ -93,7 +97,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets the include query for related entities.
     /// </summary>
     /// <param name="includeQuery">The include query.</param>
-    public SingleQueryBuilder<TEntity> WithIncludes(IQueryable<TEntity> includeQuery)
+    public SingleQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
         IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without expression is not allowed");
         return this;
