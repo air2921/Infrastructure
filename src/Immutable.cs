@@ -31,40 +31,40 @@ public static class Immutable
     public static class RepositoryTimeout
     {
         /// <summary>Timeout for GetRange operations (20 seconds).</summary>
-        public const int GetRangeAwait = 20;
+        public const int GetRangeTimeout = 20;
 
         /// <summary>Timeout for GetByFilter operations (20 seconds).</summary>
-        public const int GetByFilterAwait = 20;
+        public const int GetByFilterTimeout = 20;
 
         /// <summary>Timeout for GetById operations (20 seconds).</summary>
-        public const int GetByIdAwait = 20;
+        public const int GetByIdTimeout = 20;
 
         /// <summary>Timeout for Add operations (20 seconds).</summary>
-        public const int AddAwait = 20;
+        public const int AddTimeout = 20;
 
         /// <summary>Timeout for AddRange operations (20 seconds).</summary>
-        public const int AddRangeAwait = 20;
+        public const int AddRangeTimeout = 20;
 
         /// <summary>Timeout for RemoveById operations (20 seconds).</summary>
-        public const int RemoveByIdAwait = 20;
+        public const int RemoveByIdTimeout = 20;
 
         /// <summary>Timeout for RemoveRange operations (90 seconds).</summary>
-        public const int RemoveRangeAwait = 90;
+        public const int RemoveRangeTimeout = 90;
 
         /// <summary>Timeout for RemoveByFilter operations (20 seconds).</summary>
-        public const int RemoveByFilterAwait = 20;
+        public const int RemoveByFilterTimeout = 20;
 
         /// <summary>Timeout for Update operations (20 seconds).</summary>
-        public const int UpdateAwait = 20;
+        public const int UpdateTimeout = 20;
 
         /// <summary>Timeout for UpdateRange operations (60 seconds).</summary>
-        public const int UpdateRangeAwait = 60;
+        public const int UpdateRangeTimeout = 60;
 
         /// <summary>Timeout for Restore operations (20 seconds).</summary>
-        public const int RestoreAwait = 20;
+        public const int RestoreTimeout = 20;
 
         /// <summary>Timeout for RestoreRange operations (60 seconds).</summary>
-        public const int RestoreRangeAwait = 60;
+        public const int RestoreRangeTimeout = 60;
     }
 
     /// <summary>
