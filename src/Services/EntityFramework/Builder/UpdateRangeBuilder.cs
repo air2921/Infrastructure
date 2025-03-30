@@ -35,19 +35,7 @@ public class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
     /// <returns>Current builder instance</returns>
     public UpdateRangeBuilder<TEntity> WithEntities(IEnumerable<TEntity> entities)
     {
-        Entities = entities?.ToList() ?? throw new ArgumentNullException(nameof(entities));
-        return this;
-    }
-
-    /// <summary>
-    /// Sets a single entity to be updated
-    /// </summary>
-    /// <param name="entity">Entity to update</param>
-    /// <returns>Current builder instance</returns>
-    public UpdateRangeBuilder<TEntity> WithEntity(TEntity entity)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-        Entities = [entity];
+        Entities = entities.ToArray();
         return this;
     }
 
@@ -60,15 +48,5 @@ public class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
     {
         UpdatedByUser = user;
         return this;
-    }
-
-    /// <summary>
-    /// Validates the builder configuration
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when no entities are specified for update</exception>
-    public void Validate()
-    {
-        if (Entities.Count == 0)
-            throw new InvalidOperationException("No entities specified for update");
     }
 }

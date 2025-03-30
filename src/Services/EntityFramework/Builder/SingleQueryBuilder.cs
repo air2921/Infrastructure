@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Entity;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
@@ -22,7 +23,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Whether to ignore default query filters.
     /// </summary>
-    public bool IgnoreDefaultQuerySettings { get; private set; }
+    public bool IgnoreDefaultQuerySettings { get; private set; } = false;
 
     /// <summary>
     /// Ordering expression for the query.
@@ -37,7 +38,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Whether to disable change tracking.
     /// </summary>
-    public bool AsNoTracking { get; private set; }
+    public bool AsNoTracking { get; private set; } = true;
 
     /// <summary>
     /// Whether to sort in descending order.
@@ -60,7 +61,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <param name="filter">The filter expression.</param>
     public SingleQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
     {
-        Filter = filter ?? throw new ArgumentNullException(nameof(filter));
+        Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without filter expression is not allowed");
         return this;
     }
 
@@ -83,7 +84,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
         Expression<Func<TEntity, object?>> orderExpression,
         bool descending = true)
     {
-        OrderExpression = orderExpression ?? throw new ArgumentNullException(nameof(orderExpression));
+        OrderExpression = orderExpression ?? throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
         OrderByDesc = descending;
         return this;
     }
@@ -94,7 +95,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <param name="includeQuery">The include query.</param>
     public SingleQueryBuilder<TEntity> WithIncludes(IQueryable<TEntity> includeQuery)
     {
-        IncludeQuery = includeQuery ?? throw new ArgumentNullException(nameof(includeQuery));
+        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without expression is not allowed");
         return this;
     }
 
@@ -116,18 +117,5 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     {
         TakeFirst = takeFirst;
         return this;
-    }
-
-    /// <summary>
-    /// Validates the builder configuration.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when configuration is invalid.</exception>
-    public void Validate()
-    {
-        if (Filter is null && OrderExpression is null)
-        {
-            throw new InvalidOperationException(
-                "Either Filter or OrderExpression must be specified for single entity query");
-        }
     }
 }

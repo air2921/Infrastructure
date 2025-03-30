@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Entity;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
@@ -23,7 +24,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Indicates whether the query should ignore default query filters.
     /// </summary>
-    public bool IgnoreDefaultQuerySettings { get; private set; }
+    public bool IgnoreDefaultQuerySettings { get; private set; } = false;
 
     /// <summary>
     /// An expression for sorting entities.
@@ -38,7 +39,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Indicates whether change tracking should be disabled.
     /// </summary>
-    public bool AsNoTracking { get; private set; }
+    public bool AsNoTracking { get; private set; } = true;
 
     /// <summary>
     /// Indicates sorting direction.
@@ -48,7 +49,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// The number of entities to skip.
     /// </summary>
-    public int Skip { get; private set; }
+    public int Skip { get; private set; } = 0;
 
     /// <summary>
     /// The number of entities to take.
@@ -67,7 +68,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RangeQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
     {
-        Filter = filter ?? throw new ArgumentNullException(nameof(filter));
+        Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without f expression is not allowed");
         return this;
     }
 
@@ -92,7 +93,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
         Expression<Func<TEntity, object?>> orderExpression,
         bool descending = true)
     {
-        OrderExpression = orderExpression ?? throw new ArgumentNullException(nameof(orderExpression));
+        OrderExpression = orderExpression ?? throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
         OrderByDesc = descending;
         return this;
     }
@@ -104,7 +105,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RangeQueryBuilder<TEntity> WithIncludes(IQueryable<TEntity> includeQuery)
     {
-        IncludeQuery = includeQuery ?? throw new ArgumentNullException(nameof(includeQuery));
+        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without expression is not allowed");
         return this;
     }
 
@@ -127,8 +128,14 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RangeQueryBuilder<TEntity> WithPagination(int skip, int take)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(skip);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(take);
+        if (skip < 0)
+            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(skip)} param less than zero is not allowed");
+
+        if (take <= 0)
+            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param less or zero is not allowed");
+
+        if (take > 1000)
+            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param more than 1000 is not allowed");
 
         Skip = skip;
         Take = take;

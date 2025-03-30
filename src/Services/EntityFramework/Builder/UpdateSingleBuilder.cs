@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Entity;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -38,7 +39,7 @@ public class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance</returns>
     public UpdateSingleBuilder<TEntity> WithEntity(TEntity entity)
     {
-        Entity = entity ?? throw new ArgumentNullException(nameof(entity));
+        Entity = entity ?? throw new InvalidArgumentException("Entity for updating cannot be null");
         return this;
     }
 
@@ -51,15 +52,5 @@ public class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
     {
         UpdatedByUser = user;
         return this;
-    }
-
-    /// <summary>
-    /// Validates the builder configuration
-    /// </summary>
-    /// <exception cref="InvalidOperationException">If no entity is specified for update</exception>
-    public void Validate()
-    {
-        if (Entity is null)
-            throw new InvalidOperationException("No entity specified for update");
     }
 }

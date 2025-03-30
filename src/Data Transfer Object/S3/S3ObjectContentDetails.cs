@@ -53,7 +53,7 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// </list>
     /// </para>
     /// </remarks>
-    public required Stream Content { get; set; }
+    public required Stream Content { get; init; }
 
     /// <summary>
     /// Protected implementation of Dispose pattern.

@@ -48,40 +48,12 @@ public abstract class InfrastructureDbContext(DbContextOptions<InfrastructureDbC
     /// Applies the same restoration logic as Restore&lt;TEntity&gt; to each entity in the collection.
     /// Changes are not saved until SaveChanges is called.
     /// </remarks>
-    public IEnumerable<TEntity> RestoreRange<TEntity>(IEnumerable<TEntity> entities)
-        where TEntity : EntityBase
+    public IEnumerable<TEntity> RestoreRange<TEntity>(IEnumerable<TEntity> entities) where TEntity : EntityBase
     {
         foreach (var entity in entities)
             Restore(entity);
 
         return entities;
-    }
-
-    /// <summary>
-    /// Gets a queryable that includes both active and soft-deleted entities
-    /// </summary>
-    /// <typeparam name="TEntity">Entity type that inherits from EntityBase</typeparam>
-    /// <returns>Queryable including all entities regardless of deletion status</returns>
-    /// <remarks>
-    /// Bypasses the automatic soft-delete filtering. Useful for admin operations
-    /// or when needing to restore deleted entities.
-    /// </remarks>
-    public IQueryable<TEntity> QueryWithDeleted<TEntity>() where TEntity : EntityBase
-    {
-        return Set<TEntity>().IgnoreQueryFilters();
-    }
-
-    /// <summary>
-    /// Gets a queryable that includes only soft-deleted entities
-    /// </summary>
-    /// <typeparam name="TEntity">Entity type that inherits from EntityBase</typeparam>
-    /// <returns>Queryable containing only deleted entities</returns>
-    /// <remarks>
-    /// Useful for implementing recycle bin functionality or auditing deleted items.
-    /// </remarks>
-    public IQueryable<TEntity> QueryOnlyDeleted<TEntity>() where TEntity : EntityBase
-    {
-        return Set<TEntity>().IgnoreQueryFilters().Where(e => e.IsDeleted);
     }
 
     /// <summary>

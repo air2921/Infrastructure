@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Enums;
+using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
@@ -42,20 +43,7 @@ public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RemoveRangeBuilder<TEntity> WithEntities(IEnumerable<TEntity> entities)
     {
-        Entities = entities?.ToList() ?? throw new ArgumentNullException(nameof(entities));
-        RemoveByMode = RemoveByMode.Entities;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets a single entity to be removed.
-    /// </summary>
-    /// <param name="entity">The entity to remove.</param>
-    /// <returns>The current builder instance.</returns>
-    public RemoveRangeBuilder<TEntity> WithEntity(TEntity entity)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-        Entities = [entity];
+        Entities = entities.ToArray();
         RemoveByMode = RemoveByMode.Entities;
         return this;
     }
@@ -67,20 +55,7 @@ public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RemoveRangeBuilder<TEntity> WithIdentifiers(IEnumerable<object> identifiers)
     {
-        Identifiers = identifiers?.ToList() ?? throw new ArgumentNullException(nameof(identifiers));
-        RemoveByMode = RemoveByMode.Identifiers;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets a single entity identifier to be removed.
-    /// </summary>
-    /// <param name="identifier">The entity identifier to remove.</param>
-    /// <returns>The current builder instance.</returns>
-    public RemoveRangeBuilder<TEntity> WithIdentifier(object identifier)
-    {
-        ArgumentNullException.ThrowIfNull(identifier);
-        Identifiers = [identifier];
+        Identifiers = identifiers.ToArray();
         RemoveByMode = RemoveByMode.Identifiers;
         return this;
     }
@@ -92,23 +67,7 @@ public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RemoveRangeBuilder<TEntity> WithRemoveMode(RemoveByMode mode)
     {
-        if (!Enum.IsDefined(typeof(RemoveByMode), mode))
-            throw new ArgumentOutOfRangeException(nameof(mode));
-
         RemoveByMode = mode;
         return this;
-    }
-
-    /// <summary>
-    /// Validates the builder configuration.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when configuration is invalid.</exception>
-    public void Validate()
-    {
-        if (RemoveByMode == RemoveByMode.Entities && !Entities.Any())
-            throw new InvalidOperationException("No entities specified for Entities removal mode");
-
-        if (RemoveByMode == RemoveByMode.Identifiers && !Identifiers.Any())
-            throw new InvalidOperationException("No identifiers specified for Identifiers removal mode");
     }
 }
