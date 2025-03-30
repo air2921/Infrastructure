@@ -30,7 +30,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Whether to ignore default query filters.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal bool IgnoreDefaultQuerySettings { get; private set; } = false;
+    internal bool IgnoreDefaultQueryFilters { get; private set; } = false;
 
     /// <summary>
     /// Ordering expression for the query.
@@ -83,7 +83,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <param name="ignore">True to ignore default filters.</param>
     public SingleQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
     {
-        IgnoreDefaultQuerySettings = ignore;
+        IgnoreDefaultQueryFilters = ignore;
         return this;
     }
 

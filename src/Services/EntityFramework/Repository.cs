@@ -173,7 +173,7 @@ public sealed class Repository<TEntity, TDbContext> :
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
 
-            if (builder.IgnoreDefaultQuerySettings)
+            if (builder.IgnoreDefaultQueryFilters)
                 query = query.IgnoreQueryFilters();
 
             if (builder.AsNoTracking)
@@ -228,7 +228,7 @@ public sealed class Repository<TEntity, TDbContext> :
             if (builder.IncludeQuery is not null)
                 query = builder.IncludeQuery;
 
-            if (builder.IgnoreDefaultQuerySettings)
+            if (builder.IgnoreDefaultQueryFilters)
                 query = query.IgnoreQueryFilters();
 
             if (builder.AsNoTracking)

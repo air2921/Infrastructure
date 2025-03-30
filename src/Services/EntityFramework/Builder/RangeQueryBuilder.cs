@@ -36,7 +36,7 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// Indicates whether the query should ignore default query filters.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal bool IgnoreDefaultQuerySettings { get; private set; } = false;
+    internal bool IgnoreDefaultQueryFilters { get; private set; } = false;
 
     /// <summary>
     /// An expression for sorting entities.
@@ -110,7 +110,7 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RangeQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
     {
-        IgnoreDefaultQuerySettings = ignore;
+        IgnoreDefaultQueryFilters = ignore;
         return this;
     }
 
