@@ -21,7 +21,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// This class provides methods for querying, inserting, updating, and deleting documents in a MongoDB collection.
 /// It uses the provided <see cref="TMongoContext"/> to access the database and ensures thread-safe operations.
 /// </remarks>
-public class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILogger<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
+public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILogger<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
     : IMongoRepository<TDocument>, IMongoRepository<TMongoContext, TDocument>
     where TDocument : DocumentBase
     where TMongoContext : MongoDatabaseContext

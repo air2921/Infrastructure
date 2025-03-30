@@ -22,7 +22,7 @@ namespace Infrastructure.Services.EntityFramework;
 /// It uses asynchronous operations to ensure non-blocking behavior and supports cancellation through <see cref="CancellationToken"/>.
 /// Operations are performed in a thread-safe manner using a <see cref="ReaderWriterLockSlim"/> to avoid race conditions during database access.
 /// </remarks>
-public class Repository<TEntity, TDbContext> :
+public sealed class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
     IRepository<TEntity, TDbContext>,
     IDisposable where TEntity : EntityBase where TDbContext : InfrastructureDbContext

@@ -13,7 +13,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// a consistent interface for session management. Sessions created by this factory should
 /// be properly disposed when no longer needed.
 /// </remarks>
-public class MongoSessionFactory<TMongoContext>(TMongoContext context) :
+public sealed class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     IMongoSessionFactory, IMongoSessionFactory<TMongoContext>
     where TMongoContext : MongoDatabaseContext
 {

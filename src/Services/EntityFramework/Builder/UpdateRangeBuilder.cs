@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Services.EntityFramework.Entity;
+using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -6,7 +7,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// Fluent builder for configuring bulk entity updates with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to update, must inherit from EntityBase</typeparam>
-public class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
+public sealed class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -19,12 +20,14 @@ public class UpdateRangeBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Collection of entities to be updated
     /// </summary>
-    public IReadOnlyCollection<TEntity> Entities { get; private set; } = [];
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal IReadOnlyCollection<TEntity> Entities { get; private set; } = [];
 
     /// <summary>
     /// Identifier of the user who performed the update (for auditing)
     /// </summary>
-    public string? UpdatedByUser { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal string? UpdatedByUser { get; private set; }
 
     /// <summary>
     /// Creates a new builder instance

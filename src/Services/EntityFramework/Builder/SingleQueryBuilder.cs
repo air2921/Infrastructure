@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore.Query;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
@@ -9,7 +10,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// A builder class for constructing queries to retrieve a single entity with various options.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
-public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
+public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -22,37 +23,44 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Filter expression for the query.
     /// </summary>
-    public Expression<Func<TEntity, bool>>? Filter { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, bool>>? Filter { get; private set; }
 
     /// <summary>
     /// Whether to ignore default query filters.
     /// </summary>
-    public bool IgnoreDefaultQuerySettings { get; private set; } = false;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool IgnoreDefaultQuerySettings { get; private set; } = false;
 
     /// <summary>
     /// Ordering expression for the query.
     /// </summary>
-    public Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
 
     /// <summary>
     /// Include query for related entities.
     /// </summary>
-    public IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
 
     /// <summary>
     /// Whether to disable change tracking.
     /// </summary>
-    public bool AsNoTracking { get; private set; } = true;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool AsNoTracking { get; private set; } = true;
 
     /// <summary>
     /// Whether to sort in descending order.
     /// </summary>
-    public bool OrderByDesc { get; private set; } = true;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
     /// Whether to take the first entity (true) or last entity (false).
     /// </summary>
-    public bool TakeFirst { get; private set; } = true;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool TakeFirst { get; private set; } = true;
 
     /// <summary>
     /// Creates a new instance of SingleQueryBuilder.
@@ -99,7 +107,7 @@ public class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// <param name="includeQuery">The include query.</param>
     public SingleQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
-        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without expression is not allowed");
+        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without  includable expression is not allowed");
         return this;
     }
 

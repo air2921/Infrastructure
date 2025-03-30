@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Builder;
 using Infrastructure.Services.MongoDatabase.Document;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Services.MongoDatabase.Builder;
@@ -16,7 +17,7 @@ namespace Infrastructure.Services.MongoDatabase.Builder;
 /// This builder provides a fluent interface for constructing complex queries with
 /// method chaining. It's immutable - each method returns a new builder instance.
 /// </remarks>
-public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
+public sealed class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
 {
     /// <summary>
     /// A flag indicating whether to ignore builder constraints (like maximum take limit).
@@ -34,27 +35,32 @@ public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
     /// <summary>
     /// Gets the filter expression used to query documents from the collection.
     /// </summary>
-    public Expression<Func<TDocument, bool>>? Filter { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TDocument, bool>>? Filter { get; private set; }
 
     /// <summary>
     /// Gets the number of documents to skip in the query result.
     /// </summary>
-    public int Skip { get; private set; } = 0;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal int Skip { get; private set; } = 0;
 
     /// <summary>
     /// Gets the number of documents to take (limit) in the query result.
     /// </summary>
-    public int Take { get; private set; } = 100;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal int Take { get; private set; } = 100;
 
     /// <summary>
     /// Gets the sorting expression for the query results.
     /// </summary>
-    public Expression<Func<TDocument, object>>? OrderExpression { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TDocument, object>>? OrderExpression { get; private set; }
 
     /// <summary>
     /// Gets whether sorting should be in descending order.
     /// </summary>
-    public bool OrderByDesc { get; private set; } = true;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
     /// Creates a new builder instance with default values.
@@ -68,6 +74,7 @@ public class RangeQueryDocumentBuilder<TDocument> where TDocument : DocumentBase
     /// </summary>
     /// <returns>The current builder instance.</returns>
     [Obsolete("Do not use disabling builder restrictions unless it is done intentionally")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public RangeQueryDocumentBuilder<TDocument> WithIgnoreBuilderConstraints()
     {
         ignoreBuilderConstraints = true;

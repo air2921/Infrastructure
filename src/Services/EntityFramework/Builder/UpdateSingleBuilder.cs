@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
+using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -8,7 +9,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <para>This class provides a way to specify an entity to be updated and optionally track who performed the update.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
-public class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
+public sealed class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -22,13 +23,15 @@ public class UpdateSingleBuilder<TEntity> where TEntity : EntityBase
     /// The entity to be updated.
     /// <para>This property contains the entity instance with its updated property values that need to be persisted.</para>
     /// </summary>
-    public TEntity Entity { get; private set; } = default!;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal TEntity Entity { get; private set; } = default!;
 
     /// <summary>
     /// The identifier or name of the user who performed the update (optional).
     /// <para>This property can be used for audit purposes to track who made changes to the entity.</para>
     /// </summary>
-    public string? UpdatedByUser { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal string? UpdatedByUser { get; private set; }
 
     /// <summary>
     /// Creates a new instance of the builder

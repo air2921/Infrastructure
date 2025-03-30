@@ -14,7 +14,7 @@ namespace Infrastructure.Services.EntityFramework;
 /// Initializes a new instance of the <see cref="TransactionFactory{TDbContext}"/> class.
 /// </remarks>
 /// <param name="dbContext">The database context to be used for the transaction.</param>
-public class TransactionFactory<TDbContext>(TDbContext dbContext) : ITransactionFactory, ITransactionFactory<TDbContext>
+public sealed class TransactionFactory<TDbContext>(TDbContext dbContext) : ITransactionFactory, ITransactionFactory<TDbContext>
     where TDbContext : InfrastructureDbContext
 {
     /// <summary>

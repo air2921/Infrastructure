@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Enums;
 using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
+using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -9,7 +10,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// Provides flexible ways to specify entities for removal either by entity instances or their identifiers.
 /// </summary>
 /// <typeparam name="TEntity">The type of entities to remove, must inherit from EntityBase.</typeparam>
-public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
+public sealed class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -22,17 +23,20 @@ public class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Collection of entities to be removed directly.
     /// </summary>
-    public IEnumerable<TEntity> Entities { get; private set; } = [];
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal IEnumerable<TEntity> Entities { get; private set; } = [];
 
     /// <summary>
     /// Collection of entity identifiers for entities to be removed.
     /// </summary>
-    public IEnumerable<object> Identifiers { get; private set; } = [];
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal IEnumerable<object> Identifiers { get; private set; } = [];
 
     /// <summary>
     /// Specifies the removal mode (by entities or identifiers).
     /// </summary>
-    public RemoveByMode RemoveByMode { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal RemoveByMode RemoveByMode { get; private set; }
 
     /// <summary>
     /// Creates a new instance of RemoveRangeBuilder.

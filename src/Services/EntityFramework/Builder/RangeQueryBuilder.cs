@@ -2,6 +2,7 @@
 using Infrastructure.Services.EntityFramework.Entity;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
+using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -10,7 +11,7 @@ namespace Infrastructure.Services.EntityFramework.Builder;
 /// <para>This class is designed to assist with pagination and custom queries for entities of type <typeparamref name="TEntity"/>.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to query.</typeparam>
-public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
+public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// A flag indicating whether to ignore builder constraints (like maximum take limit).
@@ -28,42 +29,50 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// An expression for filtering entities based on a condition.
     /// </summary>
-    public Expression<Func<TEntity, bool>>? Filter { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, bool>>? Filter { get; private set; }
 
     /// <summary>
     /// Indicates whether the query should ignore default query filters.
     /// </summary>
-    public bool IgnoreDefaultQuerySettings { get; private set; } = false;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool IgnoreDefaultQuerySettings { get; private set; } = false;
 
     /// <summary>
     /// An expression for sorting entities.
     /// </summary>
-    public Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
 
     /// <summary>
     /// A query for including related entities.
     /// </summary>
-    public IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
 
     /// <summary>
     /// Indicates whether change tracking should be disabled.
     /// </summary>
-    public bool AsNoTracking { get; private set; } = true;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool AsNoTracking { get; private set; } = true;
 
     /// <summary>
     /// Indicates sorting direction.
     /// </summary>
-    public bool OrderByDesc { get; private set; } = true;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
     /// The number of entities to skip.
     /// </summary>
-    public int Skip { get; private set; } = 0;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal int Skip { get; private set; } = 0;
 
     /// <summary>
     /// The number of entities to take.
     /// </summary>
-    public int Take { get; private set; } = 100;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal int Take { get; private set; } = 100;
 
     /// <summary>
     /// Creates a new instance of RangeQueryBuilder with default settings.
@@ -76,6 +85,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// </summary>
     /// <returns>The current builder instance.</returns>
     [Obsolete("Do not use disabling builder restrictions unless it is done intentionally")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public RangeQueryBuilder<TEntity> WithIgnoreBuilderConstraints()
     {
         ignoreBuilderConstraints = true;
@@ -89,7 +99,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RangeQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
     {
-        Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without f expression is not allowed");
+        Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without filter expression is not allowed");
         return this;
     }
 
@@ -126,7 +136,7 @@ public class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// <returns>The current builder instance.</returns>
     public RangeQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
-        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without expression is not allowed");
+        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without includable expression is not allowed");
         return this;
     }
 
