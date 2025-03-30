@@ -30,11 +30,11 @@ namespace Infrastructure.Services.Utils;
 public class Randomizer : IRandomizer
 {
     private static readonly Lazy<InvalidArgumentException> _guidCombineError = new(() => new(
-        $"The allowed number of GUID combinations must be between {Immutable.MinGuidCombineLength} and {Immutable.MaxGuidCombineLength}"),
+        $"The allowed number of GUID combinations must be between {Immutable.ValidationParameter.MinGuidCombineLength} and {Immutable.ValidationParameter.MaxGuidCombineLength}"),
         LazyThreadSafetyMode.ExecutionAndPublication);
 
     private static readonly Lazy<InvalidArgumentException> _codeCombineError = new(() => new(
-        $"The valid code length must be in the range from {Immutable.MinCodeLength} to {Immutable.MaxCodeLength}"),
+        $"The valid code length must be in the range from {Immutable.ValidationParameter.MinCodeLength} to {Immutable.ValidationParameter.MaxCodeLength}"),
         LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
@@ -46,7 +46,7 @@ public class Randomizer : IRandomizer
     /// <exception cref="InvalidArgumentException">Thrown when count is outside valid range</exception>
     public string GuidCombine(int count, bool useNoHyphensFormat = false)
     {
-        if (count < Immutable.MinGuidCombineLength || count >= Immutable.MaxGuidCombineLength)
+        if (count < Immutable.ValidationParameter.MinGuidCombineLength || count >= Immutable.ValidationParameter.MaxGuidCombineLength)
             throw _guidCombineError.Value;
 
         var builder = new StringBuilder(useNoHyphensFormat ? 32 : 36 * count);
@@ -64,7 +64,7 @@ public class Randomizer : IRandomizer
     /// <exception cref="InvalidArgumentException">Thrown when length is invalid</exception>
     public string GenerateCode(int length)
     {
-        if (length < Immutable.MinCodeLength || length >= Immutable.MaxCodeLength)
+        if (length < Immutable.ValidationParameter.MinCodeLength || length >= Immutable.ValidationParameter.MaxCodeLength)
             throw _codeCombineError.Value;
 
         var builder = new StringBuilder(length);
@@ -90,7 +90,7 @@ public class Randomizer : IRandomizer
     public string GenerateReadableCode(int segmentLength = 4, int segmentCount = 2, char separator = '-')
     {
         int totalLength = segmentLength * segmentCount + (segmentCount - 1);
-        var chars = Immutable.ReadebleChars;
+        var chars = Immutable.Char.ReadebleChars;
         var random = Random.Shared;
 
         return string.Create(totalLength, (chars, segmentLength, segmentCount, separator), (span, state) =>
@@ -134,7 +134,7 @@ public class Randomizer : IRandomizer
     {
         return string.Create(17, Random.Shared, (span, random) =>
         {
-            var chars = Immutable.HexChars;
+            var chars = Immutable.Char.HexChars;
 
             byte firstByte = (byte)(random.Next(256) & 0xFC | 0x02);
             span[0] = chars[firstByte >> 4];

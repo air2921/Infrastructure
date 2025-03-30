@@ -67,9 +67,7 @@ public class TwilioConfigureOptions : Validator
         if (string.IsNullOrWhiteSpace(AccountSid) || string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(PhoneNumber))
             return false;
 
-        // Check if the phone number matches the international phone format
-        var phonePattern = @"^\+?[1-9]\d{1,14}$";
-        if (!Regex.IsMatch(PhoneNumber, phonePattern))
+        if (!Regex.IsMatch(PhoneNumber, Immutable.RegularExpression.PhoneNumber))
             return false;
 
         return true;

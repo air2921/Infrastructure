@@ -49,7 +49,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A collection of entities that match the query criteria.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task<IEnumerable<TDocument>> GetRangeAsync(RangeQueryDocumentBuilder<TDocument> queryBuilder, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TDocument>> GetRangeAsync(RangeQueryDocumentBuilder<TDocument> queryBuilder, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -90,7 +90,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>The entity with the specified identifier, or <c>null</c> if no such entity exists.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task<TDocument?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<TDocument?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -112,7 +112,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>The first entity that matches the filter, or <c>null</c> if no such entity exists.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task<TDocument?> GetByFilterAsync(Expression<Func<TDocument, bool>> query, CancellationToken cancellationToken = default)
+    public async Task<TDocument?> GetByFilterAsync(Expression<Func<TDocument, bool>> query, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -134,7 +134,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>The unique identifier of the added entity.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task<string> AddAsync(TDocument documentEntity, CancellationToken cancellationToken = default)
+    public async Task<string> AddAsync(TDocument documentEntity, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -157,7 +157,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A collection of unique identifiers for the added entities.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task<IEnumerable<string>> AddRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<string>> AddRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -185,7 +185,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task RemoveSingleAsync(string id, CancellationToken cancellationToken = default)
+    public async Task RemoveSingleAsync(string id, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -207,7 +207,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task RemoveRangeAsync(IEnumerable<string> identifiers, CancellationToken cancellationToken = default)
+    public async Task RemoveRangeAsync(IEnumerable<string> identifiers, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -230,7 +230,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task UpdateSingleAsync(TDocument documentEntity, CancellationToken cancellationToken = default)
+    public async Task UpdateSingleAsync(TDocument documentEntity, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -255,7 +255,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public virtual async Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default)
+    public async Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default)
     {
         try
         {
