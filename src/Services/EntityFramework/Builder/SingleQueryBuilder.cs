@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.ComponentModel;
 using System.Linq.Expressions;
@@ -129,5 +130,43 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     {
         TakeFirst = takeFirst;
         return this;
+    }
+
+    /// <summary>
+    /// Applies all configured query parameters to the provided IQueryable.
+    /// </summary>
+    /// <param name="query">The base query to apply parameters to.</param>
+    /// <returns>A new IQueryable with all configured parameters applied.</returns>
+    /// <remarks>
+    /// The method applies parameters in the following order:
+    /// 1. Include related entities (if specified)
+    /// 2. Ignore default query filters (if configured)
+    /// 3. Disable change tracking (if configured)
+    /// 4. Apply filtering (if specified)
+    /// 5. Apply sorting (if specified)
+    /// 6. Configure as split query (to avoid cartesian explosion when including collections)
+    /// 
+    /// Note: This method prepares the query but doesn't execute it. You'll need to call
+    /// either FirstOrDefault() or LastOrDefault() (depending on TakeFirst setting) to actually retrieve the entity.
+    /// </remarks>
+    public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
+    {
+        if (IncludeQuery is not null)
+            query = IncludeQuery;
+
+        if (IgnoreDefaultQueryFilters)
+            query = query.IgnoreQueryFilters();
+
+        if (AsNoTracking)
+            query = query.AsNoTracking();
+
+        if (Filter is not null)
+            query = query.Where(Filter);
+
+        if (OrderExpression is not null)
+            query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
+
+        query = query.AsSplitQuery();
+        return query;
     }
 }

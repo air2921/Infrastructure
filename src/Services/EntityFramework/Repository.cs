@@ -170,22 +170,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
             IQueryable<TEntity> query = _dbSet.Value;
 
-            if (builder.IncludeQuery is not null)
-                query = builder.IncludeQuery;
-
-            if (builder.IgnoreDefaultQueryFilters)
-                query = query.IgnoreQueryFilters();
-
-            if (builder.AsNoTracking)
-                query = query.AsNoTracking();
-
-            if (builder.Filter is not null)
-                query = query.Where(builder.Filter);
-
-            if (builder.OrderExpression is not null)
-                query = builder.OrderByDesc ? query.OrderByDescending(builder.OrderExpression) : query.OrderBy(builder.OrderExpression);
-
-            query = query.AsSplitQuery();
+            query = builder.Apply(query);
             return builder.TakeFirst ? await query.FirstOrDefaultAsync(cancellationToken) : await query.LastOrDefaultAsync(cancellationToken);
         }
         catch (OperationCanceledException)
@@ -225,24 +210,7 @@ public sealed class Repository<TEntity, TDbContext> :
             if (builder is null)
                 return await query.ToListAsync(cancellationToken);
 
-            if (builder.IncludeQuery is not null)
-                query = builder.IncludeQuery;
-
-            if (builder.IgnoreDefaultQueryFilters)
-                query = query.IgnoreQueryFilters();
-
-            if (builder.AsNoTracking)
-                query = query.AsNoTracking();
-
-            if (builder.Filter is not null)
-                query = query.Where(builder.Filter);
-
-            if (builder.OrderExpression is not null)
-                query = builder.OrderByDesc ? query.OrderByDescending(builder.OrderExpression) : query.OrderBy(builder.OrderExpression);
-
-            query = query.Skip(builder.Skip).Take(builder.Take);
-
-            query = query.AsSplitQuery();
+            query = builder.Apply(query);
             return await query.ToListAsync(cancellationToken);
         }
         catch (OperationCanceledException)

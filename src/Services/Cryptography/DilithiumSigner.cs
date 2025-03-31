@@ -104,18 +104,20 @@ public class DilithiumSigner : ISigner, IDisposable
     /// Initializes the OQS library and resolves all required function pointers.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// This method implements thread-safe lazy initialization using the double-checked locking pattern.
     /// It performs the following operations exactly once, regardless of how many threads attempt initialization:
+    /// </para>
     /// <list type="number">
     /// <item><description>Extracts the embedded OQS DLL (<see cref="ResourceName"/>) to a temporary file</description></item>
     /// <item><description>Loads the native library using <see cref="NativeLibrary.Load"/></description></item>
     /// <item><description>Resolves the following required functions:
     ///     <list type="bullet">
-    ///     <item><description><c>OQS_SIG_new</c> - Creates a new signature scheme instance</description></item>
-    ///     <item><description><c>OQS_SIG_free</c> - Releases a signature scheme instance</description></item>
-    ///     <item><description><c>OQS_SIG_keypair</c> - Generates key pairs</description></item>
-    ///     <item><description><c>OQS_SIG_sign</c> - Signs messages</description></item>
-    ///     <item><description><c>OQS_SIG_verify</c> - Verifies signatures</description></item>
+    ///     <item><description><c>OQS_SIG_new</c> - Creates a new signature scheme instance <see cref="ResolveNewSignatureDelegate"/></description></item>
+    ///     <item><description><c>OQS_SIG_free</c> - Releases a signature scheme instance <see cref="ResolveSignatureFreeDelegate"/></description></item>
+    ///     <item><description><c>OQS_SIG_keypair</c> - Generates key pairs <see cref="ResolveGenerateKeyPairDelegate"/></description></item>
+    ///     <item><description><c>OQS_SIG_sign</c> - Signs messages <see cref="ResolveSignDelegate"/></description></item>
+    ///     <item><description><c>OQS_SIG_verify</c> - Verifies signatures <see cref="ResolveVerifyDelegate"/></description></item>
     ///     </list>
     /// </description></item>
     /// </list>
@@ -157,31 +159,7 @@ public class DilithiumSigner : ISigner, IDisposable
                         throw _loadingError.Value;
                 }
 
-                Console.WriteLine("Resolving OQS_SIG_new...");
-                _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
-                    NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_new")
-                );
-
-                Console.WriteLine("Resolving OQS_SIG_free...");
-                _oqsSigFree = Marshal.GetDelegateForFunctionPointer<OQS_SIG_freeDelegate>(
-                    NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_free")
-                );
-
-                Console.WriteLine("Resolving OQS_SIG_keypair...");
-                _oqsSigKeypair = Marshal.GetDelegateForFunctionPointer<OQS_SIG_keypairDelegate>(
-                    NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_keypair")
-                );
-
-                Console.WriteLine("Resolving OQS_SIG_sign...");
-                _oqsSigSign = Marshal.GetDelegateForFunctionPointer<OQS_SIG_signDelegate>(
-                    NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_sign")
-                );
-
-                Console.WriteLine("Resolving OQS_SIG_verify...");
-                _oqsSigVerify = Marshal.GetDelegateForFunctionPointer<OQS_SIG_verifyDelegate>(
-                    NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_verify")
-                );
-
+                ResolveDelegates();
                 _libraryInitialized = true;
             }
             catch (Exception ex)
@@ -190,6 +168,98 @@ public class DilithiumSigner : ISigner, IDisposable
                 throw new CryptographyException(ex.Message);
             }
         }
+    }
+
+    /// <summary>
+    /// Resolves all required delegate functions from the loaded OQS library.
+    /// </summary>
+    /// <remarks>
+    /// This method sequentially resolves each required function pointer from the native library
+    /// and assigns them to their respective delegate fields. If any function cannot be resolved,
+    /// a <see cref="CryptographyException"/> will be thrown.
+    /// </remarks>
+    private static void ResolveDelegates()
+    {
+        ResolveNewSignatureDelegate();
+        ResolveSignatureFreeDelegate();
+        ResolveGenerateKeyPairDelegate();
+        ResolveSignDelegate();
+        ResolveVerifyDelegate();
+    }
+
+    /// <summary>
+    /// Resolves the OQS_SIG_new function from the native library and assigns it to the corresponding delegate.
+    /// </summary>
+    /// <remarks>
+    /// This function is used to create new instances of signature schemes. The resolved delegate
+    /// is stored in the <see cref="_oqsSigNew"/> field for later use.
+    /// </remarks>
+    private static void ResolveNewSignatureDelegate()
+    {
+        Console.WriteLine("Resolving OQS_SIG_new...");
+        _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
+            NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_new")
+        );
+    }
+
+    /// <summary>
+    /// Resolves the OQS_SIG_free function from the native library and assigns it to the corresponding delegate.
+    /// </summary>
+    /// <remarks>
+    /// This function is used to free resources associated with a signature scheme instance. The resolved delegate
+    /// is stored in the <see cref="_oqsSigFree"/> field for later use.
+    /// </remarks>
+    private static void ResolveSignatureFreeDelegate()
+    {
+        Console.WriteLine("Resolving OQS_SIG_free...");
+        _oqsSigFree = Marshal.GetDelegateForFunctionPointer<OQS_SIG_freeDelegate>(
+            NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_free")
+        );
+    }
+
+    /// <summary>
+    /// Resolves the OQS_SIG_keypair function from the native library and assigns it to the corresponding delegate.
+    /// </summary>
+    /// <remarks>
+    /// This function is used to generate key pairs for the signature scheme. The resolved delegate
+    /// is stored in the <see cref="_oqsSigKeypair"/> field for later use.
+    /// </remarks>
+    private static void ResolveGenerateKeyPairDelegate()
+    {
+        Console.WriteLine("Resolving OQS_SIG_keypair...");
+        _oqsSigKeypair = Marshal.GetDelegateForFunctionPointer<OQS_SIG_keypairDelegate>(
+            NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_keypair")
+        );
+    }
+
+    /// <summary>
+    /// Resolves the OQS_SIG_sign function from the native library and assigns it to the corresponding delegate.
+    /// </summary>
+    /// <remarks>
+    /// This function is used to create signatures for messages. The resolved delegate
+    /// is stored in the <see cref="_oqsSigSign"/> field for later use.
+    /// </remarks>
+    private static void ResolveSignDelegate()
+    {
+        Console.WriteLine("Resolving OQS_SIG_sign...");
+        _oqsSigSign = Marshal.GetDelegateForFunctionPointer<OQS_SIG_signDelegate>(
+            NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_sign")
+        );
+    }
+
+    /// <summary>
+    /// Resolves the OQS_SIG_verify function from the native library and assigns it to the corresponding delegate.
+    /// </summary>
+    /// <remarks>
+    /// This function is used to verify message signatures. The resolved delegate
+    /// is stored in the <see cref="_oqsSigVerify"/> field for later use.
+    /// </remarks>
+    private static void ResolveVerifyDelegate()
+    {
+        Console.WriteLine("Resolving OQS_SIG_verify...");
+        _oqsSigVerify = Marshal.GetDelegateForFunctionPointer<OQS_SIG_verifyDelegate>(
+            NativeLibrary.GetExport(_oqsLibraryHandle, "OQS_SIG_verify")
+        );
     }
 
     /// <summary>

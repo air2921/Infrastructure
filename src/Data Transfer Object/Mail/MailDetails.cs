@@ -8,8 +8,14 @@ namespace Infrastructure.Data_Transfer_Object;
 /// This class encapsulates information such as the recipient's username, email address, subject, and the email content.
 /// </summary>
 /// <remarks>
+/// <para>
 /// This class is used to pass email-related data to a mail service for sending emails.
 /// The <see cref="Entity"/> property contains the email body, which can be a plain text, HTML, or a more complex MIME entity.
+/// </para>
+/// <para>
+/// IMPORTANT: Ownership of the <see cref="Entity"/> resource is transferred to the recipient <see cref="MimeMessage"/>
+/// when assigned to its <c>Body</c> property. Do not dispose <see cref="Entity"/> manually after this transfer.
+/// </para>
 /// </remarks>
 public class MailDetails : MessageDetails
 {
@@ -27,5 +33,14 @@ public class MailDetails : MessageDetails
     /// Gets or sets the MIME entity representing the email body.
     /// This can include plain text, HTML, attachments, or other MIME-compliant content.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When this property is assigned to <see cref="MimeMessage.Body"/>, ownership of the resource
+    /// is transferred to the <see cref="MimeMessage"/> instance, which becomes responsible for its disposal.
+    /// </para>
+    /// <para>
+    /// Do not dispose this object manually after assignment to avoid double disposal.
+    /// </para>
+    /// </remarks>
     public required MimeEntity Entity { get; set; }
 }

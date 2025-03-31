@@ -3,6 +3,7 @@ using Infrastructure.Services.EntityFramework.Entity;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using System.ComponentModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 
@@ -171,5 +172,43 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
         Skip = skip;
         Take = take;
         return this;
+    }
+
+    /// <summary>
+    /// Applies all configured query parameters to the provided IQueryable.
+    /// </summary>
+    /// <param name="query">The base query to apply parameters to.</param>
+    /// <returns>A new IQueryable with all configured parameters applied.</returns>
+    /// <remarks>
+    /// The method applies parameters in the following order:
+    /// 1. Include related entities (if specified)
+    /// 2. Ignore default query filters (if configured)
+    /// 3. Disable change tracking (if configured)
+    /// 4. Apply filtering (if specified)
+    /// 5. Apply sorting (if specified)
+    /// 6. Apply pagination (skip/take)
+    /// 7. Configure as split query (to avoid cartesian explosion when including collections)
+    /// </remarks>
+    public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
+    {
+        if (IncludeQuery is not null)
+            query = IncludeQuery;
+
+        if (IgnoreDefaultQueryFilters)
+            query = query.IgnoreQueryFilters();
+
+        if (AsNoTracking)
+            query = query.AsNoTracking();
+
+        if (Filter is not null)
+            query = query.Where(Filter);
+
+        if (OrderExpression is not null)
+            query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
+
+        query = query.Skip(Skip).Take(Take);
+
+        query = query.AsSplitQuery();
+        return query;
     }
 }

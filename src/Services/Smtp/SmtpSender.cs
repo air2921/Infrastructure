@@ -34,7 +34,7 @@ public class SmtpSender(
     {
         try
         {
-            var emailMessage = new MimeMessage();
+            using var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(configureOptions.SenderName, configureOptions.Address));
             emailMessage.To.Add(new MailboxAddress(mail.UsernameTo, mail.To));
             emailMessage.Subject = mail.Subject;
@@ -62,7 +62,7 @@ public class SmtpSender(
     {
         try
         {
-            var emailMessage = new MimeMessage();
+            using var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(configureOptions.SenderName, configureOptions.Address));
             emailMessage.To.Add(new MailboxAddress(mail.UsernameTo, mail.To));
             emailMessage.Subject = mail.Subject;
