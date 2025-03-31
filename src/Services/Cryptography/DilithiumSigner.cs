@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Abstractions.Cryptography;
+using Infrastructure.Data_Transfer_Object.Cryptography;
 using Infrastructure.Exceptions;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -54,7 +55,6 @@ public class DilithiumSigner : ISigner, IDisposable
     private static OQS_SIG_signDelegate _oqsSigSign = null!;
     private static OQS_SIG_verifyDelegate _oqsSigVerify = null!;
 
-    private static readonly string _dllPath = Path.Combine(Path.GetTempPath(), "oqs.dll");
     private static volatile int _instanceCount = 0;
 
     private const string ResourceName = "Infrastructure.Assembly.oqs.dll";
@@ -104,12 +104,10 @@ public class DilithiumSigner : ISigner, IDisposable
     /// Initializes the OQS library and resolves all required function pointers.
     /// </summary>
     /// <remarks>
-    /// <para>
     /// This method implements thread-safe lazy initialization using the double-checked locking pattern.
     /// It performs the following operations exactly once, regardless of how many threads attempt initialization:
-    /// </para>
     /// <list type="number">
-    /// <item><description>Extracts the embedded OQS DLL (<see cref="ResourceName"/>) to a temporary file (<see cref="_dllPath"/>)</description></item>
+    /// <item><description>Extracts the embedded OQS DLL (<see cref="ResourceName"/>) to a temporary file</description></item>
     /// <item><description>Loads the native library using <see cref="NativeLibrary.Load"/></description></item>
     /// <item><description>Resolves the following required functions:
     ///     <list type="bullet">
@@ -150,12 +148,14 @@ public class DilithiumSigner : ISigner, IDisposable
                 using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName) ??
                     throw _readingResourceError.Value;
 
-                using (var fileStream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true))
+                var dllPath = Path.Join(Path.GetTempPath(), "oqs.dll");
+                using (var fileStream = new FileStream(dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                {
                     assemblyStream.CopyTo(fileStream);
-
-                _oqsLibraryHandle = NativeLibrary.Load(_dllPath);
-                if (_oqsLibraryHandle == IntPtr.Zero)
-                    throw _loadingError.Value;
+                    _oqsLibraryHandle = NativeLibrary.Load(dllPath);
+                    if (_oqsLibraryHandle == IntPtr.Zero)
+                        throw _loadingError.Value;
+                }
 
                 Console.WriteLine("Resolving OQS_SIG_new...");
                 _oqsSigNew = Marshal.GetDelegateForFunctionPointer<OQS_SIG_newDelegate>(
@@ -236,15 +236,14 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <summary>
     /// Generates a new public/private key pair using the Dilithium3 algorithm.
     /// </summary>
-    /// <returns>
-    /// A tuple containing the public key (1952 bytes) and private key (4000 bytes).
-    /// </returns>
+    /// <returns>A <see cref="KeyPairDetails"/> object containing the public and private keys as byte arrays.</returns>
     /// <exception cref="ObjectDisposedException">
     /// Thrown if the instance has been disposed.
+    /// </exception>
     /// <remarks>
     /// The key generation is thread-safe and can be called concurrently from multiple threads.
     /// </remarks>
-    public (byte[] publicKey, byte[] privateKey) GenerateKeyPair()
+    public KeyPairDetails GenerateKeyPair()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
 
@@ -257,7 +256,11 @@ public class DilithiumSigner : ISigner, IDisposable
             if (result != 0)
                 throw _generateKeyPairError.Value;
 
-            return (publicKey, privateKey);
+            return new KeyPairDetails
+            {
+                PrivateKey = privateKey,
+                PublicKey = publicKey
+            };
         }
     }
 
@@ -321,17 +324,10 @@ public class DilithiumSigner : ISigner, IDisposable
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="DilithiumSigner"/>.
+    /// Releases all resources used by the <see cref="DilithiumSigner"/> instance.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// This method releases the native resources associated with this instance. If this is the last
-    /// active instance, it also unloads the OQS library and deletes the temporary DLL file.
-    /// </para>
-    /// <para>
-    /// The object should not be used after being disposed. Always call Dispose when you are finished
-    /// using the DilithiumSigner, preferably by wrapping it in a using statement.
-    /// </para>
+    /// This method releases the native resources associated with this instance. If this is the last active instance, it also unloads the OQS library.
     /// </remarks>
     public void Dispose()
     {
@@ -347,42 +343,12 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <c>false</c> to release only unmanaged resources.
     /// </param>
     /// <remarks>
-    /// <para>
-    /// This method performs the following cleanup operations in a thread-safe manner:
-    /// </para>
+    /// This method ensures thread-safe resource management, including:
     /// <list type="number">
-    /// <item>
-    /// <description>
-    /// Always releases the native signature context (<c>_sig</c>) by calling <c>OQS_SIG_free</c>,
-    /// regardless of the <paramref name="disposing"/> parameter value.
-    /// </description>
-    /// </item>
-    /// <item>
-    /// <description>
-    /// When <paramref name="disposing"/> is <c>true</c> (regular disposal):
-    /// <list type="bullet">
-    ///   <item><description>Decrements the instance counter</description></item>
-    ///   <item><description>If this is the last instance, unloads the OQS native library using <see cref="NativeLibrary.Free"/></description></item>
-    ///   <item><description>Attempts to delete the temporary DLL file (<see cref="_dllPath"/>)</description></item>
+    /// <item><description>Releasing the native signature context.</description></item>
+    /// <item><description>Unloading the OQS library if no instances remain.</description></item>
+    /// <item><description>Suppressing finalization to prevent unnecessary resource cleanup.</description></item>
     /// </list>
-    /// </description>
-    /// </item>
-    /// <item>
-    /// <description>
-    /// When <paramref name="disposing"/> is <c>false</c> (finalizer context):
-    /// Only releases the native signature context, but does not attempt to unload the library
-    /// or delete the temporary file, as these operations require managed resources.
-    /// </description>
-    /// </item>
-    /// </list>
-    /// <para>
-    /// The method is idempotent - multiple calls will have no effect after the first call.
-    /// All operations are protected by <see cref="_instanceLock"/> to ensure thread safety.
-    /// </para>
-    /// <para>
-    /// If file deletion fails, the error is logged to the console but not propagated,
-    /// as disposal should not throw exceptions.
-    /// </para>
     /// </remarks>
     protected virtual void Dispose(bool disposing)
     {
@@ -404,16 +370,6 @@ public class DilithiumSigner : ISigner, IDisposable
             {
                 NativeLibrary.Free(_oqsLibraryHandle);
                 _oqsLibraryHandle = IntPtr.Zero;
-
-                try
-                {
-                    if (File.Exists(_dllPath))
-                        File.Delete(_dllPath);
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine($"Failed to delete {_dllPath}: {ex.Message}");
-                }
             }
 
             disposed = true;

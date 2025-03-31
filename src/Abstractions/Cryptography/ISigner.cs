@@ -1,4 +1,5 @@
-﻿using Infrastructure.Exceptions;
+﻿using Infrastructure.Data_Transfer_Object.Cryptography;
+using Infrastructure.Exceptions;
 
 namespace Infrastructure.Abstractions.Cryptography;
 
@@ -10,9 +11,11 @@ public interface ISigner
     /// <summary>
     /// Generates a public/private key pair.
     /// </summary>
-    /// <returns>A tuple containing the public and private keys as byte arrays.</returns>
-    /// <exception cref="CryptographyException">Thrown if an error occurs while generating the key pair.</exception>
-    public (byte[] publicKey, byte[] privateKey) GenerateKeyPair();
+    /// <returns>A <see cref="KeyPairDetails"/> object containing the public and private keys as byte arrays.</returns>
+    /// <exception cref="CryptographyException">
+    /// Thrown if an error occurs while generating the key pair, such as an issue with the cryptographic algorithm or resource access.
+    /// </exception>
+    public KeyPairDetails GenerateKeyPair();
 
     /// <summary>
     /// Signs a message with the provided private key.

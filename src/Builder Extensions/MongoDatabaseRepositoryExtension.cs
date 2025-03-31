@@ -73,6 +73,7 @@ public static class MongoDatabaseRepositoryExtension
             var repositoryWithContextInterfaceType = typeof(IMongoRepository<,>).MakeGenericType(documentType, mongoContextType);
             builder.Services.AddScoped(repositoryWithContextInterfaceType, repositoryType);
             builder.Services.AddScoped(interfaceType, repositoryType);
+            builder.Services.AddScoped(documentType);
         }
 
         return builder;
