@@ -38,7 +38,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     /// 4. Encrypts the data using AES-CBC with the derived key
     /// The operation can be cancelled using the provided cancellation token.
     /// </remarks>
-    public Task EncryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
+    public async Task EncryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -53,7 +53,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
             aes.Key = rfc2898.GetBytes(aes.KeySize / 8);
 
             using var cryptoStream = new CryptoStream(target, aes.CreateEncryptor(), CryptoStreamMode.Write);
-            return source.CopyToAsync(cryptoStream, cancellationToken);
+            await source.CopyToAsync(cryptoStream, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -118,7 +118,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     /// 3. Decrypts the data using AES-CBC with the derived key
     /// The operation can be cancelled using the provided cancellation token.
     /// </remarks>
-    public Task DecryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
+    public async Task DecryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -134,7 +134,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
             aes.Key = rfc2898.GetBytes(aes.KeySize / 8);
 
             using var cryptoStream = new CryptoStream(source, aes.CreateDecryptor(), CryptoStreamMode.Read);
-            return cryptoStream.CopyToAsync(target, cancellationToken);
+            await cryptoStream.CopyToAsync(target, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
