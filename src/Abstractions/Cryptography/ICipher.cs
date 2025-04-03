@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Abstractions.Cryptography;
+﻿using Infrastructure.Exceptions;
+
+namespace Infrastructure.Abstractions.Cryptography;
 
 /// <summary>
 /// Interface for encrypting and decrypting data streams.
