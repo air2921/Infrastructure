@@ -57,7 +57,7 @@ public static class ElasticSearchLoggerExtension
             .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))
             {
                 AutoRegisterTemplate = true,
-                IndexFormat = $"logs-{DateTime.UtcNow:yyyy}"
+                IndexFormat = options.Index
             })
             .CreateLogger();
 
