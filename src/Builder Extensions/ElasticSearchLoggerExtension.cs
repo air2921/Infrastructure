@@ -4,6 +4,8 @@ using Infrastructure.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Elasticsearch;
 using Serilog.Sinks.Elasticsearch;
 using System.Reflection;
 
@@ -50,6 +52,7 @@ public static class ElasticSearchLoggerExtension
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
             .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
             .Enrich.WithProperty(Immutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(Immutable.ASPNETCore.AspNetCoreEnv)!)
             .WriteTo.Console()
@@ -57,7 +60,10 @@ public static class ElasticSearchLoggerExtension
             .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))
             {
                 AutoRegisterTemplate = true,
-                IndexFormat = options.Index
+                OverwriteTemplate = true,
+                CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true),
+                IndexFormat = options.Index,
+                TypeName = null
             })
             .CreateLogger();
 

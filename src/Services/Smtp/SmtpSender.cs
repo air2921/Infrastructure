@@ -40,11 +40,7 @@ public class SmtpSender(
 
             await smtpClient.Value.SendAsync(emailMessage, cancellationToken);
         }
-        catch (SmtpClientException)
-        {
-            throw;
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not SmtpClientException)
         {
             logger.LogError(ex, "SMTP error while sending email", [mail.To]);
             throw new SmtpClientException("An error occurred while sending the email");
@@ -68,11 +64,7 @@ public class SmtpSender(
 
             smtpClient.Value.Send(emailMessage);
         }
-        catch (SmtpClientException)
-        {
-            throw;
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not SmtpClientException)
         {
             logger.LogError(ex, "SMTP error while sending email", [mail.To]);
             throw new SmtpClientException("An error occurred while sending the email");
