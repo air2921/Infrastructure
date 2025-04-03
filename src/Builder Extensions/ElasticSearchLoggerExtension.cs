@@ -60,8 +60,8 @@ public static class ElasticSearchLoggerExtension
             .Enrich.WithExceptionDetails()
             .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
             .Enrich.WithProperty(Immutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(Immutable.ASPNETCore.AspNetCoreEnv)!)
-            .WriteTo.Console(new CompactJsonFormatter())
             .ReadFrom.Configuration(options.Configuration)
+            .WriteTo.Console(new CompactJsonFormatter())
             .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))
             {
                 BatchPostingLimit = 50,

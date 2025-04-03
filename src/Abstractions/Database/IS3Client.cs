@@ -23,7 +23,7 @@ public interface IS3Client
     /// - Expiration timestamp (Expires)
     /// </returns>
     /// <exception cref="S3ClientException">Thrown when URL generation fails.</exception>
-    ValueTask<S3ObjectUrlDetails> PreSignedUrlAsync(string bucket, string key, DateTime expires);
+    ValueTask<S3ObjectUrlDetails> SignUrlAsync(string bucket, string key, DateTime expires);
 
     /// <summary>
     /// Downloads an object with complete content metadata from S3 storage.

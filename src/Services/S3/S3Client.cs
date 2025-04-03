@@ -33,7 +33,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
     /// - Expiration time
     /// </returns>
     /// <exception cref="S3ClientException">Thrown if URL generation fails.</exception>
-    public ValueTask<S3ObjectUrlDetails> PreSignedUrlAsync(string bucket, string key, DateTime expires)
+    public ValueTask<S3ObjectUrlDetails> SignUrlAsync(string bucket, string key, DateTime expires)
     {
         try
         {
