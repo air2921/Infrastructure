@@ -40,9 +40,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     /// </remarks>
     public async Task EncryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
     {
+        using var aes = Aes.Create();
+
         try
         {
-            using var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
@@ -57,7 +58,9 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to decrypt data", [key.Length]);
+            byte[] keyHash = SHA256.HashData(key);
+            string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
+            logger.LogError(ex, "An error occurred while attempting to encrypt data", [nameof(EncryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex]);
             throw new CryptographyException("An error occurred while attempting to decrypt data");
         }
     }
@@ -80,9 +83,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     /// </remarks>
     public void Encrypt(Stream source, Stream target, byte[] key)
     {
+        using var aes = Aes.Create();
+
         try
         {
-            using var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
@@ -97,7 +101,9 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to decrypt data", [key.Length]);
+            byte[] keyHash = SHA256.HashData(key);
+            string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
+            logger.LogError(ex, "An error occurred while attempting to encrypt data", [nameof(Encrypt), key.Length, source.Length, target.Length, keyHash, ivHex]);
             throw new CryptographyException("An error occurred while attempting to decrypt data");
         }
     }
@@ -120,9 +126,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     /// </remarks>
     public async Task DecryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
     {
+        using var aes = Aes.Create();
+
         try
         {
-            using var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
@@ -138,7 +145,9 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to encrypt data", [key.Length]);
+            byte[] keyHash = SHA256.HashData(key);
+            string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
+            logger.LogError(ex, "An error occurred while attempting to decrypt data", [nameof(DecryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex]);
             throw new CryptographyException("An error occurred while attempting to encrypt data");
         }
     }
@@ -160,9 +169,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     /// </remarks>
     public void Decrypt(Stream source, Stream target, byte[] key)
     {
+        using var aes = Aes.Create();
+
         try
         {
-            using var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
@@ -178,7 +188,9 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to encrypt data", [key.Length]);
+            byte[] keyHash = SHA256.HashData(key);
+            string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
+            logger.LogError(ex, "An error occurred while attempting to decrypt data", [nameof(Decrypt), key.Length, source.Length, target.Length, keyHash, ivHex]);
             throw new CryptographyException("An error occurred while attempting to encrypt data");
         }
     }
