@@ -19,11 +19,8 @@ namespace Infrastructure.Services.Sms;
 /// The constructor initializes the <see cref="SmsSender"/> with the provided logger and SMS client. It does not send any messages but prepares the instance for use.
 /// </remarks>
 public class SmsSender(
-    Lazy<Logger<SmsSender>> logger,
     SmsClientWrapper smsClient) : ISender<SmsDetails>
 {
-    private static readonly Lazy<SmsClientException> _smsSendingError = new(() => new("An error occurred while sending the SMS"), LazyThreadSafetyMode.ExecutionAndPublication);
-
     /// <summary>
     /// Sends an SMS message asynchronously.
     /// </summary>
@@ -36,18 +33,8 @@ public class SmsSender(
     /// If any error occurs while sending the SMS, it logs the error and throws a <see cref="SmsClientException"/>.
     /// </remarks>
     /// <exception cref="SmsClientException">Thrown when an error occurs during the SMS sending process.</exception>
-    public async Task SendAsync(SmsDetails sms, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await smsClient.SendAsync(sms.To, sms.Message);
-        }
-        catch (Exception ex)
-        {
-            logger.Value.LogError(ex.ToString(), sms);
-            throw _smsSendingError.Value;
-        }
-    }
+    public Task SendAsync(SmsDetails sms, CancellationToken cancellationToken = default)
+        => smsClient.SendAsync(sms.To, sms.Message);
 
     /// <summary>
     /// Sends an SMS message synchronously.
@@ -59,15 +46,5 @@ public class SmsSender(
     /// </remarks>
     /// <exception cref="SmsClientException">Thrown when an error occurs during the SMS sending process.</exception>
     public void Send(SmsDetails sms)
-    {
-        try
-        {
-            smsClient.Send(sms.To, sms.Message);
-        }
-        catch (Exception ex)
-        {
-            logger.Value.LogError(ex.ToString(), sms);
-            throw _smsSendingError.Value;
-        }
-    }
+        => smsClient.Send(sms.To, sms.Message);
 }

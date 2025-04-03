@@ -1,5 +1,6 @@
-﻿using Infrastructure.Options;
-using Twilio;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
@@ -14,7 +15,7 @@ namespace Infrastructure.Services.Sms;
 /// The wrapper supports both synchronous and asynchronous message sending operations, while also ensuring proper client initialization.
 /// </remarks>
 /// <param name="options">The configuration options containing Twilio username, password, Account SID, and phone number.</param>
-public class SmsClientWrapper(TwilioConfigureOptions options)
+public class SmsClientWrapper(ILogger logger, TwilioConfigureOptions options)
 {
     /// <summary>
     /// Asynchronously sends an SMS message.
@@ -27,13 +28,21 @@ public class SmsClientWrapper(TwilioConfigureOptions options)
     /// </remarks>
     public Task SendAsync(string phone, string message)
     {
-        var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
+        try
         {
-            From = new PhoneNumber(options.PhoneNumber),
-            Body = message,
-        };
+            var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
+            {
+                From = new PhoneNumber(options.PhoneNumber),
+                Body = message,
+            };
 
-        return MessageResource.CreateAsync(messageOptions);
+            return MessageResource.CreateAsync(messageOptions);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Twilio error while sending email", [phone]);
+            throw new SmsClientException("An error occurred while sending the SMS");
+        }
     }
 
     /// <summary>
@@ -47,12 +56,20 @@ public class SmsClientWrapper(TwilioConfigureOptions options)
     /// </remarks>
     public void Send(string phone, string message)
     {
-        var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
+        try
         {
-            From = new PhoneNumber(options.PhoneNumber),
-            Body = message
-        };
+            var messageOptions = new CreateMessageOptions(new PhoneNumber(phone))
+            {
+                From = new PhoneNumber(options.PhoneNumber),
+                Body = message,
+            };
 
-        MessageResource.Create(messageOptions);
+            MessageResource.Create(messageOptions);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Twilio error while sending email", [phone]);
+            throw new SmsClientException("An error occurred while sending the SMS");
+        }
     }
 }

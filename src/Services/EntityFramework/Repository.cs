@@ -38,21 +38,6 @@ public sealed class Repository<TEntity, TDbContext> :
 
     private bool disposed;
 
-    private static readonly Lazy<EntityException> _operationCancelledError = new(() => new("The operation was cancelled due to waiting too long for completion or due to manual cancellation"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _getRangeError = new(() => new("An error occurred while attempting to retrieve a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _getCountError = new(() => new("An error occurred while attempting to retrieve count of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _getBySingleQueryBuilderError = new(() => new("An error occurred while attempting to retrieve an entity using a single query builder"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _getByIdError = new(() => new("An error occurred while attempting to retrieve an entity by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _addError = new(() => new("An error occurred while attempting to add an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _addRangeError = new(() => new("An error occurred while attempting to add a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _deleteByIdError = new(() => new("An error occurred while attempting to delete an entity by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _deleteRangeError = new(() => new("An error occurred while attempting to delete a range of entities by their IDs"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _deleteByFilterError = new(() => new("An error occurred while attempting to delete an entity using a filter"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update an entity"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a range of entities"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _restoreError = new(() => new("An error occurred while attempting to restore a soft-deleted entity"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _restoreRangeError = new(() => new("An error occurred while attempting to restore a range of soft-deleted entities"), LazyThreadSafetyMode.ExecutionAndPublication);
-
     /// <summary>
     /// Initializes a new instance of the <see cref="Repository{TEntity, TDbContext}"/> class.
     /// </summary>
@@ -108,8 +93,8 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _getCountError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve count of entities", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to retrieve count of entities");
         }
         finally
         {
@@ -138,12 +123,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _getByIdError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve an entity by its ID", [_tName.Value, id]);
+            throw new EntityException("An error occurred while attempting to retrieve an entity by its ID");
         }
         finally
         {
@@ -175,12 +160,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _getBySingleQueryBuilderError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve an entity using a single query builder", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to retrieve an entity using a single query builder");
         }
         finally
         {
@@ -215,12 +200,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _getRangeError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve a range of entities", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to retrieve a range of entities");
         }
         finally
         {
@@ -252,12 +237,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _addError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to add an entity", [_tName.Value, new { entity.Id }]);
+            throw new EntityException("An error occurred while attempting to add an entity");
         }
         finally
         {
@@ -286,12 +271,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _addRangeError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to add a range of entities", [_tName.Value, entities.Select(x => new { x.Id })]);
+            throw new EntityException("An error occurred while attempting to add a range of entities");
         }
         finally
         {
@@ -327,12 +312,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _deleteByIdError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to delete an entity by its ID", [_tName.Value, id]);
+            throw new EntityException("An error occurred while attempting to delete an entity by its ID");
         }
         finally
         {
@@ -370,12 +355,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _deleteByFilterError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to delete an entity using a filter", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to delete an entity using a filter");
         }
         finally
         {
@@ -430,16 +415,16 @@ public sealed class Repository<TEntity, TDbContext> :
                 return entities;
             }
 
-            throw _deleteRangeError.Value;
+            throw new EntityException($"Invalid {nameof(builder.RemoveByMode)}");
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _deleteRangeError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to delete a range of entities by their IDs", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to delete a range of entities by their IDs");
         }
         finally
         {
@@ -484,12 +469,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _updateError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to update an entity", [_tName.Value, builder.Entity.Id]);
+            throw new EntityException("An error occurred while attempting to update an entity");
         }
         finally
         {
@@ -536,12 +521,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _updateRangeError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to update a range of entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
+            throw new EntityException("An error occurred while attempting to update a range of entities");
         }
         finally
         {
@@ -583,12 +568,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _restoreError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity", [_tName.Value, entity.Id]);
+            throw new EntityException("An error occurred while attempting to restore a soft-deleted entity");
         }
         finally
         {
@@ -630,12 +615,12 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (OperationCanceledException)
         {
-            throw _operationCancelledError.Value;
+            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex.ToString(), _tName.Value);
-            throw _restoreRangeError.Value;
+            _logger.Value.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities", [_tName.Value, entities.Select(x => new { x.Id })]);
+            throw new EntityException("An error occurred while attempting to restore a range of soft-deleted entities");
         }
         finally
         {

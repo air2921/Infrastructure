@@ -28,16 +28,6 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
 {
     private readonly Lazy<IMongoCollection<TDocument>> _collection = new(() => context.SetDocument(document), LazyThreadSafetyMode.ExecutionAndPublication);
 
-    private static readonly Lazy<EntityException> _getRangeError = new(() => new("An error occurred while attempting to retrieve a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _getByIdError = new(() => new("An error occurred while attempting to retrieve a document by its ID"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _getByFilterError = new(() => new("An error occurred while attempting to retrieve a document using the specified filter"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _addError = new(() => new("An error occurred while attempting to save a document"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _addRangeError = new(() => new("An error occurred while attempting to save a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _removeError = new(() => new("An error occurred while attempting to delete a document"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _removeRangeError = new(() => new("An error occurred while attempting to delete a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _updateError = new(() => new("An error occurred while attempting to update a document"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<EntityException> _updateRangeError = new(() => new("An error occurred while attempting to update a collection of documents"), LazyThreadSafetyMode.ExecutionAndPublication);
-
     private static readonly Lazy<InsertOneOptions> _insertOneOptions = new(() => new InsertOneOptions());
     private static readonly Lazy<InsertManyOptions> _insertManyOptions = new(() => new InsertManyOptions());
     private static readonly Lazy<ReplaceOptions> _replaceOptions = new(() => new ReplaceOptions() { IsUpsert = false });
@@ -78,8 +68,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _getRangeError.Value;
+            logger.LogError(ex, "An error occurred while attempting to retrieve a collection of documents");
+            throw new EntityException("An error occurred while attempting to retrieve a collection of documents");
         }
     }
 
@@ -100,8 +90,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _getByIdError.Value;
+            logger.LogError(ex, "An error occurred while attempting to retrieve a document by its ID", [id]);
+            throw new EntityException("An error occurred while attempting to retrieve a document by its ID");
         }
     }
 
@@ -122,8 +112,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _getByFilterError.Value;
+            logger.LogError(ex, "An error occurred while attempting to retrieve a document using the specified filter");
+            throw new EntityException("An error occurred while attempting to retrieve a document using the specified filter");
         }
     }
 
@@ -145,8 +135,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _addError.Value;
+            logger.LogError(ex, "An error occurred while attempting to save a document", [new { documentEntity.Id, documentEntity.CollectionName }]);
+            throw new EntityException("An error occurred while attempting to save a document");
         }
     }
 
@@ -173,8 +163,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _addRangeError.Value;
+            logger.LogError(ex, "An error occurred while attempting to save a collection of documents", [documentEntities.Select(x => new { x.Id, x.CollectionName })]);
+            throw new EntityException("An error occurred while attempting to save a collection of documents");
         }
     }
 
@@ -195,8 +185,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _removeError.Value;
+            logger.LogError(ex, "An error occurred while attempting to delete a document", [id]);
+            throw new EntityException("An error occurred while attempting to delete a document");
         }
     }
 
@@ -218,8 +208,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _removeRangeError.Value;
+            logger.LogError(ex, "An error occurred while attempting to delete a collection of documents", [identifiers]);
+            throw new EntityException("An error occurred while attempting to delete a collection of documents");
         }
     }
 
@@ -243,8 +233,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _updateError.Value;
+            logger.LogError(ex, "An error occurred while attempting to update a document", [new { documentEntity.Id, documentEntity.CollectionName }]);
+            throw new EntityException("An error occurred while attempting to update a document");
         }
     }
 
@@ -277,8 +267,8 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _updateRangeError.Value;
+            logger.LogError(ex, "An error occurred while attempting to update a collection of documents", [documentEntities.Select(x => new { x.Id, x.CollectionName })]);
+            throw new EntityException("An error occurred while attempting to update a collection of documents");
         }
     }
 }

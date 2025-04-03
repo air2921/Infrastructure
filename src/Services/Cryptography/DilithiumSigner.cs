@@ -63,12 +63,6 @@ public class DilithiumSigner : ISigner, IDisposable
     private const int PrivateKeyLength = 4000;
     private const int SignatureLength = 3293;
 
-    private static readonly Lazy<CryptographyException> _readingResourceError = new(() => new($"{ResourceName} is not found"));
-    private static readonly Lazy<CryptographyException> _loadingError = new(() => new("Failed to load oqs.dll"));
-    private static readonly Lazy<CryptographyException> _initializationError = new(() => new("Failed to initialize Dilithium"));
-    private static readonly Lazy<CryptographyException> _generateKeyPairError = new(() => new("An error occurred while attempting to generate a key pair"));
-    private static readonly Lazy<CryptographyException> _signingError = new(() => new("An error occurred while attempting to sign a message"));
-
     /// <summary>
     /// Static constructor that initializes the OQS library when the first instance of <see cref="DilithiumSigner"/> is created.
     /// </summary>
@@ -148,7 +142,7 @@ public class DilithiumSigner : ISigner, IDisposable
                 Console.WriteLine($"Loading {ResourceName}...");
 
                 using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName) ??
-                    throw _readingResourceError.Value;
+                    throw new CryptographyException("${ResourceName} is not found");
 
                 var dllPath = Path.Join(Path.GetTempPath(), "oqs.dll");
                 using (var fileStream = new FileStream(dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.DeleteOnClose))
@@ -156,7 +150,7 @@ public class DilithiumSigner : ISigner, IDisposable
                     assemblyStream.CopyTo(fileStream);
                     _oqsLibraryHandle = NativeLibrary.Load(dllPath);
                     if (_oqsLibraryHandle == IntPtr.Zero)
-                        throw _loadingError.Value;
+                        throw new CryptographyException("Failed to load oqs.dll");
                 }
 
                 ResolveDelegates();
@@ -285,7 +279,7 @@ public class DilithiumSigner : ISigner, IDisposable
         {
             _sig = _oqsSigNew(AlgorithmName);
             if (_sig == IntPtr.Zero)
-                throw _initializationError.Value;
+                throw new CryptographyException("Failed to initialize Dilithium");
 
             Interlocked.Increment(ref _instanceCount);
         }
@@ -324,7 +318,7 @@ public class DilithiumSigner : ISigner, IDisposable
 
             int result = _oqsSigKeypair(_sig, publicKey, privateKey);
             if (result != 0)
-                throw _generateKeyPairError.Value;
+                throw new CryptographyException("An error occurred while attempting to generate a key pair");
 
             return new KeyPairDetails
             {
@@ -361,7 +355,7 @@ public class DilithiumSigner : ISigner, IDisposable
 
             int result = _oqsSigSign(_sig, signature, out long signatureLen, message, message.Length, privateKey);
             if (result != 0)
-                throw _signingError.Value;
+                throw new CryptographyException("An error occurred while attempting to sign a message");
 
             return signature;
         }

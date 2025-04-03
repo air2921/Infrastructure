@@ -16,9 +16,6 @@ namespace Infrastructure.Services.Cryptography;
 /// </remarks>
 public class Hasher(ILogger<Hasher> logger) : IHasher
 {
-    private static readonly Lazy<CryptographyException> _hashingError = new(() => new("An error occurred while hashing the object"));
-    private static readonly Lazy<CryptographyException> _verifyingError = new(() => new("An error occurred while checking the hash"));
-
     /// <summary>
     /// Hashes a password using the BCrypt algorithm.
     /// </summary>
@@ -35,7 +32,7 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw _hashingError.Value;
+            throw new CryptographyException("An error occurred while hashing the object");
         }
     }
 
@@ -56,7 +53,7 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
         catch (Exception ex)
         {
             logger.LogError(ex.ToString());
-            throw _verifyingError.Value;
+            throw new CryptographyException("An error occurred while checking the hash");
         }
     }
 }

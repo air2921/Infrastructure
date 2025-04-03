@@ -20,11 +20,6 @@ namespace Infrastructure.Services.DistributedCache;
 /// </remarks>
 public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, CacheConfigureOptions configureOptions) : ICacheClient
 {
-    private static readonly Lazy<DistributedCacheException> _getError = new(() => new("An error occurred while attempting to retrieve data from the cache"));
-    private static readonly Lazy<DistributedCacheException> _setError = new(() => new("An error occurred while attempting to cache data"));
-    private static readonly Lazy<DistributedCacheException> _removeError = new(() => new("An error occurred while attempting to remove data from the cache"));
-    private static readonly Lazy<DistributedCacheException> _checkExistingError = new(() => new("An error occurred while attempting to check if a key exists in the cache"));
-
     /// <summary>
     /// Retrieves an object from the cache associated with the specified key.
     /// </summary>
@@ -50,8 +45,8 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _getError.Value;
+            logger.LogError(ex, "An error occurred while attempting to retrieve data from the cache", [key, typeof(TResult)]);
+            throw new DistributedCacheException("An error occurred while attempting to retrieve data from the cache");
         }
     }
 
@@ -81,8 +76,8 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _setError.Value;
+            logger.LogError(ex, "An error occurred while attempting to cache data", [key, typeof(TValue), absolute.TotalSeconds, sliding.TotalSeconds]);
+            throw new DistributedCacheException("An error occurred while attempting to cache data");
         }
     }
 
@@ -110,8 +105,8 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _setError.Value;
+            logger.LogError(ex, "An error occurred while attempting to cache data", [key, typeof(TValue), absolute.TotalSeconds]);
+            throw new DistributedCacheException("An error occurred while attempting to cache data");
         }
     }
 
@@ -130,8 +125,8 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _removeError.Value;
+            logger.LogError(ex, "An error occurred while attempting to remove data from the cache", [key]);
+            throw new DistributedCacheException("An error occurred while attempting to remove data from the cache");
         }
     }
 
@@ -154,8 +149,8 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.ToString());
-            throw _checkExistingError.Value;
+            logger.LogError(ex, "An error occurred while attempting to check if a key exists in the cache", [key]);
+            throw new DistributedCacheException("An error occurred while attempting to check if a key exists in the cache");
         }
     }
 }

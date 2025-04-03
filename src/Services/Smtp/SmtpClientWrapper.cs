@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Options;
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
@@ -21,13 +22,10 @@ namespace Infrastructure.Services.Smtp;
 /// </remarks>
 public class SmtpClientWrapper : IDisposable
 {
-    private readonly Lazy<SmtpClient> _smtpClient;
+    private readonly Lazy<IMailTransport> _transport;
     private readonly ILogger<SmtpClientWrapper> _logger;
 
     private volatile bool disposed;
-
-    private static readonly Lazy<SmtpClientException> _smtpAuthError = new(() => new("Failed to authenticate or connect to the SMTP server"), LazyThreadSafetyMode.ExecutionAndPublication);
-    private static readonly Lazy<SmtpClientException> _smtpAuthOrSocketError = new(() => new("Error during email sending due to authentication or network issues"), LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SmtpClientWrapper"/> class.
@@ -40,7 +38,7 @@ public class SmtpClientWrapper : IDisposable
     {
         _logger = logger;
 
-        _smtpClient = new Lazy<SmtpClient>(() =>
+        _transport = new Lazy<IMailTransport>(() =>
         {
             var client = new SmtpClient();
             try
@@ -50,8 +48,8 @@ public class SmtpClientWrapper : IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString(), nameof(SmtpClientWrapper));
-                throw _smtpAuthError.Value;
+                _logger.LogError(ex, "Unable to connect or authorize to smtp server");
+                throw new SmtpClientException("Failed to authenticate or connect to the SMTP server");
             }
 
             return client;
@@ -70,12 +68,12 @@ public class SmtpClientWrapper : IDisposable
 
         try
         {
-            await _smtpClient.Value.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            await _transport.Value.SendAsync(message, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
-            _logger.LogError(ex.ToString(), nameof(SendAsync));
-            throw _smtpAuthOrSocketError.Value;
+            _logger.LogError(ex, "Unable to connect or authorize to smtp server", [nameof(SendAsync)]);
+            throw new SmtpClientException("Error during email sending due to authentication or network issues");
         }
         catch (OperationCanceledException)
         {
@@ -94,12 +92,12 @@ public class SmtpClientWrapper : IDisposable
 
         try
         {
-            _smtpClient.Value.Send(message);
+            _transport.Value.Send(message);
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
-            _logger.LogError(ex.ToString(), nameof(Send));
-            throw _smtpAuthOrSocketError.Value;
+            _logger.LogError(ex, "Unable to connect or authorize to smtp server", [nameof(Send)]);
+            throw new SmtpClientException("Error during email sending due to authentication or network issues");
         }
     }
 
@@ -112,11 +110,11 @@ public class SmtpClientWrapper : IDisposable
         if (disposed)
             return;
 
-        if (disposing && _smtpClient.IsValueCreated)
-            _smtpClient.Value.Disconnect(true);
+        if (disposing && _transport.IsValueCreated)
+            _transport.Value.Disconnect(true);
 
-        if (_smtpClient.IsValueCreated)
-            _smtpClient.Value.Dispose();
+        if (_transport.IsValueCreated)
+            _transport.Value.Dispose();
 
         disposed = true;
     }
