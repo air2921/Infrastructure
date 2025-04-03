@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Exceptions;
+using Serilog.Formatting.Compact;
 using Serilog.Formatting.Elasticsearch;
 using Serilog.Sinks.Elasticsearch;
 using System.Reflection;
@@ -50,15 +51,23 @@ public static class ElasticSearchLoggerExtension
         options.EnsureSuccessValidation("Invalid ElasticSearch configuration. Please check connection");
 
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Is(options.EventLevel)
+            .Enrich.WithMachineName()
+            .Enrich.WithProcessId()
+            .Enrich.WithCorrelationId()
+            .Enrich.WithClientIp()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
             .Enrich.WithProperty(Immutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(Immutable.ASPNETCore.AspNetCoreEnv)!)
-            .WriteTo.Console()
+            .WriteTo.Console(new CompactJsonFormatter())
             .ReadFrom.Configuration(options.Configuration)
             .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))
             {
+                BatchPostingLimit = 50,
+                Period = TimeSpan.FromSeconds(2),
+                BufferFileSizeLimitBytes = 1024 * 1024,
+                BufferRetainedInvalidPayloadsLimitBytes = 5000,
                 AutoRegisterTemplate = true,
                 OverwriteTemplate = true,
                 CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true),

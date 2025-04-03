@@ -1,5 +1,7 @@
 ﻿using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Serilog.Events;
 
 namespace Infrastructure.Options;
 
@@ -29,7 +31,15 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// The index name with a default pattern of "logs-YYYY" where YYYY is the current UTC year.
     /// Custom index names can be set but must start with "logs" (case insensitive).
     /// </value>
-    public string Index { get; set; } = $"logs-{DateTime.UtcNow:yyyy}";
+    public string Index { get; set; } = $"logs-{DateTime.UtcNow:yyyy.MM.dd}";
+
+    /// <summary>
+    /// Gets or sets the minimum log level for Elasticsearch.
+    /// </summary>
+    /// <value>
+    /// The minimum log event level. Defaults to <see cref="LogEventLevel.Information"/>.
+    /// </value>
+    public LogEventLevel EventLevel { get; set; } = LogEventLevel.Information;
 
     /// <summary>
     /// Gets or sets the configuration settings for Elasticsearch.
