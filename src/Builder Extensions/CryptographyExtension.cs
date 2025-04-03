@@ -19,12 +19,14 @@ public static class CryptographyExtension
     /// This method registers the following services for Dependency Injection (DI):
     /// <list type="bullet">
     ///     <item><description><see cref="IHasher"/> - Scoped service for hashing data.</description></item>
+    ///     <item><description><see cref="ICipher"/> - Scoped service for encrypt and decrypt data.</description></item>
     ///     <item><description><see cref="ISigner"/> - Singleton service for signing data using the Dilithium algorithm.</description></item>
     /// </list>
     /// </remarks>
     public static IInfrastructureBuilder AddCryptography(this IInfrastructureBuilder builder)
     {
         builder.Services.AddScoped<IHasher, Hasher>();
+        builder.Services.AddScoped<ICipher, AesCipher>();
         builder.Services.AddSingleton<ISigner, DilithiumSigner>();
 
         return builder;
