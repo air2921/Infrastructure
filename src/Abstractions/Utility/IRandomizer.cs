@@ -22,7 +22,7 @@ public interface IRandomizer
     /// <param name="length">The length of the numeric code to generate. The value must be between <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>.</param>
     /// <returns>A random numeric code as a string.</returns>
     /// <exception cref="InvalidArgumentException">Thrown if the <paramref name="length"/> is outside the supported range, defined in <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>.</exception>
-    public string GenerateCode(int length);
+    public string GenerateNumericCode(int length);
 
     /// <summary>
     /// Generates a human-readable code with segments (e.g., "AB3X-9KJL").

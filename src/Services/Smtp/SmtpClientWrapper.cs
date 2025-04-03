@@ -43,7 +43,7 @@ public class SmtpClientWrapper : IDisposable
             var client = new SmtpClient();
             try
             {
-                client.Connect(configureOptions.Provider, (int)configureOptions.Port, SecureSocketOptions.Auto);
+                client.Connect(configureOptions.Provider, (int)configureOptions.Port, configureOptions.SecureSocket);
                 client.Authenticate(configureOptions.Address, configureOptions.Password);
             }
             catch (Exception ex)

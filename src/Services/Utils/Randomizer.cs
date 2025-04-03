@@ -62,7 +62,7 @@ public class Randomizer : IRandomizer
     /// <param name="length">Desired code length (between <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>)</param>
     /// <returns>String containing random digits</returns>
     /// <exception cref="InvalidArgumentException">Thrown when length is invalid</exception>
-    public string GenerateCode(int length)
+    public string GenerateNumericCode(int length)
     {
         if (length < Immutable.ValidationParameter.MinCodeLength || length >= Immutable.ValidationParameter.MaxCodeLength)
             throw _codeCombineError.Value;

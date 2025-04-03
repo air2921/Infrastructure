@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Configuration;
 using Infrastructure.Enums;
+using MailKit.Security;
 
 namespace Infrastructure.Options;
 
@@ -37,6 +38,12 @@ public sealed class SmtpConfigureOptions : Validator
     /// </summary>
     /// <value>The SMTP server port.</value>
     public SmtpPort Port { get; set; }
+
+    /// <summary>
+    /// Gets or sets the secure socket options for SMTP connection.
+    /// </summary>
+    /// <value>The SSL/TLS connection options. Default is Auto.</value>
+    public SecureSocketOptions SecureSocket { get; set; } = SecureSocketOptions.Auto;
 
     /// <summary>
     /// Validates whether the instance is configured correctly.
