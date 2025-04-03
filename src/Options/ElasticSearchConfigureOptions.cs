@@ -27,7 +27,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// </summary>
     /// <value>
     /// The index name with a default pattern of "logs-YYYY" where YYYY is the current UTC year.
-    /// Custom index names can be set but must not start with "logs" (case insensitive).
+    /// Custom index names can be set but must start with "logs" (case insensitive).
     /// </value>
     public string Index { get; set; } = $"logs-{DateTime.UtcNow:yyyy}";
 
