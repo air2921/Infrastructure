@@ -20,25 +20,25 @@ public sealed class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     /// <summary>
     /// Begins a new synchronous MongoDB session.
     /// </summary>
-    /// <returns>An <see cref="IClientSession"/> representing the new session.</returns>
+    /// <returns>An <see cref="IClientSessionHandle"/> representing the new session.</returns>
     /// <remarks>
     /// This method creates a new client session that can be used for transactions or
     /// other session-dependent operations. The session should be disposed when no
     /// longer needed to free up server resources.
     /// </remarks>
-    public IClientSession BeginSession()
+    public IClientSessionHandle BeginSession()
         => context.StartSession();
 
     /// <summary>
     /// Begins a new asynchronous MongoDB session.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation and returns an <see cref="IClientSession"/> when completed.</returns>
+    /// <returns>A task that represents the asynchronous operation and returns an <see cref="IClientSessionHandle"/> when completed.</returns>
     /// <remarks>
     /// This async method creates a new client session that can be used for transactions or
     /// other session-dependent operations. The session should be disposed when no
     /// longer needed to free up server resources.
     /// </remarks>
-    public Task<IClientSession> BeginSessionAsync(CancellationToken cancellationToken = default)
+    public Task<IClientSessionHandle> BeginSessionAsync(CancellationToken cancellationToken = default)
         => context.StartSessionAsync(cancellationToken);
 }

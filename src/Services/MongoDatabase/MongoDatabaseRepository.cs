@@ -30,7 +30,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
 
     private static readonly Lazy<InsertOneOptions> _insertOneOptions = new(() => new InsertOneOptions());
     private static readonly Lazy<InsertManyOptions> _insertManyOptions = new(() => new InsertManyOptions());
-    private static readonly Lazy<ReplaceOptions> _replaceOptions = new(() => new ReplaceOptions() { IsUpsert = false });
+    private static readonly Lazy<DeleteOptions> _deleteOptions = new(() => new DeleteOptions());
 
     /// <summary>
     /// Retrieves a range of entities from the MongoDB collection based on the provided query builder.
@@ -121,16 +121,22 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// Adds a single entity to the collection.
     /// </summary>
     /// <param name="documentEntity">The entity to add to the collection.</param>
+    /// <param name="sessionHandle">Optional MongoDB client session handle for transaction support. 
+    /// If null, the operation will be executed without a transaction.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>The unique identifier of the added entity.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public async Task<string> AddAsync(TDocument documentEntity, CancellationToken cancellationToken = default)
+    public async Task<string> AddAsync(TDocument documentEntity, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default)
     {
         try
         {
             logger.LogInformation($"Received request to insert one entity\nCollection name: {document.CollectionName}");
 
-            await _collection.Value.InsertOneAsync(document, _insertOneOptions.Value, cancellationToken);
+            if (sessionHandle is not null)
+                await _collection.Value.InsertOneAsync(sessionHandle, document, _insertOneOptions.Value, cancellationToken);
+            else
+                await _collection.Value.InsertOneAsync(document, _insertOneOptions.Value, cancellationToken);
+
             return documentEntity.Id;
         }
         catch (Exception ex)
@@ -144,22 +150,23 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// Adds a collection of entities to the MongoDB collection.
     /// </summary>
     /// <param name="documentEntities">The collection of entities to add.</param>
+    /// <param name="sessionHandle">Optional MongoDB client session handle for transaction support.
+    /// If null, the operation will be executed without a transaction.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A collection of unique identifiers for the added entities.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public async Task<IEnumerable<string>> AddRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<string>> AddRangeAsync(IEnumerable<TDocument> documentEntities, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default)
     {
         try
         {
             logger.LogInformation($"Received request to insert a range of entities\nCollection name: {document.CollectionName}");
 
-            var task = _collection.Value.InsertManyAsync(documentEntities, _insertManyOptions.Value, cancellationToken);
+            if (sessionHandle is not null)
+                await _collection.Value.InsertManyAsync(sessionHandle, documentEntities, _insertManyOptions.Value, cancellationToken);
+            else
+                await _collection.Value.InsertManyAsync(documentEntities, _insertManyOptions.Value, cancellationToken);
 
-            var identifiers = new HashSet<string>();
-            identifiers.UnionWith(documentEntities.Select(x => x.Id));
-
-            await task;
-            return identifiers;
+            return documentEntities.Select(x => x.Id).ToHashSet();
         }
         catch (Exception ex)
         {
@@ -172,16 +179,23 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// Removes a single entity from the collection by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the entity to remove.</param>
+    /// <param name="sessionHandle">Optional MongoDB client session handle for transaction support.
+    /// If null, the operation will be executed without a transaction.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public async Task RemoveSingleAsync(string id, CancellationToken cancellationToken = default)
+    public async Task RemoveSingleAsync(string id, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default)
     {
         try
         {
             logger.LogInformation($"Received request to remove one entity by id {id}\nCollection name: {document.CollectionName}");
 
-            await _collection.Value.DeleteOneAsync(x => x.Id == id, cancellationToken);
+            var filter = Builders<TDocument>.Filter.Eq(x => x.Id, id);
+
+            if (sessionHandle is not null)
+                await _collection.Value.DeleteOneAsync(sessionHandle, filter, cancellationToken: cancellationToken);
+            else
+                await _collection.Value.DeleteOneAsync(filter, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -194,17 +208,24 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// Removes a collection of entities from the MongoDB collection by their unique identifiers.
     /// </summary>
     /// <param name="identifiers">The collection of unique identifiers of the entities to remove.</param>
+    /// <param name="sessionHandle">Optional MongoDB client session handle for transaction support.
+    /// If null, the operation will be executed without a transaction.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public async Task RemoveRangeAsync(IEnumerable<string> identifiers, CancellationToken cancellationToken = default)
+    public async Task RemoveRangeAsync(IEnumerable<string> identifiers, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default)
     {
         try
         {
             logger.LogInformation($"Received request to remove a range of entities by identifiers\nCollection name: {document.CollectionName}");
 
-            var tasks = identifiers.Select(id => _collection.Value.DeleteOneAsync(x => x.Id.Equals(id), cancellationToken));
-            await Task.WhenAll(tasks);
+            var filter = Builders<TDocument>.Filter.In(x => x.Id, identifiers);
+
+            if (sessionHandle is not null)
+                await _collection.Value.DeleteManyAsync(sessionHandle, filter, _deleteOptions.Value, cancellationToken);
+            else
+                await _collection.Value.DeleteManyAsync(filter, cancellationToken);
+
         }
         catch (Exception ex)
         {
@@ -217,19 +238,24 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     /// Updates a single entity in the MongoDB collection.
     /// </summary>
     /// <param name="documentEntity">The entity to update.</param>
+    /// <param name="sessionHandle">Optional MongoDB client session handle for transaction support.
+    /// If null, the operation will be executed without a transaction.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public async Task UpdateSingleAsync(TDocument documentEntity, CancellationToken cancellationToken = default)
+    public async Task UpdateSingleAsync(TDocument documentEntity, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default)
     {
         try
         {
             logger.LogInformation($"Received request to update one entity, entityId {documentEntity.Id}\nCollection name: {document.CollectionName}");
 
-            documentEntity.UpdatedAt = DateTimeOffset.UtcNow;
+            document.UpdatedAt = DateTimeOffset.UtcNow;
+            var filter = Builders<TDocument>.Filter.Eq(x => x.Id, document.Id);
 
-            var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
-            await _collection.Value.ReplaceOneAsync(filter, documentEntity, _replaceOptions.Value, cancellationToken);
+            if (sessionHandle is not null)
+                await _collection.Value.ReplaceOneAsync(sessionHandle, filter, document, cancellationToken: cancellationToken);
+            else
+                await _collection.Value.ReplaceOneAsync(filter, document, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -239,31 +265,43 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     }
 
     /// <summary>
-    /// Updates a collection of entities in the MongoDB collection.
+    /// Updates a collection of entities in the MongoDB collection using bulk operations.
     /// </summary>
     /// <param name="documentEntities">The collection of entities to update.</param>
+    /// <param name="sessionHandle">Optional MongoDB client session handle for transaction support.
+    /// If null, the operation will be executed without a transaction.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    /// <exception cref="EntityException">Thrown if an unexpected error occurs during the operation.</exception>
-    public async Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, CancellationToken cancellationToken = default)
+    /// <exception cref="EntityException">Thrown when:
+    /// <list type="bullet">
+    /// <item><description>The input collection is null</description></item>
+    /// <item><description>No documents were provided for update</description></item>
+    /// <item><description>An unexpected error occurs during the bulk operation</description></item>
+    /// </list>
+    /// </exception>
+    public async Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default)
     {
         try
         {
             logger.LogInformation($"Received request to update a range of entities\nCollection name: {document.CollectionName}");
 
+            var documentsList = documentEntities.ToList();
             var bulkOps = new List<WriteModel<TDocument>>();
 
-            foreach (var documentEntity in documentEntities)
+            foreach (var doc in documentsList)
             {
-                documentEntity.UpdatedAt = DateTimeOffset.UtcNow;
-
-                var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
-                var replaceOne = new ReplaceOneModel<TDocument>(filter, documentEntity) { IsUpsert = false };
-                bulkOps.Add(replaceOne);
+                doc.UpdatedAt = DateTimeOffset.UtcNow;
+                var filter = Builders<TDocument>.Filter.Eq(x => x.Id, doc.Id);
+                bulkOps.Add(new ReplaceOneModel<TDocument>(filter, doc));
             }
 
-            if (bulkOps.Count != 0)
-                await _collection.Value.BulkWriteAsync(bulkOps, cancellationToken: cancellationToken);
+            if (bulkOps.Count > 0)
+            {
+                if (sessionHandle is not null)
+                    await _collection.Value.BulkWriteAsync(sessionHandle, bulkOps, cancellationToken: cancellationToken);
+                else
+                    await _collection.Value.BulkWriteAsync(bulkOps, cancellationToken: cancellationToken);
+            }
         }
         catch (Exception ex)
         {

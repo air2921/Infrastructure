@@ -76,7 +76,7 @@ public abstract class MongoDatabaseContext : IDisposable
     /// This synchronous method is typically used for transactions and other session-dependent operations.
     /// The session should be disposed when no longer needed to free up resources.
     /// </remarks>
-    public virtual IClientSession StartSession()
+    public virtual IClientSessionHandle StartSession()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         return _client.Value.StartSession(null, default);
@@ -92,7 +92,7 @@ public abstract class MongoDatabaseContext : IDisposable
     /// This asynchronous method is typically used for transactions and other session-dependent operations.
     /// The session should be disposed when no longer needed to free up resources.
     /// </remarks>
-    public virtual async Task<IClientSession> StartSessionAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<IClientSessionHandle> StartSessionAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         return await _client.Value.StartSessionAsync(null, cancellationToken);

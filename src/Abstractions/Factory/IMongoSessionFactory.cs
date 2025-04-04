@@ -15,7 +15,7 @@ public interface IMongoSessionFactory
     /// <summary>
     /// Begins a new synchronous MongoDB client session.
     /// </summary>
-    /// <returns>An <see cref="IClientSession"/> representing the new session.</returns>
+    /// <returns>An <see cref="IClientSessionHandle"/> representing the new session.</returns>
     /// <remarks>
     /// <para>
     /// The created session can be used for transactional operations or to ensure causal consistency.
@@ -24,13 +24,13 @@ public interface IMongoSessionFactory
     /// The caller is responsible for disposing the session when it's no longer needed to free up server resources.
     /// </para>
     /// </remarks>
-    public IClientSession BeginSession();
+    public IClientSessionHandle BeginSession();
 
     /// <summary>
     /// Begins a new asynchronous MongoDB client session.
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the <see cref="IClientSession"/>.</returns>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the <see cref="IClientSessionHandle"/>.</returns>
     /// <remarks>
     /// <para>
     /// The created session can be used for transactional operations or to ensure causal consistency.
@@ -39,7 +39,7 @@ public interface IMongoSessionFactory
     /// The caller is responsible for disposing the session when it's no longer needed to free up server resources.
     /// </para>
     /// </remarks>
-    public Task<IClientSession> BeginSessionAsync(CancellationToken cancellationToken = default);
+    public Task<IClientSessionHandle> BeginSessionAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>
