@@ -15,7 +15,7 @@ namespace Infrastructure.Services.EntityFramework;
 /// </remarks>
 /// <param name="dbContext">The database context to be used for the transaction.</param>
 public sealed class TransactionFactory<TDbContext>(TDbContext dbContext) : ITransactionFactory, ITransactionFactory<TDbContext>
-    where TDbContext : InfrastructureDbContext
+    where TDbContext : EntityFrameworkContext
 {
     /// <summary>
     /// Begins a new database transaction synchronously.

@@ -43,7 +43,7 @@ public static class MongoDatabaseRepositoryExtension
     /// </list>
     /// Note: The MongoDB session factories are registered as scoped services to ensure proper transaction handling within a scope.
     /// </remarks>
-    public static IInfrastructureBuilder AddMongoRepository<TMongoContext>(this IInfrastructureBuilder builder, Action<MongoDatabaseConfigureOptions> configureOptions) where TMongoContext : MongoDatabaseContext
+    public static IInfrastructureBuilder AddMongoRepository<TMongoContext>(this IInfrastructureBuilder builder, Action<MongoDatabaseConfigureOptions> configureOptions) where TMongoContext : MongoContext
     {
         var options = new MongoDatabaseConfigureOptions();
         configureOptions.Invoke(options);

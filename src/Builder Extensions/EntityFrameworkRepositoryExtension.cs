@@ -42,7 +42,7 @@ public static class EntityFrameworkRepositoryExtension
     ///     <item><description>SQLite: Configures <typeparamref name="TDbContext"/> to use SQLite with detailed errors and logging.</description></item>
     /// </list>
     /// </remarks>
-    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : InfrastructureDbContext
+    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : EntityFrameworkContext
     {
         var options = new EntityFrameworkConfigureOptions();
         configureOptions.Invoke(options);

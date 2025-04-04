@@ -12,7 +12,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// A generic repository class for performing CRUD operations on a MongoDB collection.
 /// This class supports working with a specific MongoDB context and document type.
 /// </summary>
-/// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoDatabaseContext"/>.</typeparam>
+/// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoContext"/>.</typeparam>
 /// <typeparam name="TDocument">The type of the document, which must inherit from <see cref="DocumentBase"/>.</typeparam>
 /// <param name="context">The MongoDB context used to access the database.</param>
 /// <param name="logger">A logger for tracking operations performed by this repository.</param>
@@ -24,7 +24,7 @@ namespace Infrastructure.Services.MongoDatabase;
 public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILogger<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
     : IMongoRepository<TDocument>, IMongoRepository<TMongoContext, TDocument>
     where TDocument : DocumentBase
-    where TMongoContext : MongoDatabaseContext
+    where TMongoContext : MongoContext
 {
     private readonly Lazy<IMongoCollection<TDocument>> _collection = new(() => context.SetDocument(document), LazyThreadSafetyMode.ExecutionAndPublication);
 

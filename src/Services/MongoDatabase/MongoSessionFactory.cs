@@ -15,7 +15,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// </remarks>
 public sealed class MongoSessionFactory<TMongoContext>(TMongoContext context) :
     IMongoSessionFactory, IMongoSessionFactory<TMongoContext>
-    where TMongoContext : MongoDatabaseContext
+    where TMongoContext : MongoContext
 {
     /// <summary>
     /// Begins a new synchronous MongoDB session.

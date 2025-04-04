@@ -25,7 +25,7 @@ namespace Infrastructure.Services.EntityFramework;
 public sealed class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
     IRepository<TEntity, TDbContext>,
-    IDisposable where TEntity : EntityBase where TDbContext : InfrastructureDbContext
+    IDisposable where TEntity : EntityBase where TDbContext : EntityFrameworkContext
 {
     #region fields and constructor
 

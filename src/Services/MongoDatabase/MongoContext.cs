@@ -15,18 +15,18 @@ namespace Infrastructure.Services.MongoDatabase;
 /// and provides transactional support through session management when available.
 /// Transactions require MongoDB replica set or sharded cluster (v4.0+ for replica sets, v4.2+ for sharded clusters).
 /// </remarks>
-public abstract class MongoDatabaseContext : IDisposable
+public abstract class MongoContext : IDisposable
 {
     private readonly Lazy<MongoClient> _client;
     private readonly Lazy<IMongoDatabase> _database;
     private volatile bool _disposed = false;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MongoDatabaseContext"/> class.
+    /// Initializes a new instance of the <see cref="MongoContext"/> class.
     /// </summary>
     /// <param name="configureOptions">Configuration options for connecting to MongoDB.</param>
     /// <exception cref="EntityException">Thrown when transactions are enabled but not supported by the MongoDB deployment.</exception>
-    protected MongoDatabaseContext(MongoDatabaseConfigureOptions configureOptions)
+    protected MongoContext(MongoDatabaseConfigureOptions configureOptions)
     {
         _client = new Lazy<MongoClient>(() => new MongoClient(configureOptions.Connection),
             LazyThreadSafetyMode.ExecutionAndPublication);

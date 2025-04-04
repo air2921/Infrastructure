@@ -45,12 +45,12 @@ public interface IMongoSessionFactory
 /// <summary>
 /// Provides a generic factory interface for creating MongoDB client sessions with a specific context type.
 /// </summary>
-/// <typeparam name="TMongoContext">The type of MongoDB context used to create sessions, must inherit from <see cref="MongoDatabaseContext"/>.</typeparam>
+/// <typeparam name="TMongoContext">The type of MongoDB context used to create sessions, must inherit from <see cref="MongoContext"/>.</typeparam>
 /// <remarks>
 /// This interface extends <see cref="IMongoSessionFactory"/> without adding new members, serving as a typed marker
 /// interface for dependency injection scenarios where a specific context type is required.
 /// </remarks>
-public interface IMongoSessionFactory<TMongoContext> : IMongoSessionFactory where TMongoContext : MongoDatabaseContext
+public interface IMongoSessionFactory<TMongoContext> : IMongoSessionFactory where TMongoContext : MongoContext
 {
 
 }

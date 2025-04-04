@@ -10,7 +10,7 @@ namespace Infrastructure.Services.EntityFramework.Context;
 /// Base database context with soft delete functionality and audit tracking
 /// </summary>
 /// <param name="options">The options to be used by a DbContext</param>
-public abstract class InfrastructureDbContext(DbContextOptions<InfrastructureDbContext> options) : DbContext(options)
+public abstract class EntityFrameworkContext(DbContextOptions<EntityFrameworkContext> options) : DbContext(options)
 {
     /// <summary>
     /// Restores a soft-deleted entity by marking it as active

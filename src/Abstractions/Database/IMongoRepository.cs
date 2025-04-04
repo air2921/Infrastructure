@@ -105,12 +105,12 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
 /// <summary>
 /// Represents a repository for interacting with MongoDB for a specific document type and a specific context.
 /// </summary>
-/// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoDatabaseContext"/>.</typeparam>
+/// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoContext"/>.</typeparam>
 /// <typeparam name="TDocument">The type of document the repository will handle, which must inherit from <see cref="DocumentBase"/>.</typeparam>
 public interface IMongoRepository<TMongoContext, TDocument> :
     IMongoRepository<TDocument>
     where TDocument : DocumentBase
-    where TMongoContext : MongoDatabaseContext
+    where TMongoContext : MongoContext
 {
 
 }

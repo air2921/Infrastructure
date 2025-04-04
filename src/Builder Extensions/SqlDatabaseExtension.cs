@@ -36,7 +36,7 @@ internal static class SqlDatabaseExtension
     ///     <item><description>Validates the database configuration (connection string and database type).</description></item>
     /// </list>
     /// </remarks>
-    internal static IInfrastructureBuilder AddDatabaseContext<TDbContext>(this IInfrastructureBuilder builder, EntityFrameworkConfigureOptions options) where TDbContext : InfrastructureDbContext
+    internal static IInfrastructureBuilder AddDatabaseContext<TDbContext>(this IInfrastructureBuilder builder, EntityFrameworkConfigureOptions options) where TDbContext : EntityFrameworkContext
     {
         if (!options.IsEnable)
             return builder;
@@ -67,7 +67,7 @@ internal static class SqlDatabaseExtension
     ///     <item><description>Logging of database commands to the console at the Information level.</description></item>
     /// </list>
     /// </remarks>
-    private static IInfrastructureBuilder AddPostgreSql<TDbContext>(this IInfrastructureBuilder builder, string connection) where TDbContext : InfrastructureDbContext
+    private static IInfrastructureBuilder AddPostgreSql<TDbContext>(this IInfrastructureBuilder builder, string connection) where TDbContext : EntityFrameworkContext
     {
         builder.Services.AddDbContextPool<TDbContext>(options =>
         {
@@ -94,7 +94,7 @@ internal static class SqlDatabaseExtension
     ///     <item><description>Logging of database commands to the console at the Information level.</description></item>
     /// </list>
     /// </remarks>
-    private static IInfrastructureBuilder AddSqlServer<TDbContext>(this IInfrastructureBuilder builder, string connection) where TDbContext : InfrastructureDbContext
+    private static IInfrastructureBuilder AddSqlServer<TDbContext>(this IInfrastructureBuilder builder, string connection) where TDbContext : EntityFrameworkContext
     {
         builder.Services.AddDbContextPool<TDbContext>(options =>
         {
@@ -121,7 +121,7 @@ internal static class SqlDatabaseExtension
     ///     <item><description>Logging of database commands to the console at the Information level.</description></item>
     /// </list>
     /// </remarks>
-    private static IInfrastructureBuilder AddSqlLite<TDbContext>(this IInfrastructureBuilder builder, string connection) where TDbContext : InfrastructureDbContext
+    private static IInfrastructureBuilder AddSqlLite<TDbContext>(this IInfrastructureBuilder builder, string connection) where TDbContext : EntityFrameworkContext
     {
         builder.Services.AddDbContextPool<TDbContext>(options =>
         {
