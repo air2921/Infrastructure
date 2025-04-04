@@ -37,7 +37,7 @@ public abstract class MongoDatabaseContext : IDisposable
         if (configureOptions.EnableTransactions)
         {
             var transactionsSupported = CheckTransactionsSupport();
-            if (transactionsSupported)
+            if (!transactionsSupported)
             {
                 throw new EntityException(
                     "Transactions are not supported by the current MongoDB deployment. " +

@@ -21,16 +21,16 @@ public sealed class MongoDatabaseConfigureOptions : Validator
 
     /// <summary>
     /// Gets or sets whether transactions should be enabled for this connection.
-    /// Default is true. When enabled, the system will verify transaction support during initialization.
+    /// Default is false. When enabled, the system will verify transaction support during initialization.
     /// </summary>
     /// <value>
-    /// <c>true</c> to enable transaction support (default); <c>false</c> to disable transactions.
+    /// <c>true</c> to enable transaction support; <c>false</c> to disable transactions (default).
     /// When enabled, the system will verify MongoDB deployment supports transactions during initialization.
     /// </value>
     /// <remarks>
     /// Transactions require MongoDB replica set or sharded cluster (v4.0+ for replica sets, v4.2+ for sharded clusters).
     /// </remarks>
-    public bool EnableTransactions { get; set; } = true;
+    public bool EnableTransactions { get; set; } = false;
 
     /// <summary>
     /// Validates whether the instance is configured correctly.
