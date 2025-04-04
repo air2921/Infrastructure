@@ -1,4 +1,5 @@
-﻿using Infrastructure.Options;
+﻿using Infrastructure.Exceptions;
+using Infrastructure.Options;
 using Infrastructure.Services.MongoDatabase.Document;
 using MongoDB.Driver;
 
@@ -7,28 +8,65 @@ namespace Infrastructure.Services.MongoDatabase;
 /// <summary>
 /// An abstract base class representing a MongoDB database context.
 /// This class provides access to a MongoDB database and manages the lifecycle of the MongoDB client.
-/// This class is responsible for initializing the MongoDB client and database, and it implements <see cref="IDisposable"/>
-/// to ensure proper cleanup of resources. It also provides methods to retrieve document collections and manage database sessions.
+/// Implements <see cref="IDisposable"/> to ensure proper cleanup of resources.
 /// </summary>
 /// <remarks>
 /// The context manages MongoDB client and database instances using lazy initialization,
-/// and provides transactional support through session management.
+/// and provides transactional support through session management when available.
+/// Transactions require MongoDB replica set or sharded cluster (v4.0+ for replica sets, v4.2+ for sharded clusters).
 /// </remarks>
 public abstract class MongoDatabaseContext : IDisposable
 {
     private readonly Lazy<MongoClient> _client;
     private readonly Lazy<IMongoDatabase> _database;
-    private volatile bool disposed = false;
+    private volatile bool _disposed = false;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MongoDatabaseContext"/> class with the specified configuration options.
-    /// The MongoDB client and database are initialized lazily when first accessed.
+    /// Initializes a new instance of the <see cref="MongoDatabaseContext"/> class.
     /// </summary>
-    /// <param name="configureOptions">Configuration options for connecting to the MongoDB database.</param>
+    /// <param name="configureOptions">Configuration options for connecting to MongoDB.</param>
+    /// <exception cref="EntityException">Thrown when transactions are enabled but not supported by the MongoDB deployment.</exception>
     protected MongoDatabaseContext(MongoDatabaseConfigureOptions configureOptions)
     {
-        _client = new Lazy<MongoClient>(() => new(configureOptions.Connection), LazyThreadSafetyMode.ExecutionAndPublication);
-        _database = new Lazy<IMongoDatabase>(() => _client.Value.GetDatabase(configureOptions.Database), LazyThreadSafetyMode.ExecutionAndPublication);
+        _client = new Lazy<MongoClient>(() => new MongoClient(configureOptions.Connection),
+            LazyThreadSafetyMode.ExecutionAndPublication);
+
+        _database = new Lazy<IMongoDatabase>(() => _client.Value.GetDatabase(configureOptions.Database),
+            LazyThreadSafetyMode.ExecutionAndPublication);
+
+        if (configureOptions.EnableTransactions)
+        {
+            var transactionsSupported = CheckTransactionsSupport();
+            if (transactionsSupported)
+            {
+                throw new EntityException(
+                    "Transactions are not supported by the current MongoDB deployment. " +
+                    "Ensure you're using a replica set or sharded cluster with MongoDB 4.0+.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if the current MongoDB deployment supports transactions.
+    /// </summary>
+    /// <returns>True if transactions are supported, false otherwise.</returns>
+    private bool CheckTransactionsSupport()
+    {
+        try
+        {
+            using var session = _client.Value.StartSession();
+            session.StartTransaction();
+            session.AbortTransaction();
+            return true;
+        }
+        catch (MongoCommandException ex) when (ex.Code == 20 || ex.CodeName == "IllegalOperation")
+        {
+            return false;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -39,18 +77,16 @@ public abstract class MongoDatabaseContext : IDisposable
     {
         get
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
+            ObjectDisposedException.ThrowIf(_disposed, this);
             return _database.Value;
         }
     }
 
     /// <summary>
-    /// Gets a MongoDB collection for a specific document type. This method creates a new instance of the document
-    /// to retrieve the collection name from the <see cref="DocumentBase.CollectionName"/> property.
+    /// Gets a MongoDB collection for the specified document type.
     /// </summary>
-    /// <typeparam name="TDocument">The type of the document, which must inherit from <see cref="DocumentBase"/> and have a parameterless constructor.</typeparam>
-    /// <returns>An <see cref="IMongoCollection{TDocument}"/> instance representing the collection for the specified document type.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the document type does not have a parameterless constructor.</exception>
+    /// <typeparam name="TDocument">The document type, must inherit from <see cref="DocumentBase"/>.</typeparam>
+    /// <returns>An <see cref="IMongoCollection{TDocument}"/> instance.</returns>
     protected virtual IMongoCollection<TDocument> SetDocument<TDocument>() where TDocument : DocumentBase, new()
     {
         var document = new TDocument();
@@ -58,48 +94,39 @@ public abstract class MongoDatabaseContext : IDisposable
     }
 
     /// <summary>
-    /// Gets a MongoDB collection for a specific document type using the provided document instance.
-    /// The collection name is retrieved from the <see cref="DocumentBase.CollectionName"/> property of the document.
+    /// Gets a MongoDB collection for the specified document instance.
     /// </summary>
-    /// <typeparam name="TDocument">The type of the document, which must inherit from <see cref="DocumentBase"/>.</typeparam>
-    /// <param name="document">An instance of the document from which to retrieve the collection name.</param>
-    /// <returns>An <see cref="IMongoCollection{TDocument}"/> instance representing the collection for the specified document type.</returns>
+    /// <typeparam name="TDocument">The document type, must inherit from <see cref="DocumentBase"/>.</typeparam>
+    /// <param name="document">The document instance containing the collection name.</param>
+    /// <returns>An <see cref="IMongoCollection{TDocument}"/> instance.</returns>
     public virtual IMongoCollection<TDocument> SetDocument<TDocument>(TDocument document) where TDocument : DocumentBase
         => Database.GetCollection<TDocument>(document.CollectionName);
 
     /// <summary>
-    /// Starts a new client session with the default options for this MongoDB context.
+    /// Starts a new client session.
     /// </summary>
-    /// <returns>A <see cref="IClientSessionHandle"/> representing the new session.</returns>
+    /// <returns>A <see cref="IClientSessionHandle"/> representing the session.</returns>
     /// <exception cref="ObjectDisposedException">Thrown if the context has been disposed.</exception>
-    /// <remarks>
-    /// This synchronous method is typically used for transactions and other session-dependent operations.
-    /// The session should be disposed when no longer needed to free up resources.
-    /// </remarks>
     public virtual IClientSessionHandle StartSession()
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
-        return _client.Value.StartSession(null, default);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return _client.Value.StartSession();
     }
 
     /// <summary>
-    /// Asynchronously starts a new client session with the default options for this MongoDB context.
+    /// Asynchronously starts a new client session.
     /// </summary>
-    /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation and returns a <see cref="IClientSessionHandle"/> when completed.</returns>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="ObjectDisposedException">Thrown if the context has been disposed.</exception>
-    /// <remarks>
-    /// This asynchronous method is typically used for transactions and other session-dependent operations.
-    /// The session should be disposed when no longer needed to free up resources.
-    /// </remarks>
     public virtual async Task<IClientSessionHandle> StartSessionAsync(CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
-        return await _client.Value.StartSessionAsync(null, cancellationToken);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return await _client.Value.StartSessionAsync(cancellationToken: cancellationToken);
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MongoDatabaseContext"/>.
+    /// Disposes the context and releases resources.
     /// </summary>
     public void Dispose()
     {
@@ -108,20 +135,19 @@ public abstract class MongoDatabaseContext : IDisposable
     }
 
     /// <summary>
-    /// Releases the unmanaged resources used by the <see cref="MongoDatabaseContext"/> and optionally releases the managed resources.
+    /// Protected implementation of Dispose pattern.
     /// </summary>
-    /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+    /// <param name="disposing">True to release both managed and unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (disposed)
+        if (_disposed)
             return;
 
-        if (disposing)
+        if (disposing && _client.IsValueCreated)
         {
-            if (_client.IsValueCreated)
-                _client.Value.Dispose();
+            _client.Value.Dispose();
         }
 
-        disposed = true;
+        _disposed = true;
     }
 }
