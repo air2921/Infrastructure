@@ -133,9 +133,9 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
             logger.LogInformation($"Received request to insert one entity\nCollection name: {document.CollectionName}");
 
             if (sessionHandle is not null)
-                await _collection.Value.InsertOneAsync(sessionHandle, document, _insertOneOptions.Value, cancellationToken);
+                await _collection.Value.InsertOneAsync(sessionHandle, documentEntity, _insertOneOptions.Value, cancellationToken);
             else
-                await _collection.Value.InsertOneAsync(document, _insertOneOptions.Value, cancellationToken);
+                await _collection.Value.InsertOneAsync(documentEntity, _insertOneOptions.Value, cancellationToken);
 
             return documentEntity.Id;
         }
@@ -250,12 +250,12 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
             logger.LogInformation($"Received request to update one entity, entityId {documentEntity.Id}\nCollection name: {document.CollectionName}");
 
             document.UpdatedAt = DateTimeOffset.UtcNow;
-            var filter = Builders<TDocument>.Filter.Eq(x => x.Id, document.Id);
+            var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
 
             if (sessionHandle is not null)
-                await _collection.Value.ReplaceOneAsync(sessionHandle, filter, document, cancellationToken: cancellationToken);
+                await _collection.Value.ReplaceOneAsync(sessionHandle, filter, documentEntity, cancellationToken: cancellationToken);
             else
-                await _collection.Value.ReplaceOneAsync(filter, document, cancellationToken: cancellationToken);
+                await _collection.Value.ReplaceOneAsync(filter, documentEntity, cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {

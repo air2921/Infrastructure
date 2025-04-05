@@ -67,10 +67,10 @@ public static class MongoDatabaseRepositoryExtension
 
         foreach (var documentType in documentTypes)
         {
-            var repositoryType = typeof(MongoDatabaseRepository<,>).MakeGenericType(documentType, mongoContextType);
+            var repositoryType = typeof(MongoDatabaseRepository<,>).MakeGenericType(mongoContextType, documentType);
 
             var interfaceType = typeof(IMongoRepository<>).MakeGenericType(documentType);
-            var repositoryWithContextInterfaceType = typeof(IMongoRepository<,>).MakeGenericType(documentType, mongoContextType);
+            var repositoryWithContextInterfaceType = typeof(IMongoRepository<,>).MakeGenericType(mongoContextType, documentType);
             builder.Services.AddScoped(repositoryWithContextInterfaceType, repositoryType);
             builder.Services.AddScoped(interfaceType, repositoryType);
             builder.Services.AddScoped(documentType);
