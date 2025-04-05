@@ -18,6 +18,13 @@
     </EmbeddedResource>
   </ItemGroup>
 
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<PackageId>AirInc.Infrastructure</PackageId>
+		<Version>1.0.0</Version>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.400" />
 		<PackageReference Include="AWSSDK.S3" Version="3.7.415.1" />
