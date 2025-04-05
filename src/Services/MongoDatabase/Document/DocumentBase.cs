@@ -19,7 +19,6 @@ public abstract class DocumentBase
     /// Automatically initialized with new ObjectId converted to string
     /// </summary>
     [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
     [BsonElement("_id")]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
@@ -27,7 +26,6 @@ public abstract class DocumentBase
     /// Document creation timestamp in UTC
     /// </summary>
     [BsonElement("created_at")]
-    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>
@@ -35,7 +33,6 @@ public abstract class DocumentBase
     /// Null if never modified
     /// </summary>
     [BsonElement("updated_at")]
-    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     [BsonIgnoreIfNull]
     public DateTimeOffset? UpdatedAt { get; set; }
 
