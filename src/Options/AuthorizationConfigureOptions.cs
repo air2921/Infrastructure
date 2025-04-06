@@ -103,7 +103,7 @@ public sealed class AuthorizationConfigureOptions : Validator
         if (string.IsNullOrWhiteSpace(Key) || string.IsNullOrWhiteSpace(Issuer) || string.IsNullOrWhiteSpace(Audience))
             return false;
 
-        if (Expiration == TimeSpan.Zero || Expiration.TotalSeconds <= 900)
+        if (Expiration == TimeSpan.Zero || Expiration < TimeSpan.FromMinutes(30))
             return false;
 
         if (string.IsNullOrWhiteSpace(Algorithm) || !_algs.Contains(Algorithm))

@@ -17,7 +17,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// </remarks>
 public abstract class MongoContext : IDisposable
 {
-    private readonly Lazy<MongoClient> _client;
+    private readonly MongoClient _client;
     private readonly Lazy<IMongoDatabase> _database;
     private volatile bool _disposed = false;
 
@@ -28,45 +28,8 @@ public abstract class MongoContext : IDisposable
     /// <exception cref="EntityException">Thrown when transactions are enabled but not supported by the MongoDB deployment.</exception>
     protected MongoContext(MongoDatabaseConfigureOptions configureOptions)
     {
-        _client = new Lazy<MongoClient>(() => new MongoClient(configureOptions.Connection),
-            LazyThreadSafetyMode.ExecutionAndPublication);
-
-        _database = new Lazy<IMongoDatabase>(() => _client.Value.GetDatabase(configureOptions.Database),
-            LazyThreadSafetyMode.ExecutionAndPublication);
-
-        if (configureOptions.EnableTransactions)
-        {
-            var transactionsSupported = CheckTransactionsSupport();
-            if (!transactionsSupported)
-            {
-                throw new EntityException(
-                    "Transactions are not supported by the current MongoDB deployment. " +
-                    "Ensure you're using a replica set or sharded cluster with MongoDB 4.0+.");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Checks if the current MongoDB deployment supports transactions.
-    /// </summary>
-    /// <returns>True if transactions are supported, false otherwise.</returns>
-    private bool CheckTransactionsSupport()
-    {
-        try
-        {
-            using var session = _client.Value.StartSession();
-            session.StartTransaction();
-            session.AbortTransaction();
-            return true;
-        }
-        catch (MongoCommandException ex) when (ex.Code == 20 || ex.CodeName == "IllegalOperation")
-        {
-            return false;
-        }
-        catch (NotSupportedException)
-        {
-            return false;
-        }
+        _client = new MongoClient(configureOptions.Connection);
+        _database = new Lazy<IMongoDatabase>(() => _client.GetDatabase(configureOptions.Database));
     }
 
     /// <summary>
@@ -110,7 +73,7 @@ public abstract class MongoContext : IDisposable
     public virtual IClientSessionHandle StartSession()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return _client.Value.StartSession();
+        return _client.StartSession();
     }
 
     /// <summary>
@@ -122,7 +85,7 @@ public abstract class MongoContext : IDisposable
     public virtual async Task<IClientSessionHandle> StartSessionAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return await _client.Value.StartSessionAsync(cancellationToken: cancellationToken);
+        return await _client.StartSessionAsync(cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -143,9 +106,9 @@ public abstract class MongoContext : IDisposable
         if (_disposed)
             return;
 
-        if (disposing && _client.IsValueCreated)
+        if (disposing)
         {
-            _client.Value.Dispose();
+            _client?.Dispose();
         }
 
         _disposed = true;

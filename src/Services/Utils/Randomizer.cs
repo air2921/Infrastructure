@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Abstractions.Utility;
+using Infrastructure.Enums;
 using Infrastructure.Exceptions;
 using System.Text;
 
@@ -29,29 +30,21 @@ namespace Infrastructure.Services.Utils;
 /// </remarks>
 public class Randomizer : IRandomizer
 {
-    private static readonly Lazy<InvalidArgumentException> _guidCombineError = new(() => new(
-        $"The allowed number of GUID combinations must be between {Immutable.ValidationParameter.MinGuidCombineLength} and {Immutable.ValidationParameter.MaxGuidCombineLength}"),
-        LazyThreadSafetyMode.ExecutionAndPublication);
-
-    private static readonly Lazy<InvalidArgumentException> _codeCombineError = new(() => new(
-        $"The valid code length must be in the range from {Immutable.ValidationParameter.MinCodeLength} to {Immutable.ValidationParameter.MaxCodeLength}"),
-        LazyThreadSafetyMode.ExecutionAndPublication);
-
     /// <summary>
     /// Combines multiple GUIDs into a single optimized string.
     /// </summary>
-    /// <param name="count">Number of GUIDs to combine (between <see cref="Immutable.MinGuidCombineLength"/> and <see cref="Immutable.MaxGuidCombineLength"/>)</param>
-    /// <param name="useNoHyphensFormat">When true, outputs condensed 32-character format (default: false)</param>
+    /// <param name="count">Number of GUIDs to combine (between <see cref="Immutable.ValidationParameter.MinGuidCombineLength"/> and <see cref="Immutable.ValidationParameter.MaxGuidCombineLength"/>)</param>
+    /// <param name="format">Guid generator format. Defaults is <see cref="GuidFormat.D"/><c>false</c>.</param>
     /// <returns>Concatenated GUID string in specified format</returns>
     /// <exception cref="InvalidArgumentException">Thrown when count is outside valid range</exception>
-    public string GuidCombine(int count, bool useNoHyphensFormat = false)
+    public string GuidCombine(int count, GuidFormat format = GuidFormat.D)
     {
-        if (count < Immutable.ValidationParameter.MinGuidCombineLength || count >= Immutable.ValidationParameter.MaxGuidCombineLength)
-            throw _guidCombineError.Value;
+        if (count < Immutable.ValidationParameter.MinGuidCombineLength || count > Immutable.ValidationParameter.MaxGuidCombineLength)
+            throw new InvalidArgumentException($"The allowed number of GUID combinations must be between {Immutable.ValidationParameter.MinGuidCombineLength} and {Immutable.ValidationParameter.MaxGuidCombineLength}");
 
-        var builder = new StringBuilder(useNoHyphensFormat ? 32 : 36 * count);
+        var builder = new StringBuilder(((int)format) * count);
         for (int i = 0; i < count; i++)
-            builder.Append(Guid.NewGuid().ToString(useNoHyphensFormat ? "N" : string.Empty));
+            builder.Append(Guid.NewGuid().ToString(format.ToString()));
 
         return builder.ToString();
     }
@@ -59,13 +52,13 @@ public class Randomizer : IRandomizer
     /// <summary>
     /// Generates a purely numeric random code with guaranteed length.
     /// </summary>
-    /// <param name="length">Desired code length (between <see cref="Immutable.MinCodeLength"/> and <see cref="Immutable.MaxCodeLength"/>)</param>
+    /// <param name="length">Desired code length (between <see cref="Immutable.ValidationParameter.MinCodeLength"/> and <see cref="Immutable.ValidationParameter.MaxCodeLength"/>)</param>
     /// <returns>String containing random digits</returns>
     /// <exception cref="InvalidArgumentException">Thrown when length is invalid</exception>
     public string GenerateNumericCode(int length)
     {
-        if (length < Immutable.ValidationParameter.MinCodeLength || length >= Immutable.ValidationParameter.MaxCodeLength)
-            throw _codeCombineError.Value;
+        if (length < Immutable.ValidationParameter.MinCodeLength || length > Immutable.ValidationParameter.MaxCodeLength)
+            throw new InvalidArgumentException($"The valid code length must be in the range from {Immutable.ValidationParameter.MinCodeLength} to {Immutable.ValidationParameter.MaxCodeLength}");
 
         var builder = new StringBuilder(length);
         for (int i = 0; i < length; i++)

@@ -81,8 +81,8 @@ public static class Immutable
         /// <summary>Minimum allowed length for GUID combinations (1 combines).</summary>
         public const int MinGuidCombineLength = 1;
 
-        /// <summary>Maximum allowed length for GUID combinations (10 combines).</summary>
-        public const int MaxGuidCombineLength = 10;
+        /// <summary>Maximum allowed length for GUID combinations (15 combines).</summary>
+        public const int MaxGuidCombineLength = 15;
     }
 
     /// <summary>

@@ -30,10 +30,10 @@ public static class MongoDatabaseRepositoryExtension
     /// <list type="bullet">
     ///     <item><description><see cref="MongoDatabaseConfigureOptions"/> - Singleton service for storing MongoDB configuration.</description></item>
     ///     <item><description><typeparamref name="TMongoContext"/> - Scoped service for interacting with the MongoDB database context.</description></item>
-    ///     <item><description><see cref="IMongoSessionFactory"/> - Scoped service for creating MongoDB sessions.</description></item>
-    ///     <item><description><see cref="IMongoSessionFactory{TMongoContext}"/> - Scoped service for creating MongoDB sessions with specific context.</description></item>
-    ///     <item><description><see cref="IMongoRepository{TDocument}"/> - Transient service for interacting with documents of type <typeparamref name="TDocument"/>.</description></item>
-    ///     <item><description><see cref="IMongoRepository{TMongoContext, TDocument}"/> - Transient service for interacting with documents of type <typeparamref name="TDocument"/> using <typeparamref name="TMongoContext"/>.</description></item>
+    ///     <item><description><see cref="IMongoSessionFactory"/> - Transient service for creating MongoDB sessions.</description></item>
+    ///     <item><description><see cref="IMongoSessionFactory{TMongoContext}"/> - Transient service for creating MongoDB sessions with specific context.</description></item>
+    ///     <item><description><see cref="IMongoRepository{TDocument}"/> - Scoped service for interacting with documents of type <typeparamref name="TDocument"/>.</description></item>
+    ///     <item><description><see cref="IMongoRepository{TMongoContext, TDocument}"/> - Scoped service for interacting with documents of type <typeparamref name="TDocument"/> using <typeparamref name="TMongoContext"/>.</description></item>
     /// </list>
     /// Additionally, this method performs the following:
     /// <list type="bullet">

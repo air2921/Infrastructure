@@ -21,7 +21,8 @@ public sealed class TransactionFactory<TDbContext>(TDbContext dbContext) : ITran
     /// Begins a new database transaction synchronously.
     /// </summary>
     /// <returns>A new <see cref="IDbContextTransaction"/> representing the transaction.</returns>
-    public IDbContextTransaction Begin() => dbContext.Database.BeginTransaction();
+    public IDbContextTransaction Begin() 
+        => dbContext.Database.BeginTransaction();
 
     /// <summary>
     /// Begins a new database transaction asynchronously.
