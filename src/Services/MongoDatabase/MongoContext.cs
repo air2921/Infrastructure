@@ -25,7 +25,6 @@ public abstract class MongoContext : IDisposable
     /// Initializes a new instance of the <see cref="MongoContext"/> class.
     /// </summary>
     /// <param name="configureOptions">Configuration options for connecting to MongoDB.</param>
-    /// <exception cref="EntityException">Thrown when transactions are enabled but not supported by the MongoDB deployment.</exception>
     protected MongoContext(MongoDatabaseConfigureOptions configureOptions)
     {
         _client = new MongoClient(configureOptions.Connection);
