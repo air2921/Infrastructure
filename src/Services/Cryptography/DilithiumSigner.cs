@@ -38,7 +38,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     private volatile bool disposed;
 
-    #region Pointers
+    #region Descriptors
 
     /// <summary>
     /// A pointer to the loaded <c>oqs.dll</c> library.
@@ -169,10 +169,28 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </summary>
     /// <remarks>
     /// This constructor attempts to resolve the required function pointers from the native <c>oqs.dll</c> library.
+    /// It ensures the proper loading of the native library and initialization of the signature object for the Dilithium algorithm.
+    /// Additionally, it subscribes to the <c>ProcessExit</c> event to delete the temporary <c>oqs.dll</c> file when the application terminates,
+    /// ensuring the cleanup of resources even if <see cref="Dispose"/> is not explicitly called.
     /// </remarks>
     public DilithiumSigner()
     {
         DilithiumPointerResolve();
+
+        AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
+        {
+            if (!File.Exists(_dllPath))
+                return;
+
+            try
+            {
+                File.Delete(_dllPath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting DLL file: " + ex.Message);
+            }
+        };
     }
 
     /// <summary>
@@ -462,9 +480,9 @@ public class DilithiumSigner : ISigner, IDisposable
                     _oqsLibraryHandle = IntPtr.Zero;
                 }
             }
-
-            disposed = true;
         }
+
+        disposed = true;
     }
 
     /// <summary>
