@@ -14,11 +14,11 @@ public class KeyPairDetails
     /// Gets the public key component of the key pair.
     /// The public key can be freely distributed and is typically used for encryption or signature verification.
     /// </summary>
-    public required ReadOnlyMemory<byte> PublicKey { get; init; }
+    public required byte[] PublicKey { get; init; }
 
     /// <summary>
     /// Gets the private key component of the key pair.
     /// The private key must be kept confidential and is used for decryption or creating digital signatures.
     /// </summary>
-    public required ReadOnlyMemory<byte> PrivateKey { get; init; }
+    public required byte[] PrivateKey { get; init; }
 }
