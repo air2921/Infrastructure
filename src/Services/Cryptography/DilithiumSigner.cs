@@ -239,11 +239,11 @@ public class DilithiumSigner : ISigner, IDisposable
                 if (_oqsLibraryHandle == IntPtr.Zero)
                     throw new CryptographyException("Failed to load oqs.dll");
 
+                ResolveDelegates();
+
                 _sig = _oqsSigNew(Immutable.Dilithium.AlgorithmName);
                 if (_sig == IntPtr.Zero)
                     throw new CryptographyException("Failed to initialize Dilithium");
-
-                ResolveDelegates();
             }
             catch (Exception ex)
             {
