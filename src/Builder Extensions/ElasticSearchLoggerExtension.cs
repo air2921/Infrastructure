@@ -70,7 +70,7 @@ public static class ElasticSearchLoggerExtension
                 BufferRetainedInvalidPayloadsLimitBytes = 5000,
                 AutoRegisterTemplate = true,
                 OverwriteTemplate = true,
-                CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true),
+                CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true, formatStackTraceAsArray: true),
                 IndexFormat = options.Index,
                 TypeName = null
             })
