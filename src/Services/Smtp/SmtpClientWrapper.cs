@@ -25,7 +25,7 @@ public class SmtpClientWrapper : IDisposable
     private readonly Lazy<IMailTransport> _transport;
     private readonly ILogger<SmtpClientWrapper> _logger;
 
-    private volatile bool disposed;
+    private volatile bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SmtpClientWrapper"/> class.
@@ -64,7 +64,7 @@ public class SmtpClientWrapper : IDisposable
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
     public async Task SendAsync(MimeMessage message, CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         try
         {
@@ -88,7 +88,7 @@ public class SmtpClientWrapper : IDisposable
     /// <exception cref="SmtpClientException">Thrown if there is an error during the email sending process.</exception>
     public void Send(MimeMessage message)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         try
         {
@@ -107,7 +107,7 @@ public class SmtpClientWrapper : IDisposable
     /// <param name="disposing">Indicates whether the method is called from the Dispose method (true) or from the finalizer (false).</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (disposed)
+        if (_disposed)
             return;
 
         if (disposing && _transport.IsValueCreated)
@@ -116,7 +116,7 @@ public class SmtpClientWrapper : IDisposable
         if (_transport.IsValueCreated)
             _transport.Value.Dispose();
 
-        disposed = true;
+        _disposed = true;
     }
 
     /// <summary>

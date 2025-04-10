@@ -43,7 +43,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to get range of entities\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to get range of entities", [document.CollectionName]);
 
             var findOptions = new FindOptions<TDocument>
             {
@@ -84,7 +84,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to get entity by id {id}\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to get entity by id", [document.CollectionName, id]);
 
             return await _collection.Value.Find(x => x.Id.Equals(id)).FirstOrDefaultAsync(cancellationToken);
         }
@@ -106,7 +106,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to get entity by filter\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to get entity by filter", [document.CollectionName]);
 
             return await _collection.Value.Find(query).FirstOrDefaultAsync(cancellationToken);
         }
@@ -130,7 +130,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to insert one entity\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to insert one entity", [document.CollectionName]);
 
             if (sessionHandle is not null)
                 await _collection.Value.InsertOneAsync(sessionHandle, documentEntity, _insertOneOptions.Value, cancellationToken);
@@ -159,7 +159,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to insert a range of entities\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to insert a range of entities", [document.CollectionName]);
 
             if (sessionHandle is not null)
                 await _collection.Value.InsertManyAsync(sessionHandle, documentEntities, _insertManyOptions.Value, cancellationToken);
@@ -188,7 +188,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to remove one entity by id {id}\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to remove one entity by id", [document.CollectionName, id]);
 
             var filter = Builders<TDocument>.Filter.Eq(x => x.Id, id);
 
@@ -217,7 +217,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to remove a range of entities by identifiers\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to remove a range of entities by identifiers", [document.CollectionName, identifiers]);
 
             var filter = Builders<TDocument>.Filter.In(x => x.Id, identifiers);
 
@@ -247,7 +247,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to update one entity, entityId {documentEntity.Id}\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to update one entity", [document.CollectionName, documentEntity.Id]);
 
             document.UpdatedAt = DateTimeOffset.UtcNow;
             var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
@@ -283,7 +283,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation($"Received request to update a range of entities\nCollection name: {document.CollectionName}");
+            logger.LogInformation("Received request to update a range of entities", [document.CollectionName, documentEntities.Select(x => x.Id)]);
 
             var documentsList = documentEntities.ToList();
             var bulkOps = new List<WriteModel<TDocument>>();

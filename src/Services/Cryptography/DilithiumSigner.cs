@@ -36,9 +36,9 @@ public class DilithiumSigner : ISigner, IDisposable
     /// This field is used to track whether the object has been disposed, ensuring that no operations
     /// are performed on the instance after it has been disposed.
     /// </remarks>
-    private volatile bool disposed;
+    private volatile bool _disposed;
 
-    #region Descriptors
+    #region Pointers
 
     /// <summary>
     /// A pointer to the loaded <c>oqs.dll</c> library.
@@ -361,7 +361,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     public KeyPairDetails GenerateKeyPair()
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         lock (_pointerLock)
         {
@@ -399,7 +399,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     public byte[] Sign(byte[] message, byte[] privateKey)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         lock (_pointerLock)
         {
@@ -430,7 +430,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// </remarks>
     public bool Verify(byte[] message, byte[] signature, byte[] publicKey)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         lock (_pointerLock)
         {
@@ -463,7 +463,7 @@ public class DilithiumSigner : ISigner, IDisposable
     /// <exception cref="ObjectDisposedException">Thrown if the object is already disposed when this method is called.</exception>
     protected virtual void Dispose(bool disposing)
     {
-        if (disposed)
+        if (_disposed)
             return;
 
         lock (_pointerLock)
@@ -484,7 +484,7 @@ public class DilithiumSigner : ISigner, IDisposable
             }
         }
 
-        disposed = true;
+        _disposed = true;
     }
 
     /// <summary>
