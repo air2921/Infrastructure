@@ -16,17 +16,17 @@ public class MLDSA44Format : IOqsAlgorithmFormat
     public string Algorithm => "ML-DSA-44";
 
     /// <summary>
-    /// Gets the signature length of 1620 bytes for ML-DSA-44
+    /// Gets the signature length of 2420 bytes for ML-DSA-44
     /// </summary>
-    public int SignatureLength => 1620;
+    public int SignatureLength => 2420;
 
     /// <summary>
-    /// Gets the public key length of 896 bytes for ML-DSA-44
+    /// Gets the public key length of 1312 bytes for ML-DSA-44
     /// </summary>
-    public int PublicKeyLength => 896;
+    public int PublicKeyLength => 1312;
 
     /// <summary>
-    /// Gets the private key length of 2096 bytes for ML-DSA-44
+    /// Gets the private key length of 2560 bytes for ML-DSA-44
     /// </summary>
-    public int PrivateKeyLength => 2096;
+    public int PrivateKeyLength => 2560;
 }
