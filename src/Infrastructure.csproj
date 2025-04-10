@@ -12,11 +12,14 @@
     <None Remove="oqs.dll" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Assembly\oqs.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assembly\oqs.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Assembly\oqs.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
