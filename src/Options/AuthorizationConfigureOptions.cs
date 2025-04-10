@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Configuration;
-using Infrastructure.Exceptions.Global;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;

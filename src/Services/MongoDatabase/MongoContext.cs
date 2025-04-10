@@ -1,5 +1,4 @@
-﻿using Infrastructure.Exceptions;
-using Infrastructure.Options;
+﻿using Infrastructure.Options;
 using Infrastructure.Services.MongoDatabase.Document;
 using MongoDB.Driver;
 

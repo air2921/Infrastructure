@@ -1,9 +1,9 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
-using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.ComponentModel;
-using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Services.EntityFramework.Builder;
 

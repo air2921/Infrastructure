@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Services.EntityFramework.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Infrastructure.Services.EntityFramework.Context;
 
