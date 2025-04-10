@@ -15,7 +15,7 @@ public interface IOqsAlgorithmFormat
     public string ResourceName => "Infrastructure.Assembly.oqs.dll";
 
     /// <summary>
-    /// Algorithm name (e.g. "Dilithium2")
+    /// Algorithm name (e.g. "Dilithium5")
     /// </summary>
     public string Algorithm { get; }
 

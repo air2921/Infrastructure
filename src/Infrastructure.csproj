@@ -27,7 +27,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.400" />
-		<PackageReference Include="AWSSDK.S3" Version="3.7.415.1" />
+		<PackageReference Include="AWSSDK.S3" Version="3.7.416.7" />
 		<PackageReference Include="Azure.Identity" Version="1.13.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
@@ -35,7 +35,7 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.6.0" />
 		<PackageReference Include="MimeKit" Version="4.11.0" />
-		<PackageReference Include="MongoDB.Driver" Version="3.2.1" />
+		<PackageReference Include="MongoDB.Driver" Version="3.3.0" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
@@ -51,14 +51,14 @@
 		<PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
 		<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
 		<PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
-		<PackageReference Include="MailKit" Version="4.6.0" />
+		<PackageReference Include="MailKit" Version="4.11.0" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 		<PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
-		<PackageReference Include="Twilio" Version="7.9.0" />
+		<PackageReference Include="Twilio" Version="7.10.0" />
 	</ItemGroup>
 
 	<ItemGroup>

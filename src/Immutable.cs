@@ -112,39 +112,4 @@ public static class Immutable
         /// </summary>
         public const string PhoneNumber = @"^\+?[1-9]\d{1,14}$";
     }
-
-    /// <summary>
-    /// Contains constants related to the Dilithium post-quantum cryptographic algorithm.
-    /// </summary>
-    /// <remarks>
-    /// This class provides configuration values for working with the Dilithium3 algorithm,
-    /// including resource locations and expected key/signature lengths.
-    /// </remarks>
-    public static class Dilithium
-    {
-        /// <summary>
-        /// The embedded resource name for the assembly containing the Dilithium implementation.
-        /// </summary>
-        public const string ResourceName = "Infrastructure.Assembly.oqs.dll";
-
-        /// <summary>
-        /// The name of the Dilithium algorithm variant being used (Dilithium3).
-        /// </summary>
-        public const string AlgorithmName = "Dilithium3";
-
-        /// <summary>
-        /// The expected length (in bytes) of a Dilithium3 public key.
-        /// </summary>
-        public const int PublicKeyLength = 1952;
-
-        /// <summary>
-        /// The expected length (in bytes) of a Dilithium3 private key.
-        /// </summary>
-        public const int PrivateKeyLength = 4000;
-
-        /// <summary>
-        /// The expected length (in bytes) of a Dilithium3 signature.
-        /// </summary>
-        public const int SignatureLength = 3293;
-    }
 }

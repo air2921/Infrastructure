@@ -1,7 +1,6 @@
 ﻿using Infrastructure.Abstractions.Cryptography;
 using Infrastructure.Exceptions;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 
 namespace Infrastructure.Services.Cryptography.Oqs;
@@ -82,7 +81,7 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// This field is used to track whether the object has been disposed, ensuring that no operations
     /// are performed on the instance after it has been disposed.
     /// </remarks>
-    private volatile bool _disposed;
+    protected volatile bool disposed;
 
     #region Pointers
 
@@ -100,7 +99,7 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// <remarks>
     /// This object is initialized during the class instantiation and is used to perform signing and verification operations.
     /// </remarks>
-    private volatile IntPtr _sig;
+    protected volatile IntPtr sig;
 
     #endregion
 
@@ -243,11 +242,10 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     protected OqsAlgorithm()
     {
         var algorithm = new TAlgorithm();
-
-        if (IsValidFormat(algorithm))
-            throw new CryptographyException("Invalid algorithm format");
-
         algorithmFormat = algorithm;
+
+        if (IsValidFormat())
+            throw new CryptographyException("Invalid algorithm format");
 
         DilithiumPointerResolve();
 
@@ -316,8 +314,10 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
                     using var assemblyStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(algorithmFormat.ResourceName) ??
                         throw new CryptographyException($"{algorithmFormat.ResourceName} is not found");
 
-                    using (var stream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096))
+#pragma warning disable IDE0063
+                    using (var stream = new FileStream(_dllPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096))
                         assemblyStream.CopyTo(stream);
+#pragma warning restore IDE0063
                 }
 
                 _oqsLibraryHandle = NativeLibrary.Load(_dllPath);
@@ -326,8 +326,8 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
 
                 ResolveDelegates();
 
-                _sig = _oqsSigNew(algorithmFormat.Algorithm);
-                if (_sig == IntPtr.Zero)
+                sig = _oqsSigNew(algorithmFormat.Algorithm);
+                if (sig == IntPtr.Zero)
                     throw new CryptographyException($"Failed to initialize {algorithmFormat.Algorithm}");
             }
             catch (Exception ex)
@@ -447,7 +447,6 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// <summary>
     /// Validates the algorithm format parameters.
     /// </summary>
-    /// <param name="algorithmFormat">The algorithm format to validate.</param>
     /// <returns>
     /// <c>true</c> if the format meets all validation requirements; otherwise, <c>false</c>.
     /// </returns>
@@ -458,12 +457,12 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// 
     /// The method is marked as virtual to allow derived classes to extend the validation logic.
     /// </remarks>
-    protected virtual bool IsValidFormat(IOqsAlgorithmFormat algorithmFormat)
+    protected virtual bool IsValidFormat()
     {
-        if (!IsValidSignatureLength(algorithmFormat))
+        if (!IsValidSignatureLength())
             return false;
 
-        if (!IsValidKeyLength(algorithmFormat))
+        if (!IsValidKeyLength())
             return false;
 
         return true;
@@ -472,7 +471,6 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// <summary>
     /// Validates the key lengths specified in the algorithm format.
     /// </summary>
-    /// <param name="algorithmFormat">The algorithm format containing key length parameters.</param>
     /// <returns>
     /// <c>true</c> if both public and private key lengths are non-zero; otherwise, <c>false</c>.
     /// </returns>
@@ -481,7 +479,7 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// - Public key (<see cref="IOqsAlgorithmFormat.PublicKeyLength"/>)
     /// - Private key (<see cref="IOqsAlgorithmFormat.PrivateKeyLength"/>)
     /// </remarks>
-    private bool IsValidKeyLength(IOqsAlgorithmFormat algorithmFormat)
+    private bool IsValidKeyLength()
     {
         if (algorithmFormat.PublicKeyLength == 0 || algorithmFormat.PrivateKeyLength == 0)
             return false;
@@ -492,14 +490,13 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// <summary>
     /// Validates the signature length specified in the algorithm format.
     /// </summary>
-    /// <param name="algorithmFormat">The algorithm format containing the signature length parameter.</param>
     /// <returns>
     /// <c>true</c> if the signature length is non-zero; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
     /// Checks that <see cref="IOqsAlgorithmFormat.SignatureLength"/> contains a valid positive value.
     /// </remarks>
-    private bool IsValidSignatureLength(IOqsAlgorithmFormat algorithmFormat)
+    private bool IsValidSignatureLength()
     {
         if (algorithmFormat.SignatureLength == 0)
             return false;
@@ -531,20 +528,20 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// </remarks>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (disposed)
             return;
 
         lock (pointerLock)
         {
-            if (_sig != IntPtr.Zero)
+            if (sig != IntPtr.Zero)
             {
-                _oqsSigFree(_sig);
-                _sig = IntPtr.Zero;
+                _oqsSigFree(sig);
+                sig = IntPtr.Zero;
             }
 
             if (disposing)
             {
-                if (_sig != IntPtr.Zero)
+                if (sig != IntPtr.Zero)
                 {
                     NativeLibrary.Free(_oqsLibraryHandle);
                     _oqsLibraryHandle = IntPtr.Zero;
@@ -552,7 +549,7 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
             }
         }
 
-        _disposed = true;
+        disposed = true;
     }
 
     /// <summary>
@@ -589,7 +586,7 @@ public abstract class OqsAlgorithm<TAlgorithm> : IDisposable where TAlgorithm : 
     /// </para>
     /// </remarks>
     protected void CheckDisposed()
-        => ObjectDisposedException.ThrowIf(_disposed, this);
+        => ObjectDisposedException.ThrowIf(disposed, this);
 
     #endregion
 }
