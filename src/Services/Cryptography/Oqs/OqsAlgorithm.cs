@@ -65,6 +65,16 @@ public abstract class OqsAlgorithm : IDisposable
     /// </remarks>
     protected IOqsAlgorithmFormat algorithmFormat;
 
+    /// <summary>
+    /// The filename of the native library based on the current operating system platform.
+    /// </summary>
+    /// <remarks>
+    /// This static readonly field determines the correct native library filename based on the runtime OS:
+    /// - "oqs.so" for Linux platforms
+    /// - "oqs.dll" for all other platforms (Windows, macOS etc.)
+    /// The value is determined using <see cref="RuntimeInformation.IsOSPlatform"/> check during static initialization.
+    /// This filename is used to construct the full library path in <see cref="_dllPath"/>.
+    /// </remarks>
     private static readonly string _fileName = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "oqs.so" : "oqs.dll";
 
     /// <summary>

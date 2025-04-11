@@ -59,7 +59,7 @@
 		<PackageId>AirSoft.Infrastructure</PackageId>
 		<Authors>AirSoft Team</Authors>
 		<Company>AirSoft</Company>
-		<Version>8.0.0</Version>
+		<Version>1.0.0</Version>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<RepositoryUrl>https://github.com/air2921/Infrastructure</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
