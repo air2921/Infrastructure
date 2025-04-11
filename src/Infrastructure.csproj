@@ -13,15 +13,19 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Assembly\oqs.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'" />
-		<EmbeddedResource Include="Assembly\oqs.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'" />
+		<EmbeddedResource Include="Assembly\oqs.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Assembly\oqs.so">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
 
-		<Content Include="Assembly\oqs.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+		<Content Include="Assembly\oqs.dll">
 			<Pack>true</Pack>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-		<Content Include="Assembly\oqs.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+		<Content Include="Assembly\oqs.so">
 			<Pack>true</Pack>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
