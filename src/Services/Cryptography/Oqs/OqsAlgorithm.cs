@@ -544,15 +544,15 @@ public abstract class OqsAlgorithm : IDisposable
 
         lock (pointerLock)
         {
-            if (sig != IntPtr.Zero)
-            {
-                _oqsSigFree(sig);
-                sig = IntPtr.Zero;
-            }
-
-            if (disposing)
+            lock (pointerLock)
             {
                 if (sig != IntPtr.Zero)
+                {
+                    _oqsSigFree(sig);
+                    sig = IntPtr.Zero;
+                }
+
+                if (_oqsLibraryHandle != IntPtr.Zero)
                 {
                     NativeLibrary.Free(_oqsLibraryHandle);
                     _oqsLibraryHandle = IntPtr.Zero;
