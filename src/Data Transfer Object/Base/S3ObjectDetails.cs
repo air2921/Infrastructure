@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Data_Transfer_Object.Base;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Infrastructure.Data_Transfer_Object.Base;
 
 /// <summary>
 /// Represents base details of an S3 object.
@@ -13,5 +15,6 @@ public abstract class S3ObjectDetails
     /// <summary>
     /// Gets or sets the object key representing the full path within the S3 bucket.
     /// </summary>
-    public required string Key { get; set; }
+    [Required]
+    public string Key { get; set; } = null!;
 }

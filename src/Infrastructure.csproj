@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net8.0;net7.0;net6.0;netcoreapp3.1</TargetFrameworks>
+	<TargetFrameworks>net8.0;net7.0</TargetFrameworks>
 	<LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,48 +10,35 @@
 	<Microsoft_V8>8.0.4</Microsoft_V8>
 	<Npgsql_V8>8.0.2</Npgsql_V8>
 	<DI_V8>8.0.1</DI_V8>
-	<Microsoft_V7>7.0.20</Microsoft_V7>
-	<Microsoft_V6>6.0.30</Microsoft_V6>
-	<Microsoft_V3>3.1.32</Microsoft_V3>
+	<Microsoft_V7>7.0.0</Microsoft_V7>
 
-	<AzureIdentity_V8>1.13.2</AzureIdentity_V8>
-	<AzureIdentity_V7>1.10.4</AzureIdentity_V7>
-	<AzureIdentity_V6>1.10.4</AzureIdentity_V6>
-	<AzureIdentity_V3>1.5.0</AzureIdentity_V3>
+	<SerilogAsp_V8>8.0.0</SerilogAsp_V8>
+	<SerilogAsp_V7>7.0.0</SerilogAsp_V7>
 
-	<AWSSDK_V8>3.7.416.7</AWSSDK_V8>
-	<AWSSDK_V7>3.7.100.50</AWSSDK_V7>
-	<AWSSDK_V6>3.7.100.50</AWSSDK_V6>
-	<AWSSDK_V3>3.7.100.50</AWSSDK_V3>
-	  
-	<SystemTextJson_V8>8.0.5</SystemTextJson_V8>
-	<SystemTextJson_V7>7.0.3</SystemTextJson_V7>
-	<SystemTextJson_V6>6.0.16</SystemTextJson_V6>
-	<SystemTextJson_V3>4.7.2</SystemTextJson_V3>
-  </PropertyGroup>
+	<SerilogSettingConfiguration_V8>8.0.0</SerilogSettingConfiguration_V8>
+	<SerilogSettingConfiguration_V7>7.0.0</SerilogSettingConfiguration_V7>
+
+</PropertyGroup>
 
   <ItemGroup>
     <None Remove="oqs.dll" />
   </ItemGroup>
 
 	<ItemGroup>
+		<Content Remove="Assembly\oqs.dll" />
+		<Content Remove="Assembly\oqs.so" />
+
+		<None Include="Assembly\oqs.dll" Pack="true" PackagePath="lib\net7.0" />
+		<None Include="Assembly\oqs.dll" Pack="true" PackagePath="lib\net8.0" />
+		<None Include="Assembly\oqs.so" Pack="true" PackagePath="lib\net7.0" />
+		<None Include="Assembly\oqs.so" Pack="true" PackagePath="lib\net8.0" />
+
 		<EmbeddedResource Include="Assembly\oqs.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</EmbeddedResource>
 		<EmbeddedResource Include="Assembly\oqs.so">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</EmbeddedResource>
-
-		<Content Include="Assembly\oqs.dll">
-			<Pack>true</Pack>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Assembly\oqs.so">
-			<Pack>true</Pack>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 
 	<PropertyGroup>
@@ -69,65 +56,43 @@
 		<!-- Microsoft.Extensions.* -->
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(DI_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(Microsoft_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(Microsoft_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
 
 		<!-- Microsoft.Extensions.Caching.StackExchangeRedis -->
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="$(Microsoft_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="$(Microsoft_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="$(Microsoft_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
 
 		<!-- Microsoft.Extensions.EntityFrameworkCore -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(Microsoft_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(Microsoft_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(Microsoft_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
 
 		<!-- SQLite Provider -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(Microsoft_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(Microsoft_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
 
 		<!-- SQL Server Provider -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(Microsoft_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(Microsoft_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(Microsoft_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
 
 		<!-- PostgreSQL Provider -->
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(Npgsql_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(Microsoft_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(Microsoft_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
 
-		<!-- Azure -->
-		<PackageReference Include="Azure.Identity" Version="$(AzureIdentity_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageReference Include="Azure.Identity" Version="$(AzureIdentity_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Azure.Identity" Version="$(AzureIdentity_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Azure.Identity" Version="$(AzureIdentity_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
+		<!-- Serilog.AspNetCore -->
+		<PackageReference Include="Serilog.AspNetCore" Version="$(SerilogAsp_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
+		<PackageReference Include="Serilog.AspNetCore" Version="$(SerilogAsp_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
 
-		<!-- AWS -->
-		<PackageReference Include="AWSSDK.S3" Version="$(AWSSDK_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageReference Include="AWSSDK.S3" Version="$(AWSSDK_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="AWSSDK.S3" Version="$(AWSSDK_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="AWSSDK.S3" Version="$(AWSSDK_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
-
-		<!-- System.* -->
-		<PackageReference Include="System.Text.Json" Version="$(SystemTextJson_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageReference Include="System.Text.Json" Version="$(SystemTextJson_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="System.Text.Json" Version="$(SystemTextJson_V6)" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="System.Text.Json" Version="$(SystemTextJson_V3)" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
+		<!-- Serilog.Settings.Configuration -->
+		<PackageReference Include="Serilog.Settings.Configuration" Version="$(SerilogSettingConfiguration_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="$(SerilogSettingConfiguration_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
 
 		<!-- Cross-platform packages (fixed versions) -->
-		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+		<PackageReference Include="System.Text.Json" Version="8.0.5" />
+		<PackageReference Include="AWSSDK.S3" Version="3.7.101" />
 		<PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.1.2" />
 		<PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
 		<PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
 		<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
 		<PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
 		<PackageReference Include="MongoDB.Driver" Version="3.3.0" />
 		<PackageReference Include="Twilio" Version="7.10.0" />

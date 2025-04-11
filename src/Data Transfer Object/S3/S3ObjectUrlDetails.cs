@@ -16,7 +16,7 @@ public class S3ObjectUrlDetails : S3ObjectDetails
     /// <summary>
     /// Gets or sets the generated pre-signed URL for accessing the object.
     /// </summary>
-    public required string Url { get; set; }
+    public string Url { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the expiration date and time of the pre-signed URL.
@@ -24,7 +24,7 @@ public class S3ObjectUrlDetails : S3ObjectDetails
     /// <remarks>
     /// All times are in UTC. Attempts to use the URL after this time will return 403 Forbidden.
     /// </remarks>
-    public required DateTime Expires { get; set; }
+    public DateTime Expires { get; set; }
 
     /// <summary>
     /// Gets or sets the HTTP verb permitted by the pre-signed URL.
@@ -32,5 +32,5 @@ public class S3ObjectUrlDetails : S3ObjectDetails
     /// <remarks>
     /// Typically GET for downloads or PUT for uploads. Other verbs may be restricted by S3 policies.
     /// </remarks>
-    public required HttpVerb Verb { get; set; }
+    public HttpVerb Verb { get; set; }
 }

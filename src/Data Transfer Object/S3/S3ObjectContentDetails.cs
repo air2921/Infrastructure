@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Data_Transfer_Object.Base;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Data_Transfer_Object.S3;
 
@@ -26,7 +27,8 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// <value>
     /// A string representing the MIME type (e.g., "application/pdf", "image/jpeg").
     /// </value>
-    public required string ContentType { get; set; }
+    [Required]
+    public string ContentType { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the size of the object content in bytes.
@@ -34,7 +36,8 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// <value>
     /// A long integer representing the exact byte count of the content.
     /// </value>
-    public required long Size { get; set; }
+    [Required]
+    public long Size { get; set; }
 
     /// <summary>
     /// Gets or sets the stream containing the object's data.
@@ -53,7 +56,8 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// </list>
     /// </para>
     /// </remarks>
-    public required Stream Content { get; init; }
+    [Required]
+    public Stream Content { get; init; } = null!;
 
     /// <summary>
     /// Protected implementation of Dispose pattern.

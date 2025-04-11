@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace Infrastructure.Data_Transfer_Object.Authorization;
 
@@ -14,12 +15,14 @@ public class JsonWebTokenDetails : AuthorizationDetails
     /// <summary>
     /// Gets or sets the unique identifier of the user associated with the JWT.
     /// </summary>
-    public required string UserId { get; set; }
+    [Required]
+    public string UserId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the role of the user associated with the JWT.
     /// </summary>
-    public required string Role { get; set; }
+    [Required]
+    public string Role { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets a collection of claims associated with the JWT.

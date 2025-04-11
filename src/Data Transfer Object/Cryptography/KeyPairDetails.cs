@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Data_Transfer_Object.Cryptography;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Infrastructure.Data_Transfer_Object.Cryptography;
 
 /// <summary>
 /// Represents a cryptographic key pair containing both public and private keys.
@@ -14,11 +16,13 @@ public class KeyPairDetails
     /// Gets the public key component of the key pair.
     /// The public key can be freely distributed and is typically used for encryption or signature verification.
     /// </summary>
-    public required byte[] PublicKey { get; init; }
+    [Required]
+    public byte[] PublicKey { get; set; } = null!;
 
     /// <summary>
     /// Gets the private key component of the key pair.
     /// The private key must be kept confidential and is used for decryption or creating digital signatures.
     /// </summary>
-    public required byte[] PrivateKey { get; init; }
+    [Required]
+    public byte[] PrivateKey { get; set; } = null!;
 }

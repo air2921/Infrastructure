@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Data_Transfer_Object.Base;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Data_Transfer_Object.Sms;
 
@@ -20,5 +21,6 @@ public class SmsDetails : MessageDetails
     /// This value represents the message body that will be sent to the recipient's phone.
     /// The message text should not be null or empty to ensure a valid SMS is sent.
     /// </remarks>
-    public required string Message { get; set; }
+    [Required]
+    public string Message { get; set; } = null!;
 }

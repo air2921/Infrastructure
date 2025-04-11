@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Data_Transfer_Object.Base;
 using MimeKit;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Data_Transfer_Object;
 
@@ -22,12 +23,14 @@ public class MailDetails : MessageDetails
     /// <summary>
     /// Gets or sets the username of the recipient.
     /// </summary>
-    public required string UsernameTo { get; set; }
+    [Required]
+    public string UsernameTo { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the subject of the email.
     /// </summary>
-    public required string Subject { get; set; }
+    [Required]
+    public string Subject { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the MIME entity representing the email body.
@@ -42,5 +45,6 @@ public class MailDetails : MessageDetails
     /// Do not dispose this object manually after assignment to avoid double disposal.
     /// </para>
     /// </remarks>
-    public required MimeEntity Entity { get; set; }
+    [Required]
+    public MimeEntity Entity { get; set; } = null!;
 }
