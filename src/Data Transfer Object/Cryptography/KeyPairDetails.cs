@@ -16,13 +16,11 @@ public class KeyPairDetails
     /// Gets the public key component of the key pair.
     /// The public key can be freely distributed and is typically used for encryption or signature verification.
     /// </summary>
-    [Required]
-    public byte[] PublicKey { get; set; } = null!;
+    public required byte[] PublicKey { get; set; }
 
     /// <summary>
     /// Gets the private key component of the key pair.
     /// The private key must be kept confidential and is used for decryption or creating digital signatures.
     /// </summary>
-    [Required]
-    public byte[] PrivateKey { get; set; } = null!;
+    public required byte[] PrivateKey { get; set; }
 }

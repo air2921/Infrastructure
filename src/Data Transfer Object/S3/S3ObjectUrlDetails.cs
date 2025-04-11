@@ -16,7 +16,7 @@ public class S3ObjectUrlDetails : S3ObjectDetails
     /// <summary>
     /// Gets or sets the generated pre-signed URL for accessing the object.
     /// </summary>
-    public string Url { get; set; } = null!;
+    public required string Url { get; set; }
 
     /// <summary>
     /// Gets or sets the expiration date and time of the pre-signed URL.

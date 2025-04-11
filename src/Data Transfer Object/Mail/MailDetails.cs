@@ -23,14 +23,12 @@ public class MailDetails : MessageDetails
     /// <summary>
     /// Gets or sets the username of the recipient.
     /// </summary>
-    [Required]
-    public string UsernameTo { get; set; } = null!;
+    public required string UsernameTo { get; set; }
 
     /// <summary>
     /// Gets or sets the subject of the email.
     /// </summary>
-    [Required]
-    public string Subject { get; set; } = null!;
+    public required string Subject { get; set; }
 
     /// <summary>
     /// Gets or sets the MIME entity representing the email body.
@@ -45,6 +43,5 @@ public class MailDetails : MessageDetails
     /// Do not dispose this object manually after assignment to avoid double disposal.
     /// </para>
     /// </remarks>
-    [Required]
-    public MimeEntity Entity { get; set; } = null!;
+    public required MimeEntity Entity { get; set; }
 }

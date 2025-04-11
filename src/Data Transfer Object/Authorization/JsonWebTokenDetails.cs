@@ -15,14 +15,12 @@ public class JsonWebTokenDetails : AuthorizationDetails
     /// <summary>
     /// Gets or sets the unique identifier of the user associated with the JWT.
     /// </summary>
-    [Required]
-    public string UserId { get; set; } = null!;
+    public required string UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the role of the user associated with the JWT.
     /// </summary>
-    [Required]
-    public string Role { get; set; } = null!;
+    public required string Role { get; set; }
 
     /// <summary>
     /// Gets or sets a collection of claims associated with the JWT.

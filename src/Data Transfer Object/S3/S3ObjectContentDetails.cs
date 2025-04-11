@@ -27,8 +27,7 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// <value>
     /// A string representing the MIME type (e.g., "application/pdf", "image/jpeg").
     /// </value>
-    [Required]
-    public string ContentType { get; set; } = null!;
+    public required string ContentType { get; set; }
 
     /// <summary>
     /// Gets or sets the size of the object content in bytes.
@@ -36,8 +35,7 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// <value>
     /// A long integer representing the exact byte count of the content.
     /// </value>
-    [Required]
-    public long Size { get; set; }
+    public required long Size { get; set; }
 
     /// <summary>
     /// Gets or sets the stream containing the object's data.
@@ -56,8 +54,7 @@ public class S3ObjectContentDetails : S3ObjectDetails, IDisposable
     /// </list>
     /// </para>
     /// </remarks>
-    [Required]
-    public Stream Content { get; init; } = null!;
+    public required Stream Content { get; init; }
 
     /// <summary>
     /// Protected implementation of Dispose pattern.

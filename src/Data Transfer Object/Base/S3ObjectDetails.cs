@@ -15,6 +15,5 @@ public abstract class S3ObjectDetails
     /// <summary>
     /// Gets or sets the object key representing the full path within the S3 bucket.
     /// </summary>
-    [Required]
-    public string Key { get; set; } = null!;
+    public required string Key { get; set; }
 }

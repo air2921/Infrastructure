@@ -10,6 +10,5 @@ public abstract class MessageDetails
     /// <summary>
     /// Gets or sets the recipient of the message.
     /// </summary>
-    [Required]
-    public virtual string To { get; set; } = null!;
+    public required virtual string To { get; set; }
 }

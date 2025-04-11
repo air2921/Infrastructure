@@ -21,6 +21,5 @@ public class SmsDetails : MessageDetails
     /// This value represents the message body that will be sent to the recipient's phone.
     /// The message text should not be null or empty to ensure a valid SMS is sent.
     /// </remarks>
-    [Required]
-    public string Message { get; set; } = null!;
+    public required string Message { get; set; }
 }
