@@ -1,18 +1,19 @@
-﻿namespace Infrastructure.Abstractions.Cryptography;
+﻿using System.Runtime.InteropServices;
+
+namespace Infrastructure.Abstractions.Cryptography;
 
 /// <summary>
 /// Specifies the format and parameters for a quantum-safe cryptographic algorithm
 /// </summary>
 /// <remarks>
-/// Provides required parameters and factory method for concrete algorithm implementations.
 /// Default implementation includes embedded OQS library path.
 /// </remarks>
 public interface IOqsAlgorithmFormat
 {
     /// <summary>
-    /// Path to embedded OQS library (default: "Infrastructure.Assembly.oqs.dll")
+    /// Path to embedded OQS library
     /// </summary>
-    public string ResourceName => "Infrastructure.Assembly.oqs.dll";
+    public string ResourceName => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "Infrastructure.Assembly.oqs.so" : "Infrastructure.Assembly.oqs.dll";
 
     /// <summary>
     /// Algorithm name (e.g. "Dilithium5")

@@ -12,16 +12,27 @@
     <None Remove="oqs.dll" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Assembly\oqs.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assembly\oqs.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'" />
+		<EmbeddedResource Include="Assembly\oqs.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'" />
+
+		<Content Include="Assembly\oqs.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+			<Pack>true</Pack>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assembly\oqs.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+			<Pack>true</Pack>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-		<PackageId>AirInc.Infrastructure</PackageId>
-		<Authors>air2921;Tusa101;CommonZ</Authors>
+		<PackageId>AirSoft.Infrastructure</PackageId>
+		<Authors>AirSoft Team</Authors>
+		<Company>AirSoft</Company>
 		<Version>8.0.0</Version>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<RepositoryUrl>https://github.com/air2921/Infrastructure</RepositoryUrl>
