@@ -66,7 +66,7 @@ public class TwilioConfigureOptions : Validator
         if (string.IsNullOrWhiteSpace(AccountSid) || string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(PhoneNumber))
             return false;
 
-        if (!Regex.IsMatch(PhoneNumber, Immutable.RegularExpression.PhoneNumber))
+        if (!Regex.IsMatch(PhoneNumber, InfrastructureImmutable.RegularExpression.PhoneNumber))
             return false;
 
         return true;
