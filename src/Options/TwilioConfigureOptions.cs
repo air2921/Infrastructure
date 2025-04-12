@@ -20,7 +20,7 @@ public class TwilioConfigureOptions : Validator
     /// The Account SID is used to identify your Twilio account.
     /// This identifier is required for authentication and to interact with the Twilio API.
     /// </remarks>
-    public string AccountSid { get; set; } = null!;
+    public string AccountSid { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the username for authentication with Twilio.
@@ -29,7 +29,7 @@ public class TwilioConfigureOptions : Validator
     /// <remarks>
     /// This is the username used during the authentication process via Basic Authentication.
     /// </remarks>
-    public string Username { get; set; } = null!;
+    public string Username { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password for authentication with Twilio.
@@ -38,7 +38,7 @@ public class TwilioConfigureOptions : Validator
     /// <remarks>
     /// This password is used during the authentication process along with the username for Basic Authentication.
     /// </remarks>
-    public string Password { get; set; } = null!;
+    public string Password { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the phone number to be used for sending SMS messages.
@@ -48,7 +48,7 @@ public class TwilioConfigureOptions : Validator
     /// The phone number must be in a valid international format (e.g., +1XXXXXXXXXX).
     /// This number is used as the sender when sending messages through the Twilio API.
     /// </remarks>
-    public string PhoneNumber { get; set; } = null!;
+    public string PhoneNumber { internal get; set; } = null!;
 
     /// <summary>
     /// Validates whether the Twilio configuration is correct.
@@ -63,11 +63,10 @@ public class TwilioConfigureOptions : Validator
     /// </remarks>
     public override bool IsValidConfigure()
     {
-        // Check if all required fields are provided
         if (string.IsNullOrWhiteSpace(AccountSid) || string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(PhoneNumber))
             return false;
 
-        if (!Regex.IsMatch(PhoneNumber, Immutable.RegularExpression.PhoneNumber))
+        if (!Regex.IsMatch(PhoneNumber, InfrastructureImmutable.RegularExpression.PhoneNumber))
             return false;
 
         return true;

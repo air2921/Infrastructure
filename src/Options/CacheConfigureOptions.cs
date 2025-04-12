@@ -45,7 +45,7 @@ public sealed class CacheConfigureOptions : Validator
     /// <value>The JSON serializer settings.</value>
     public JsonSerializerOptions JsonSerializerSettings
     {
-        get => _jsonSerializerSettings;
+        internal get => _jsonSerializerSettings;
         set => _jsonSerializerSettings = value;
     }
 
@@ -55,7 +55,7 @@ public sealed class CacheConfigureOptions : Validator
     /// <value>The JSON naming policy.</value>
     public JsonNamingPolicy JsonNamingPolicy
     {
-        get => _jsonNamingPolicy;
+        internal get => _jsonNamingPolicy;
         set => _jsonNamingPolicy = value;
     }
 
@@ -63,7 +63,7 @@ public sealed class CacheConfigureOptions : Validator
     /// Gets or sets the connection string.
     /// </summary>
     /// <value>The connection string.</value>
-    public string Connection { get; set; } = null!;
+    public string Connection { internal get; set; } = null!;
 
     /// <summary>
     /// Validates whether the instance is configured correctly.

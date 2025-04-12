@@ -13,7 +13,6 @@ namespace Infrastructure.Services.Sms;
 /// The <see cref="SmsSender"/> class interacts with the <see cref="SmsClientWrapper"/> to send SMS messages. It handles error logging and exception management during the sending process.
 /// This class uses a <see cref="Logger{SmsSender}"/> to log errors when an exception occurs while sending messages.
 /// </remarks>
-/// <param name="logger">A logger used to log errors and events related to SMS sending.</param>
 /// <param name="smsClient">An instance of <see cref="SmsClientWrapper"/> used to send SMS messages.</param>
 /// <remarks>
 /// The constructor initializes the <see cref="SmsSender"/> with the provided logger and SMS client. It does not send any messages but prepares the instance for use.

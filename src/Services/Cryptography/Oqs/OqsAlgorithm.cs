@@ -222,7 +222,7 @@ public abstract class OqsAlgorithm : IDisposable
     #region Constructor and Destructor
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="OqsAlgorithm{TAlgorithm}"/> class.
+    /// Initializes a new instance of the <see cref="OqsAlgorithm"/> class.
     /// Automatically creates and validates the algorithm format specification.
     /// </summary>
     /// <exception cref="CryptographyException">
@@ -234,7 +234,6 @@ public abstract class OqsAlgorithm : IDisposable
     /// <remarks>
     /// The constructor performs the following operations:
     /// <list type="number">
-    ///   <item><description>Creates a new instance of <typeparamref name="TAlgorithm"/> using its parameterless constructor</description></item>
     ///   <item><description>Validates the algorithm format using <see cref="IsValidFormat"/></description></item>
     ///   <item><description>Stores the validated format in <see cref="algorithmFormat"/></description></item>
     ///   <item><description>Initializes native resources by calling <see cref="DilithiumPointerResolve"/></description></item>
@@ -243,12 +242,6 @@ public abstract class OqsAlgorithm : IDisposable
     /// 
     /// <para>
     /// Note: The temporary DLL file (<see cref="_dllPath"/>) is automatically deleted when the process exits.
-    /// </para>
-    /// 
-    /// <para>
-    /// Type Constraints:
-    /// <typeparamref name="TAlgorithm"/> must have a parameterless constructor (enforced by <c>new()</c> constraint)
-    /// and implement <see cref="IOqsAlgorithmFormat"/>.
     /// </para>
     /// </remarks>
     protected OqsAlgorithm(IOqsAlgorithmFormat algorithmFormat)
@@ -307,7 +300,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// <remarks>
     /// This method performs the following operations in a thread-safe manner:
     /// 1. Extracts the embedded OQS DLL to a temporary file if not already present
-    /// 2. Loads the native library using <see cref="NativeLibrary.Load"/>
+    /// 2. Loads the native library using <see cref="NativeLibrary.Load(string)"/>
     /// 3. Resolves all required function delegates via <see cref="ResolveDelegates"/>
     /// 4. Initializes the signature scheme instance
     /// 
@@ -341,7 +334,7 @@ public abstract class OqsAlgorithm : IDisposable
                 if (sig == IntPtr.Zero)
                     throw new CryptographyException($"Failed to initialize {algorithmFormat.Algorithm}");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not CryptographyException)
             {
                 Console.WriteLine("Error during initialization: " + ex.ToString());
                 throw new CryptographyException(ex.Message);
@@ -528,11 +521,11 @@ public abstract class OqsAlgorithm : IDisposable
     /// </param>
     /// <remarks>
     /// This method implements the standard dispose pattern and performs the following operations:
-    /// 1. Checks the disposal state via <see cref="_disposed"/> flag to prevent duplicate disposal
+    /// 1. Checks the disposal state via <see cref="disposed"/> flag to prevent duplicate disposal
     /// 2. Uses <see cref="pointerLock"/> to ensure thread-safe cleanup
-    /// 3. Releases the signature object via <see cref="_oqsSigFree"/> if <see cref="_sig"/> is initialized
+    /// 3. Releases the signature object via <see cref="_oqsSigFree"/> if <see cref="sig"/> is initialized
     /// 4. Conditionally frees the native library handle (<see cref="_oqsLibraryHandle"/>) when <paramref name="disposing"/> is true
-    /// 5. Sets the <see cref="_disposed"/> flag to prevent future operations on disposed instance
+    /// 5. Sets the <see cref="disposed"/> flag to prevent future operations on disposed instance
     ///
     /// Note: When called with <c>false</c> (from finalizer), only unmanaged resources are released.
     /// Derived classes should override this method to add their own cleanup logic while calling base.Dispose(disposing).
@@ -589,7 +582,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// access to the instance's resources.
     /// </para>
     /// <para>
-    /// The check is performed by verifying the <see cref="_disposed"/> flag. If the flag is set to <c>true</c>,
+    /// The check is performed by verifying the <see cref="disposed"/> flag. If the flag is set to <c>true</c>,
     /// the method throws an <see cref="ObjectDisposedException"/> with the current instance's type name.
     /// </para>
     /// </remarks>

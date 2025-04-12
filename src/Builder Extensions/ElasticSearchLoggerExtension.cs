@@ -59,7 +59,7 @@ public static class ElasticSearchLoggerExtension
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
-            .Enrich.WithProperty(Immutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(Immutable.ASPNETCore.AspNetCoreEnv)!)
+            .Enrich.WithProperty(InfrastructureImmutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(InfrastructureImmutable.ASPNETCore.AspNetCoreEnv)!)
             .ReadFrom.Configuration(options.Configuration)
             .WriteTo.Console(new CompactJsonFormatter())
             .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))

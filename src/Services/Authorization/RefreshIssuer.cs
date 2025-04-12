@@ -4,7 +4,7 @@ using Infrastructure.Data_Transfer_Object.Authorization;
 namespace Infrastructure.Services.Authorization;
 
 /// <remarks>
-/// This class uses the provided <see cref="IGenerator"/> to create a refresh token by combining a specified number of GUIDs.
+/// This class uses the provided <see cref="IRandomizer"/> to create a refresh token by combining a specified number of GUIDs.
 /// The number of GUIDs to combine is determined by the <see cref="RefreshDetails.CombineCount"/> property.
 /// </remarks>
 public class RefreshIssuer(IRandomizer randomizer) : ITokenIssuer<RefreshDetails>

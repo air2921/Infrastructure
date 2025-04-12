@@ -33,14 +33,14 @@ public class Randomizer : IRandomizer
     /// <summary>
     /// Combines multiple GUIDs into a single optimized string.
     /// </summary>
-    /// <param name="count">Number of GUIDs to combine (between <see cref="Immutable.ValidationParameter.MinGuidCombineLength"/> and <see cref="Immutable.ValidationParameter.MaxGuidCombineLength"/>)</param>
+    /// <param name="count">Number of GUIDs to combine (between <see cref="InfrastructureImmutable.ValidationParameter.MinGuidCombineLength"/> and <see cref="InfrastructureImmutable.ValidationParameter.MaxGuidCombineLength"/>)</param>
     /// <param name="format">Guid generator format. Defaults is <see cref="GuidFormat.D"/><c>false</c>.</param>
     /// <returns>Concatenated GUID string in specified format</returns>
     /// <exception cref="InvalidArgumentException">Thrown when count is outside valid range</exception>
     public string GuidCombine(int count, GuidFormat format = GuidFormat.D)
     {
-        if (count < Immutable.ValidationParameter.MinGuidCombineLength || count > Immutable.ValidationParameter.MaxGuidCombineLength)
-            throw new InvalidArgumentException($"The allowed number of GUID combinations must be between {Immutable.ValidationParameter.MinGuidCombineLength} and {Immutable.ValidationParameter.MaxGuidCombineLength}");
+        if (count < InfrastructureImmutable.ValidationParameter.MinGuidCombineLength || count > InfrastructureImmutable.ValidationParameter.MaxGuidCombineLength)
+            throw new InvalidArgumentException($"The allowed number of GUID combinations must be between {InfrastructureImmutable.ValidationParameter.MinGuidCombineLength} and {InfrastructureImmutable.ValidationParameter.MaxGuidCombineLength}");
 
         var builder = new StringBuilder(((int)format) * count);
         for (int i = 0; i < count; i++)
@@ -52,13 +52,13 @@ public class Randomizer : IRandomizer
     /// <summary>
     /// Generates a purely numeric random code with guaranteed length.
     /// </summary>
-    /// <param name="length">Desired code length (between <see cref="Immutable.ValidationParameter.MinCodeLength"/> and <see cref="Immutable.ValidationParameter.MaxCodeLength"/>)</param>
+    /// <param name="length">Desired code length (between <see cref="InfrastructureImmutable.ValidationParameter.MinCodeLength"/> and <see cref="InfrastructureImmutable.ValidationParameter.MaxCodeLength"/>)</param>
     /// <returns>String containing random digits</returns>
     /// <exception cref="InvalidArgumentException">Thrown when length is invalid</exception>
     public string GenerateNumericCode(int length)
     {
-        if (length < Immutable.ValidationParameter.MinCodeLength || length > Immutable.ValidationParameter.MaxCodeLength)
-            throw new InvalidArgumentException($"The valid code length must be in the range from {Immutable.ValidationParameter.MinCodeLength} to {Immutable.ValidationParameter.MaxCodeLength}");
+        if (length < InfrastructureImmutable.ValidationParameter.MinCodeLength || length > InfrastructureImmutable.ValidationParameter.MaxCodeLength)
+            throw new InvalidArgumentException($"The valid code length must be in the range from {InfrastructureImmutable.ValidationParameter.MinCodeLength} to {InfrastructureImmutable.ValidationParameter.MaxCodeLength}");
 
         var builder = new StringBuilder(length);
         for (int i = 0; i < length; i++)
@@ -83,7 +83,7 @@ public class Randomizer : IRandomizer
     public string GenerateReadableCode(int segmentLength = 4, int segmentCount = 2, char separator = '-')
     {
         int totalLength = segmentLength * segmentCount + (segmentCount - 1);
-        var chars = Immutable.Char.ReadebleChars;
+        var chars = InfrastructureImmutable.Char.ReadebleChars;
         var random = Random.Shared;
 
         return string.Create(totalLength, (chars, segmentLength, segmentCount, separator), (span, state) =>
@@ -127,7 +127,7 @@ public class Randomizer : IRandomizer
     {
         return string.Create(17, Random.Shared, (span, random) =>
         {
-            var chars = Immutable.Char.HexChars;
+            var chars = InfrastructureImmutable.Char.HexChars;
 
             byte firstByte = (byte)(random.Next(256) & 0xFC | 0x02);
             span[0] = chars[firstByte >> 4];
