@@ -61,8 +61,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <para>Thread-safe method.</para>
     /// </summary>
     /// <returns>An <see cref="IQueryable{TEntity}"/> representing the entity set.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public IQueryable<TEntity> GetQuery()
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterReadLock();
 
         try
@@ -82,8 +84,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="filter">The filter expression to apply to the entity set.</param>
     /// <returns>The count of entities that match the filter.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the count operation.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterReadLock();
 
         try
@@ -114,8 +118,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>The entity with the specified identifier, or <c>null</c> if not found.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterReadLock();
 
         try
@@ -148,8 +154,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>The first or last entity that matches the filter, or <c>null</c> if not found.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<TEntity?> GetByFilterAsync(SingleQueryBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterReadLock();
 
         try
@@ -185,8 +193,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>A list of entities matching the query criteria.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the retrieval operation.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<IEnumerable<TEntity>> GetRangeAsync(RangeQueryBuilder<TEntity>? builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterReadLock();
 
         try
@@ -225,8 +235,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>The added entity.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the add operation.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<TEntity> AddAsync(CreateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -266,8 +278,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <exception cref="EntityException">
     /// Thrown when an error occurs during the add operation or when operation is canceled.
     /// </exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<IEnumerable<TEntity>> AddRangeAsync(CreateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -305,8 +319,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">A token to cancel the operation if needed</param>
     /// <returns>The deleted entity, or null if not found</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during deletion</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<TEntity?> DeleteAsync(RemoveSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -358,8 +374,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Deleted entities</returns>
     /// <exception cref="EntityException">On deletion error</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -430,8 +448,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The updated entity</returns>
     /// <exception cref="EntityException">On update error</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -474,8 +494,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated entities</returns>
     /// <exception cref="EntityException">On update error</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -519,8 +541,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The restored entity</returns>
     /// <exception cref="EntityException">On restore error</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<TEntity> RestoreAsync(RestoreSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -558,8 +582,10 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Restored entities</returns>
     /// <exception cref="EntityException">On restore error</exception>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task<IEnumerable<TEntity>> RestoreRangeAsync(RestoreRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
         _lock.EnterWriteLock();
 
         try
@@ -601,8 +627,11 @@ public sealed class Repository<TEntity, TDbContext> :
     /// It's typically used after performing multiple operations when you want to
     /// ensure all changes are committed together.
     /// </remarks>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
+
         try
         {
             await _context.SaveChangesAsync(cancellationToken);
@@ -623,8 +652,11 @@ public sealed class Repository<TEntity, TDbContext> :
     /// This method will persist all changes tracked by the current DbContext instance.
     /// Consider using <see cref="SaveChangesAsync"/> for non-blocking operations.
     /// </remarks>
+    /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
     public void SaveChanges()
     {
+        ObjectDisposedException.ThrowIf(disposed, this);
+
         try
         {
 
