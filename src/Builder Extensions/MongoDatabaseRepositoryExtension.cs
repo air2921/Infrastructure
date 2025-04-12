@@ -32,16 +32,22 @@ public static class MongoDatabaseRepositoryExtension
     ///     <item><description><typeparamref name="TMongoContext"/> - Scoped service for interacting with the MongoDB database context.</description></item>
     ///     <item><description><see cref="IMongoSessionFactory"/> - Transient service for creating MongoDB sessions.</description></item>
     ///     <item><description><see cref="IMongoSessionFactory{TMongoContext}"/> - Transient service for creating MongoDB sessions with specific context.</description></item>
-    ///     <item><description><see cref="IMongoRepository{TDocument}"/> - Scoped service for interacting with documents of type <typeparamref name="TDocument"/>.</description></item>
-    ///     <item><description><see cref="IMongoRepository{TMongoContext, TDocument}"/> - Scoped service for interacting with documents of type <typeparamref name="TDocument"/> using <typeparamref name="TMongoContext"/>.</description></item>
+    ///     <item><description>Scoped implementations of <see cref="IMongoRepository{T}"/> for all document types in the context.</description></item>
+    ///     <item><description>Scoped implementations of <see cref="IMongoRepository{TContext, T}"/> for all document types with context.</description></item>
     /// </list>
     /// Additionally, this method performs the following:
     /// <list type="bullet">
     ///     <item><description>Validates the MongoDB configuration (connection string and database name).</description></item>
-    ///     <item><description>Registers repositories for all document types found in <typeparamref name="TMongoContext"/>.</description></item>
+    ///     <item><description>Automatically registers repositories for all document types found in <typeparamref name="TMongoContext"/>.</description></item>
     ///     <item><description>Configures session factories for transaction support.</description></item>
     /// </list>
-    /// Note: The MongoDB session factories are registered as scoped services to ensure proper transaction handling within a scope.
+    /// <para>
+    /// Note: The document types are automatically discovered from the <typeparamref name="TMongoContext"/> properties 
+    /// of type <see cref="IMongoCollection{T}"/>.
+    /// </para>
+    /// <para>
+    /// The MongoDB session factories are registered as scoped services to ensure proper transaction handling within a scope.
+    /// </para>
     /// </remarks>
     public static IInfrastructureBuilder AddMongoRepository<TMongoContext>(this IInfrastructureBuilder builder, Action<MongoDatabaseConfigureOptions> configureOptions) where TMongoContext : MongoContext
     {

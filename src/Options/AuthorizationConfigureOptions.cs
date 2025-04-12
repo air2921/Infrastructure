@@ -41,7 +41,7 @@ public sealed class AuthorizationConfigureOptions : Validator
     /// <value>
     /// The encoding used for authorization token generation and validation.
     /// </value>
-    public Encoding Encoding { get; set; } = Encoding.UTF8;
+    public Encoding Encoding { internal get; set; } = Encoding.UTF8;
 
     /// <summary>
     /// Gets or sets the algorithm used for authorization token signing and validation.
@@ -49,7 +49,7 @@ public sealed class AuthorizationConfigureOptions : Validator
     /// <value>
     /// The algorithm used for authorization. Must be one of the supported algorithms from <see cref="SecurityAlgorithms"/>.
     /// </value>
-    public string Algorithm { get; set; } = null!;
+    public string Algorithm { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the expiration time for authorization tokens. Defaults to 30 minutes.
@@ -57,7 +57,7 @@ public sealed class AuthorizationConfigureOptions : Validator
     /// <value>
     /// The expiration time for authorization tokens. Must be greater than 15 minutes (900 seconds).
     /// </value>
-    public TimeSpan Expiration { get; set; } = TimeSpan.FromMinutes(30);
+    public TimeSpan Expiration { internal get; set; } = TimeSpan.FromMinutes(30);
 
     /// <summary>
     /// Gets or sets the key used for signing authorization tokens.
@@ -65,7 +65,7 @@ public sealed class AuthorizationConfigureOptions : Validator
     /// <value>
     /// The signing key used for token generation and validation. Must not be null or empty.
     /// </value>
-    public string Key { get; set; } = null!;
+    public string Key { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the issuer of the authorization tokens.
@@ -73,7 +73,7 @@ public sealed class AuthorizationConfigureOptions : Validator
     /// <value>
     /// The issuer of the authorization tokens. Must not be null or empty.
     /// </value>
-    public string Issuer { get; set; } = null!;
+    public string Issuer { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the audience of the authorization tokens.
@@ -81,7 +81,7 @@ public sealed class AuthorizationConfigureOptions : Validator
     /// <value>
     /// The audience of the authorization tokens. Must not be null or empty.
     /// </value>
-    public string Audience { get; set; } = null!;
+    public string Audience { internal get; set; } = null!;
 
     /// <summary>
     /// Validates whether the current configuration is valid.

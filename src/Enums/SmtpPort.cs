@@ -13,12 +13,12 @@ public enum SmtpPort
     /// </summary>
     Smtp = 25,
 
-    [Obsolete("Port 465 is deprecated and should be avoided. Use port 587 instead.")]
     /// <summary>
     /// SMTP port with SSL (465).
     /// Used for secure connections with the mail server.
     /// This port is deprecated and should be avoided in favor of port 587.
     /// </summary>
+    [Obsolete("Port 465 is deprecated and should be avoided. Use port 587 instead.")]
     Smtps = 465,
 
     /// <summary>

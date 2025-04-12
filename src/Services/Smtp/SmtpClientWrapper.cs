@@ -13,8 +13,6 @@ namespace Infrastructure.Services.Smtp;
 /// A wrapper class for the <see cref="SmtpClient"/> that provides a simplified API for sending emails through an SMTP server.
 /// This class handles the connection, authentication, and email sending functionality, while also supporting error handling and logging.
 /// </summary>
-/// <param name="logger">A logger for tracking errors and operations performed by this class.</param>
-/// <param name="configureOptions">Configuration options containing SMTP provider, port, address, and password for authentication.</param>
 /// <remarks>
 /// This class wraps around the <see cref="SmtpClient"/> to provide a safer and more manageable interface for sending emails asynchronously.
 /// The email sending process includes exception handling for authentication and network issues, logging them accordingly.

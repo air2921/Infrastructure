@@ -684,7 +684,7 @@ public sealed class Repository<TEntity, TDbContext> :
     /// If <paramref name="disposing"/> is <c>true</c>, this method releases all resources held by the repository, 
     /// including the <see cref="SemaphoreSlim"/> used for thread synchronization. 
     /// If <paramref name="disposing"/> is <c>false</c>, only unmanaged resources are released.
-    /// This method ensures that resources are not disposed more than once by checking the <see cref="_disposed"/> field.
+    /// This method ensures that resources are not disposed more than once by checking the <see cref="disposed"/> field.
     /// </remarks>
     private void Dispose(bool disposing)
     {

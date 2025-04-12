@@ -43,7 +43,7 @@
 	</ItemGroup>
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0;net7.0</TargetFramework>
 		<PackageId>AirSoft.Infrastructure</PackageId>
 		<Authors>AirSoft Team</Authors>
 		<Company>AirSoft</Company>
@@ -51,6 +51,9 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<RepositoryUrl>https://github.com/air2921/Infrastructure</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<IncludeSymbols>true</IncludeSymbols>
+		<IncludeSource>true</IncludeSource>
 	</PropertyGroup>
 
 	<ItemGroup>

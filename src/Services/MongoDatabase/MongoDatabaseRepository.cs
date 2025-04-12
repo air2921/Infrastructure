@@ -14,12 +14,9 @@ namespace Infrastructure.Services.MongoDatabase;
 /// </summary>
 /// <typeparam name="TMongoContext">The type of the MongoDB context, which must inherit from <see cref="MongoContext"/>.</typeparam>
 /// <typeparam name="TDocument">The type of the document, which must inherit from <see cref="DocumentBase"/>.</typeparam>
-/// <param name="context">The MongoDB context used to access the database.</param>
-/// <param name="logger">A logger for tracking operations performed by this repository.</param>
-/// <param name="document">An instance of the document type used to determine the collection name.</param>
 /// <remarks>
 /// This class provides methods for querying, inserting, updating, and deleting documents in a MongoDB collection.
-/// It uses the provided <see cref="TMongoContext"/> to access the database and ensures thread-safe operations.
+/// It uses the provided <typeparamref name="TMongoContext"/> to access the database and ensures thread-safe operations.
 /// </remarks>
 public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILogger<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
     : IMongoRepository<TDocument>, IMongoRepository<TMongoContext, TDocument>

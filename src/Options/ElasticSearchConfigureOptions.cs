@@ -21,7 +21,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// The connection string in URI format (e.g., "http://localhost:9200").
     /// This property must be set to a non-null, non-empty value.
     /// </value>
-    public string Connection { get; set; } = null!;
+    public string Connection { internal get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the index name pattern for Elasticsearch.
@@ -30,7 +30,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// The index name with a default pattern of "logs-YYYY" where YYYY is the current UTC year.
     /// Custom index names can be set but must start with "logs" (case insensitive).
     /// </value>
-    public string Index { get; set; } = $"logs-{DateTime.UtcNow:yyyy.MM.dd}";
+    public string Index { internal get; set; } = $"logs-{DateTime.UtcNow:yyyy.MM.dd}";
 
     /// <summary>
     /// Gets or sets the minimum log level for Elasticsearch.
@@ -38,7 +38,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// <value>
     /// The minimum log event level. Defaults to <see cref="LogEventLevel.Information"/>.
     /// </value>
-    public LogEventLevel EventLevel { get; set; } = LogEventLevel.Information;
+    public LogEventLevel EventLevel { internal get; set; } = LogEventLevel.Information;
 
     /// <summary>
     /// Gets or sets the configuration settings for Elasticsearch.
@@ -47,7 +47,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// The <see cref="IConfiguration"/> instance containing additional Elasticsearch settings.
     /// This property must be set to a non-null value.
     /// </value>
-    public IConfiguration Configuration { get; set; } = null!;
+    public IConfiguration Configuration { internal get; set; } = null!;
 
     /// <summary>
     /// Validates whether the Elasticsearch configuration is properly set.
