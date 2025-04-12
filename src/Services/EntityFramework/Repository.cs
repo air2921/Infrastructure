@@ -246,6 +246,7 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.AddTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
+            builder.Entity.CreatedBy = builder.CreatedByUser;
             await _dbSet.Value.AddAsync(builder.Entity, cancellationToken);
             
             if (builder.SaveChanges)
@@ -288,6 +289,9 @@ public sealed class Repository<TEntity, TDbContext> :
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.AddRangeTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
+
+            foreach (var entity in builder.Entities)
+                entity.CreatedBy = builder.CreatedByUser;
 
             await _dbSet.Value.AddRangeAsync(builder.Entities, cancellationToken);
             
@@ -460,7 +464,6 @@ public sealed class Repository<TEntity, TDbContext> :
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             var entity = builder.Entity;
-
             entity.UpdatedBy = builder.UpdatedByUser;
 
             _dbSet.Value.Attach(entity);
