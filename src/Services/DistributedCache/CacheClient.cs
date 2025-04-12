@@ -34,14 +34,11 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         {
             logger.LogInformation("Received request to get object from cache", [key]);
 
-            object? cacheObj = await cache.GetStringAsync(key, cancellationToken).ConfigureAwait(false);
-            if (cacheObj is null)
+            var result = await cache.GetStringAsync(key, cancellationToken).ConfigureAwait(false);
+            if (result is null)
                 return null;
 
-            if (typeof(TResult) == typeof(string))
-                return cacheObj as TResult;
-
-            return JsonSerializer.Deserialize<TResult>((string)cacheObj);
+            return JsonSerializer.Deserialize<TResult>(result);
         }
         catch (Exception ex)
         {
