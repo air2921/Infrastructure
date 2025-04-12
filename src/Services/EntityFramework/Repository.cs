@@ -1,7 +1,9 @@
 ﻿using Infrastructure.Abstractions.Database;
 using Infrastructure.Enums;
 using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Restore;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 using Infrastructure.Services.EntityFramework.Builder.Query;
 using Infrastructure.Services.EntityFramework.Context;
@@ -219,11 +221,11 @@ public sealed class Repository<TEntity, TDbContext> :
     /// Asynchronously adds a new entity to the repository.
     /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="entity">The entity to add.</param>
+    /// <param name="builder">Preconfigured builder containing the entity to add.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>The added entity.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the add operation.</exception>
-    public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<TEntity> AddAsync(CreateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 
@@ -232,10 +234,12 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.AddTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            await _dbSet.Value.AddAsync(entity, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _dbSet.Value.AddAsync(builder.Entity, cancellationToken);
+            
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
 
-            return entity;
+            return builder.Entity;
         }
         catch (OperationCanceledException)
         {
@@ -243,7 +247,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to add an entity", [_tName.Value, new { entity.Id }]);
+            _logger.Value.LogError(ex, "An error occurred while attempting to add an entity", [_tName.Value, new { builder.Entity.Id }]);
             throw new EntityException("An error occurred while attempting to add an entity");
         }
         finally
@@ -253,13 +257,16 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously adds multiple entities to the repository.
+    /// Asynchronously adds multiple entities to the repository using a configured builder.
     /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="entities">The entities to add.</param>
+    /// <param name="builder">Preconfigured builder containing the entities to add.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <exception cref="EntityException">Thrown when an error occurs during the add operation.</exception>
-    public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    /// <returns>The collection of added entities.</returns>
+    /// <exception cref="EntityException">
+    /// Thrown when an error occurs during the add operation or when operation is canceled.
+    /// </exception>
+    public async Task<IEnumerable<TEntity>> AddRangeAsync(CreateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 
@@ -268,8 +275,12 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.AddRangeTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            await _dbSet.Value.AddRangeAsync(entities, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _dbSet.Value.AddRangeAsync(builder.Entities, cancellationToken);
+            
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
+
+            return builder.Entities;
         }
         catch (OperationCanceledException)
         {
@@ -277,7 +288,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to add a range of entities", [_tName.Value, entities.Select(x => new { x.Id })]);
+            _logger.Value.LogError(ex, "An error occurred while attempting to add a range of entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
             throw new EntityException("An error occurred while attempting to add a range of entities");
         }
         finally
@@ -287,55 +298,14 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously deletes an entity by its identifier.
+    /// Asynchronously deletes an entity using a configured builder.
     /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="id">The identifier of the entity to delete.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The deleted entity, or <c>null</c> if no entity was found with the specified identifier.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
-    public async Task<TEntity?> DeleteByIdAsync(object id, CancellationToken cancellationToken = default)
-    {
-        _lock.EnterWriteLock();
-
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.RemoveByIdTimeout));
-            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
-
-            var entity = await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
-            if (entity is not null)
-            {
-                var deletedEntity = _dbSet.Value.Remove(entity).Entity;
-                await _context.SaveChangesAsync(cancellationToken);
-                return deletedEntity;
-            }
-            return null;
-        }
-        catch (OperationCanceledException)
-        {
-            throw new EntityException("The operation was cancelled due to waiting too long for completion or due to manual cancellation");
-        }
-        catch (Exception ex)
-        {
-            _logger.Value.LogError(ex, "An error occurred while attempting to delete an entity by its ID", [_tName.Value, id]);
-            throw new EntityException("An error occurred while attempting to delete an entity by its ID");
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously deletes an entity based on a specified filter.
-    /// <para>Thread-safe method.</para>
-    /// </summary>
-    /// <param name="filter">An expression that defines the filter to identify the entity to delete.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The deleted entity, or <c>null</c> if no entity matches the filter.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
-    public async Task<TEntity?> DeleteByFilterAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
+    /// <param name="builder">Builder with entity deletion parameters</param>
+    /// <param name="cancellationToken">A token to cancel the operation if needed</param>
+    /// <returns>The deleted entity, or null if not found</returns>
+    /// <exception cref="EntityException">Thrown when an error occurs during deletion</exception>
+    public async Task<TEntity?> DeleteAsync(RemoveSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 
@@ -344,15 +314,25 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.RemoveByFilterTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet.Value;
-            query = query.Where(filter);
+            TEntity? entity = default;
 
-            var entity = await query.FirstOrDefaultAsync(cancellationToken);
+            if (builder.RemoveByMode == RemoveByMode.Entity)
+                entity = builder.Entity;
+
+            if (builder.RemoveByMode == RemoveByMode.Identifier)
+                entity = await _dbSet.Value.FindAsync([builder.Id, cancellationToken], cancellationToken: cancellationToken);
+
+            if (builder.RemoveByMode == RemoveByMode.Filter && builder.Filter is not null)
+                entity = await _dbSet.Value.FirstOrDefaultAsync(builder.Filter, cancellationToken);
+
             if (entity is null)
                 return null;
 
             var deletedEntity = _dbSet.Value.Remove(entity).Entity;
-            await _context.SaveChangesAsync(cancellationToken);
+            
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
+
             return deletedEntity;
         }
         catch (OperationCanceledException)
@@ -371,20 +351,13 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously deletes a range of entities based on the specified builder parameters.
+    /// Asynchronously deletes multiple entities using a configured builder.
     /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="builder">The builder containing entities or identifiers to delete and removal mode.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The collection of deleted entities.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the delete operation.</exception>
-    /// <remarks>
-    /// The deletion mode is determined by the <see cref="RemoveRangeBuilder{TEntity}.RemoveByMode"/> property:
-    /// <list type="bullet">
-    /// <item><description>If mode is <see cref="RemoveByMode.Entity"/>, deletes the entities directly</description></item>
-    /// <item><description>If mode is <see cref="RemoveByMode.Identifier"/>, first fetches entities by their identifiers before deletion</description></item>
-    /// </list>
-    /// </remarks>
+    /// <param name="builder">Configured builder with deletion parameters</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Deleted entities</returns>
+    /// <exception cref="EntityException">On deletion error</exception>
     public async Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
@@ -397,7 +370,10 @@ public sealed class Repository<TEntity, TDbContext> :
             if (builder.RemoveByMode == RemoveByMode.Entity)
             {
                 _context.RemoveRange(builder.Entities);
-                await _context.SaveChangesAsync(cancellationToken);
+
+                if (builder.SaveChanges)
+                    await _context.SaveChangesAsync(cancellationToken);
+
                 return builder.Entities;
             }
 
@@ -408,7 +384,24 @@ public sealed class Repository<TEntity, TDbContext> :
                     .ToListAsync(cancellationToken);
 
                 _context.RemoveRange(entities);
-                await _context.SaveChangesAsync(cancellationToken);
+
+                if (builder.SaveChanges)
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                return entities;
+            }
+
+            if (builder.RemoveByMode == RemoveByMode.Filter && builder.Filter is not null)
+            {
+                var entities = await _dbSet.Value
+                    .Where(builder.Filter)
+                    .ToListAsync(cancellationToken);
+
+                _context.RemoveRange(entities);
+
+                if (builder.SaveChanges)
+                    await _context.SaveChangesAsync(cancellationToken);
+
                 return entities;
             }
 
@@ -430,21 +423,13 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously updates a single entity based on the specified builder parameters.
-    /// <para>Thread-safe method that automatically sets update tracking fields.</para>
+    /// Asynchronously updates an entity using a configured builder.
+    /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="builder">The builder containing the entity to update and optional user information.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The updated entity, or <c>null</c> if the update failed.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
-    /// <remarks>
-    /// This method automatically:
-    /// <list type="bullet">
-    /// <item><description>Sets the <c>UpdatedBy</c> field to the builder's <see cref="UpdateSingleBuilder{TEntity}.UpdatedByUser"/> value</description></item>
-    /// <item><description>Sets the <c>UpdatedAt</c> field to the current UTC timestamp</description></item>
-    /// <item><description>Marks all entity properties as modified for the update</description></item>
-    /// </list>
-    /// </remarks>
+    /// <param name="builder">Builder with entity update parameters</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The updated entity</returns>
+    /// <exception cref="EntityException">On update error</exception>
     public async Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
@@ -461,7 +446,9 @@ public sealed class Repository<TEntity, TDbContext> :
             _dbSet.Value.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
 
-            await _context.SaveChangesAsync(cancellationToken);
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
+
             return entity;
         }
         catch (OperationCanceledException)
@@ -480,22 +467,13 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously updates a collection of entities based on the specified builder parameters.
-    /// <para>Thread-safe method that automatically sets update tracking fields for all entities.</para>
+    /// Asynchronously updates multiple entities using a configured builder.
+    /// <para>Thread-safe batch update operation.</para>
     /// </summary>
-    /// <param name="builder">The builder containing entities to update and optional user information.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>A collection of updated entities.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
-    /// <remarks>
-    /// This method performs the following operations for each entity:
-    /// <list type="bullet">
-    /// <item><description>Sets the <c>UpdatedBy</c> field to the builder's <see cref="UpdateRangeBuilder{TEntity}.UpdatedByUser"/> value</description></item>
-    /// <item><description>Sets the <c>UpdatedAt</c> field to the current UTC timestamp</description></item>
-    /// <item><description>Marks all entity properties as modified for the update</description></item>
-    /// </list>
-    /// All updates are performed in a single transaction.
-    /// </remarks>
+    /// <param name="builder">Configured builder with update parameters</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Updated entities</returns>
+    /// <exception cref="EntityException">On update error</exception>
     public async Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
@@ -513,7 +491,9 @@ public sealed class Repository<TEntity, TDbContext> :
                 _context.Entry(entity).State = EntityState.Modified;
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
+
             return builder.Entities;
         }
         catch (OperationCanceledException)
@@ -532,24 +512,14 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously restores a soft-deleted entity in the repository.
-    /// <para>Sets IsDeleted to false and updates the UpdatedAt timestamp.</para>
-    /// <para>Thread-safe method with write lock protection.</para>
+    /// Asynchronously restores a soft-deleted entity using a configured builder.
+    /// <para>Thread-safe method.</para>
     /// </summary>
-    /// <param name="entity">The entity to restore. Must not be null.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The restored entity with updated properties.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the restore operation.</exception>
-    /// <remarks>
-    /// This method will:
-    /// <list type="bullet">
-    ///   <item><description>Mark the entity as not deleted (IsDeleted = false)</description></item>
-    ///   <item><description>Update the UpdatedAt timestamp to current UTC time</description></item>
-    ///   <item><description>Change entity state to Modified</description></item>
-    ///   <item><description>Persist changes to the database</description></item>
-    /// </list>
-    /// </remarks>
-    public async Task<TEntity> RestoreAsync(TEntity entity, CancellationToken cancellationToken = default)
+    /// <param name="builder">Builder with entity restore parameters</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The restored entity</returns>
+    /// <exception cref="EntityException">On restore error</exception>
+    public async Task<TEntity> RestoreAsync(RestoreSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 
@@ -558,10 +528,12 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.RestoreTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _context.Restore(entity);
-            await _context.SaveChangesAsync(cancellationToken);
+            _context.Restore(builder.Entity);
 
-            return entity;
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
+
+            return builder.Entity;
         }
         catch (OperationCanceledException)
         {
@@ -569,7 +541,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity", [_tName.Value, entity.Id]);
+            _logger.Value.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity", [_tName.Value, builder.Entity.Id]);
             throw new EntityException("An error occurred while attempting to restore a soft-deleted entity");
         }
         finally
@@ -579,24 +551,14 @@ public sealed class Repository<TEntity, TDbContext> :
     }
 
     /// <summary>
-    /// Asynchronously restores multiple soft-deleted entities in the repository.
-    /// <para>Batch operation that efficiently restores all provided entities.</para>
-    /// <para>Thread-safe method with write lock protection.</para>
+    /// Asynchronously restores multiple soft-deleted entities using a configured builder.
+    /// <para>Thread-safe batch operation.</para>
     /// </summary>
-    /// <param name="entities">The collection of entities to restore. Must not be null or contain null elements.</param>
-    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
-    /// <returns>The collection of restored entities with updated properties.</returns>
-    /// <exception cref="EntityException">Thrown when an error occurs during the restore operation.</exception>
-    /// <remarks>
-    /// This method will for each entity:
-    /// <list type="bullet">
-    ///   <item><description>Mark the entity as not deleted (IsDeleted = false)</description></item>
-    ///   <item><description>Update the UpdatedAt timestamp to current UTC time</description></item>
-    ///   <item><description>Change entity state to Modified</description></item>
-    /// </list>
-    /// All changes are persisted in a single database transaction.
-    /// </remarks>
-    public async Task<IEnumerable<TEntity>> RestoreRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    /// <param name="builder">Builder with entities to restore</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Restored entities</returns>
+    /// <exception cref="EntityException">On restore error</exception>
+    public async Task<IEnumerable<TEntity>> RestoreRangeAsync(RestoreRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 
@@ -605,10 +567,12 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.RestoreRangeTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _context.RestoreRange(entities);
-            await _context.SaveChangesAsync(cancellationToken);
+            _context.RestoreRange(builder.Entities);
 
-            return entities;
+            if (builder.SaveChanges)
+                await _context.SaveChangesAsync(cancellationToken);
+
+            return builder.Entities;
         }
         catch (OperationCanceledException)
         {
@@ -616,12 +580,60 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities", [_tName.Value, entities.Select(x => new { x.Id })]);
+            _logger.Value.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
             throw new EntityException("An error occurred while attempting to restore a range of soft-deleted entities");
         }
         finally
         {
             _lock.ExitWriteLock();
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously saves all changes made in this repository to the underlying database.
+    /// <para>Thread-safe method that persists all pending changes (inserts, updates, deletes).</para>
+    /// </summary>
+    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
+    /// <returns>A task representing the asynchronous save operation.</returns>
+    /// <exception cref="EntityException">Thrown when an error occurs during the save operation.</exception>
+    /// <remarks>
+    /// This method will persist all changes tracked by the current DbContext instance.
+    /// It's typically used after performing multiple operations when you want to
+    /// ensure all changes are committed together.
+    /// </remarks>
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.Value.LogError(ex, "An error occurred while attempting to save changes", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to save changes");
+        }
+    }
+
+    /// <summary>
+    /// Synchronously saves all changes made in this repository to the underlying database.
+    /// <para>Thread-safe method that persists all pending changes (inserts, updates, deletes).</para>
+    /// </summary>
+    /// <exception cref="EntityException">Thrown when an error occurs during the save operation.</exception>
+    /// <remarks>
+    /// This method will persist all changes tracked by the current DbContext instance.
+    /// Consider using <see cref="SaveChangesAsync"/> for non-blocking operations.
+    /// </remarks>
+    public void SaveChanges()
+    {
+        try
+        {
+
+            _context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.Value.LogError(ex, "An error occurred while attempting to save changes", [_tName.Value]);
+            throw new EntityException("An error occurred while attempting to save changes");
         }
     }
 
