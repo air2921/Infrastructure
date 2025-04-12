@@ -6,7 +6,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery;
 /// Abstract base class for command builders that perform database operations without returning query results.
 /// Serves as the foundation for create, update, and delete operation builders.
 /// </summary>
-public abstract class NoneQueryBuilder
+public abstract class NoneQueryBuilder<TBuilder> where TBuilder : NoneQueryBuilder<TBuilder>
 {
     /// <summary>
     /// Gets whether changes should be immediately persisted to the database.
@@ -26,9 +26,9 @@ public abstract class NoneQueryBuilder
     /// If false, changes will be tracked but not persisted until an explicit save is performed.
     /// </param>
     /// <returns>The current builder instance for fluent chaining.</returns>
-    public NoneQueryBuilder WithSaveChanges(bool save)
+    public TBuilder WithSaveChanges(bool save)
     {
         SaveChanges = save;
-        return this;
+        return (TBuilder)this;
     }
 }

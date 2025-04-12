@@ -8,7 +8,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
 /// Fluent builder for configuring single entity creation with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to create, must inherit from EntityBase</typeparam>
-public sealed class CreateSingleBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
+public sealed class CreateSingleBuilder<TEntity> : NoneQueryBuilder<CreateSingleBuilder<TEntity>> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.

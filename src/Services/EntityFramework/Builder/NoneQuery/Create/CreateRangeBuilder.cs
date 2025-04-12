@@ -7,7 +7,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
 /// Fluent builder for configuring bulk entity creation with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to create, must inherit from EntityBase</typeparam>
-public sealed class CreateRangeBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
+public sealed class CreateRangeBuilder<TEntity> : NoneQueryBuilder<CreateRangeBuilder<TEntity>> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.

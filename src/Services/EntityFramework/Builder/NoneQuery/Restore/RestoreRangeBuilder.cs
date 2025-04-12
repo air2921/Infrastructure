@@ -8,7 +8,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Restore;
 /// Enables bulk restoration of entities that implement soft delete functionality.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity to restore, must inherit from EntityBase and implement soft delete.</typeparam>
-public sealed class RestoreRangeBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
+public sealed class RestoreRangeBuilder<TEntity> : NoneQueryBuilder<RestoreRangeBuilder<TEntity>> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method pattern.

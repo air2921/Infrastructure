@@ -9,7 +9,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 /// <para>This class provides a way to specify an entity to be updated and optionally track who performed the update.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
-public sealed class UpdateSingleBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
+public sealed class UpdateSingleBuilder<TEntity> : NoneQueryBuilder<UpdateSingleBuilder<TEntity>> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.

@@ -11,7 +11,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
 /// Provides multiple ways to specify entity for removal: by instance, identifier, or filter expression.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity to remove, must inherit from EntityBase.</typeparam>
-public sealed class RemoveSingleBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
+public sealed class RemoveSingleBuilder<TEntity> : NoneQueryBuilder<RemoveSingleBuilder<TEntity>> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.

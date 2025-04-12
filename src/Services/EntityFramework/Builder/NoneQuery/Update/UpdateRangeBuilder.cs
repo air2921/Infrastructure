@@ -7,7 +7,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 /// Fluent builder for configuring bulk entity updates with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to update, must inherit from EntityBase</typeparam>
-public sealed class UpdateRangeBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
+public sealed class UpdateRangeBuilder<TEntity> : NoneQueryBuilder<UpdateRangeBuilder<TEntity>> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
