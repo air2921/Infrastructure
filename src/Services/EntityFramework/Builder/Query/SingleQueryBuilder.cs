@@ -5,100 +5,74 @@ using Microsoft.EntityFrameworkCore.Query;
 using System.ComponentModel;
 using System.Linq.Expressions;
 
-namespace Infrastructure.Services.EntityFramework.Builder;
+namespace Infrastructure.Services.EntityFramework.Builder.Query;
 
 /// <summary>
-/// A class that helps build queries for filtering, sorting, and including related entities in a range query.
-/// <para>This class is designed to assist with pagination and custom queries for entities of type <typeparamref name="TEntity"/>.</para>
+/// A builder class for constructing queries to retrieve a single entity with various options.
 /// </summary>
-/// <typeparam name="TEntity">The type of the entity to query.</typeparam>
-public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
+/// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
+public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
 {
-    /// <summary>
-    /// A flag indicating whether to ignore builder constraints (like maximum take limit).
-    /// This should be used with caution as it bypasses safety checks.
-    /// </summary>
-    private bool ignoreBuilderConstraints = false;
-
     /// <summary>
     /// Private constructor to enforce use of factory method.
     /// </summary>
-    private RangeQueryBuilder()
+    private SingleQueryBuilder()
     {
+
     }
 
     /// <summary>
-    /// An expression for filtering entities based on a condition.
+    /// Filter expression for the query.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal Expression<Func<TEntity, bool>>? Filter { get; private set; }
 
     /// <summary>
-    /// Indicates whether the query should ignore default query filters.
+    /// Whether to ignore default query filters.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool IgnoreDefaultQueryFilters { get; private set; } = false;
 
     /// <summary>
-    /// An expression for sorting entities.
+    /// Ordering expression for the query.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
 
     /// <summary>
-    /// A query for including related entities.
+    /// Include query for related entities.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
 
     /// <summary>
-    /// Indicates whether change tracking should be disabled.
+    /// Whether to disable change tracking.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool AsNoTracking { get; private set; } = true;
 
     /// <summary>
-    /// Indicates sorting direction.
+    /// Whether to sort in descending order.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
-    /// The number of entities to skip.
+    /// Whether to take the first entity (true) or last entity (false).
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal int Skip { get; private set; } = 0;
+    internal bool TakeFirst { get; private set; } = true;
 
     /// <summary>
-    /// The number of entities to take.
+    /// Creates a new instance of SingleQueryBuilder.
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal int Take { get; private set; } = 100;
-
-    /// <summary>
-    /// Creates a new instance of RangeQueryBuilder with default settings.
-    /// </summary>
-    public static RangeQueryBuilder<TEntity> Create() => new();
-
-    /// <summary>
-    /// Disables builder constraints (like maximum take limit).
-    /// This method should be used with caution as it bypasses safety checks.
-    /// </summary>
-    /// <returns>The current builder instance.</returns>
-    [Obsolete("Do not use disabling builder restrictions unless it is done intentionally")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public RangeQueryBuilder<TEntity> WithIgnoreBuilderConstraints()
-    {
-        ignoreBuilderConstraints = true;
-        return this;
-    }
+    public static SingleQueryBuilder<TEntity> Create() => new();
 
     /// <summary>
     /// Sets the filter expression for the query.
     /// </summary>
     /// <param name="filter">The filter expression.</param>
-    /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
+    public SingleQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
     {
         Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without filter expression is not allowed");
         return this;
@@ -108,20 +82,18 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets whether to ignore default query filters.
     /// </summary>
     /// <param name="ignore">True to ignore default filters.</param>
-    /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
+    public SingleQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
     {
         IgnoreDefaultQueryFilters = ignore;
         return this;
     }
 
     /// <summary>
-    /// Sets the ordering expression and direction.
+    /// Sets the ordering for the query.
     /// </summary>
     /// <param name="orderExpression">The ordering expression.</param>
     /// <param name="descending">True for descending order.</param>
-    /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithOrdering(
+    public SingleQueryBuilder<TEntity> WithOrdering(
         Expression<Func<TEntity, object?>> orderExpression,
         bool descending = true)
     {
@@ -134,10 +106,9 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets the include query for related entities.
     /// </summary>
     /// <param name="includeQuery">The include query.</param>
-    /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
+    public SingleQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
-        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without includable expression is not allowed");
+        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without  includable expression is not allowed");
         return this;
     }
 
@@ -145,32 +116,19 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets whether to disable change tracking.
     /// </summary>
     /// <param name="noTracking">True to disable tracking.</param>
-    /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithNoTracking(bool noTracking = true)
+    public SingleQueryBuilder<TEntity> WithNoTracking(bool noTracking = true)
     {
         AsNoTracking = noTracking;
         return this;
     }
 
     /// <summary>
-    /// Sets the pagination parameters.
+    /// Sets whether to take the first entity (true) or last entity (false).
     /// </summary>
-    /// <param name="skip">Number of entities to skip.</param>
-    /// <param name="take">Number of entities to take.</param>
-    /// <returns>The current builder instance.</returns>
-    public RangeQueryBuilder<TEntity> WithPagination(int skip, int take)
+    /// <param name="takeFirst">True to take first entity, false for last.</param>
+    public SingleQueryBuilder<TEntity> WithTakeFirst(bool takeFirst = true)
     {
-        if (skip < 0)
-            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(skip)} param less than zero is not allowed");
-
-        if (take <= 0)
-            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param less or zero is not allowed");
-
-        if (take > 1000 && !ignoreBuilderConstraints)
-            throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param more than 1000 is not allowed");
-
-        Skip = skip;
-        Take = take;
+        TakeFirst = takeFirst;
         return this;
     }
 
@@ -186,8 +144,10 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// 3. Disable change tracking (if configured)
     /// 4. Apply filtering (if specified)
     /// 5. Apply sorting (if specified)
-    /// 6. Apply pagination (skip/take)
-    /// 7. Configure as split query (to avoid cartesian explosion when including collections)
+    /// 6. Configure as split query (to avoid cartesian explosion when including collections)
+    /// 
+    /// Note: This method prepares the query but doesn't execute it. You'll need to call
+    /// either FirstOrDefault() or LastOrDefault() (depending on TakeFirst setting) to actually retrieve the entity.
     /// </remarks>
     public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
     {
@@ -205,8 +165,6 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
 
         if (OrderExpression is not null)
             query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
-
-        query = query.Skip(Skip).Take(Take);
 
         query = query.AsSplitQuery();
         return query;

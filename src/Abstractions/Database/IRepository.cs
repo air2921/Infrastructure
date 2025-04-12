@@ -1,5 +1,7 @@
 ﻿using Infrastructure.Exceptions;
-using Infrastructure.Services.EntityFramework.Builder;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
+using Infrastructure.Services.EntityFramework.Builder.Query;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -126,7 +128,7 @@ public interface IRepository<TEntity> where TEntity : EntityBase
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>A collection of updated entities.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the update operation.</exception>
-    Task<IEnumerable<TEntity?>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously restores a soft-deleted entity in the repository.

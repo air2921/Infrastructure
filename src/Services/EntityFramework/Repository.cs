@@ -1,7 +1,9 @@
 ﻿using Infrastructure.Abstractions.Database;
 using Infrastructure.Enums;
 using Infrastructure.Exceptions;
-using Infrastructure.Services.EntityFramework.Builder;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
+using Infrastructure.Services.EntityFramework.Builder.Query;
 using Infrastructure.Services.EntityFramework.Context;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -379,8 +381,8 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <remarks>
     /// The deletion mode is determined by the <see cref="RemoveRangeBuilder{TEntity}.RemoveByMode"/> property:
     /// <list type="bullet">
-    /// <item><description>If mode is <see cref="RemoveByMode.Entities"/>, deletes the entities directly</description></item>
-    /// <item><description>If mode is <see cref="RemoveByMode.Identifiers"/>, first fetches entities by their identifiers before deletion</description></item>
+    /// <item><description>If mode is <see cref="RemoveByMode.Entity"/>, deletes the entities directly</description></item>
+    /// <item><description>If mode is <see cref="RemoveByMode.Identifier"/>, first fetches entities by their identifiers before deletion</description></item>
     /// </list>
     /// </remarks>
     public async Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
@@ -392,23 +394,18 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Immutable.RepositoryTimeout.RemoveRangeTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            if (builder.RemoveByMode == RemoveByMode.Entities)
+            if (builder.RemoveByMode == RemoveByMode.Entity)
             {
                 _context.RemoveRange(builder.Entities);
                 await _context.SaveChangesAsync(cancellationToken);
                 return builder.Entities;
             }
 
-            if (builder.RemoveByMode == RemoveByMode.Identifiers)
+            if (builder.RemoveByMode == RemoveByMode.Identifier)
             {
-                var entities = new List<TEntity>();
-
-                foreach (var id in builder.Identifiers)
-                {
-                    var entity = await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
-                    if (entity is not null)
-                        entities.Add(entity);
-                }
+                var entities = await _dbSet.Value
+                    .Where(e => builder.Identifiers.Contains(e.Id))
+                    .ToListAsync(cancellationToken);
 
                 _context.RemoveRange(entities);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -499,7 +496,7 @@ public sealed class Repository<TEntity, TDbContext> :
     /// </list>
     /// All updates are performed in a single transaction.
     /// </remarks>
-    public async Task<IEnumerable<TEntity?>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         _lock.EnterWriteLock();
 

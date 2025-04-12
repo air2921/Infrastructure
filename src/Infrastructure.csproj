@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
 	<Microsoft_V8>8.0.4</Microsoft_V8>
 	<Npgsql_V8>8.0.2</Npgsql_V8>

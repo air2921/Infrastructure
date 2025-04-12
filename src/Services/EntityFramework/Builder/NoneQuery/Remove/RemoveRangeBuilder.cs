@@ -1,22 +1,23 @@
 ﻿using Infrastructure.Enums;
+using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
+using System.Linq.Expressions;
 
-namespace Infrastructure.Services.EntityFramework.Builder;
+namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
 
 /// <summary>
 /// A builder class for configuring parameters to remove a range of entities.
 /// Provides flexible ways to specify entities for removal either by entity instances or their identifiers.
 /// </summary>
 /// <typeparam name="TEntity">The type of entities to remove, must inherit from EntityBase.</typeparam>
-public sealed class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
+public sealed class RemoveRangeBuilder<TEntity> : NoneQueryBuilder where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
     /// </summary>
     private RemoveRangeBuilder()
     {
-        
     }
 
     /// <summary>
@@ -32,7 +33,13 @@ public sealed class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     internal IEnumerable<object> Identifiers { get; private set; } = [];
 
     /// <summary>
-    /// Specifies the removal mode (by entities or identifiers).
+    /// Filter expression to select entities for removal.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, bool>>? Filter { get; private set; }
+
+    /// <summary>
+    /// Specifies the removal mode (by entities, identifiers or filter).
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal RemoveByMode RemoveByMode { get; private set; }
@@ -40,6 +47,7 @@ public sealed class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     /// <summary>
     /// Creates a new instance of RemoveRangeBuilder.
     /// </summary>
+    /// <returns>New instance of RemoveRangeBuilder</returns>
     public static RemoveRangeBuilder<TEntity> Create() => new();
 
     /// <summary>
@@ -50,7 +58,7 @@ public sealed class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     public RemoveRangeBuilder<TEntity> WithEntities(IEnumerable<TEntity> entities)
     {
         Entities = entities.ToArray();
-        RemoveByMode = RemoveByMode.Entities;
+        RemoveByMode = RemoveByMode.Entity;
         return this;
     }
 
@@ -59,10 +67,22 @@ public sealed class RemoveRangeBuilder<TEntity> where TEntity : EntityBase
     /// </summary>
     /// <param name="identifiers">Collection of entity identifiers.</param>
     /// <returns>The current builder instance.</returns>
-    public RemoveRangeBuilder<TEntity> WithIdentifiers(IEnumerable<object> identifiers)
+    public RemoveRangeBuilder<TEntity> WithIdentifiers(IEnumerable<string> identifiers)
     {
         Identifiers = identifiers.ToArray();
-        RemoveByMode = RemoveByMode.Identifiers;
+        RemoveByMode = RemoveByMode.Identifier;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the filter expression to select entities for removal.
+    /// </summary>
+    /// <param name="filter">Filter expression to select entities.</param>
+    /// <returns>The current builder instance.</returns>
+    public RemoveRangeBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
+    {
+        Filter = filter ?? throw new InvalidArgumentException("Filter for filtering entities cannot be null");
+        RemoveByMode = RemoveByMode.Filter;
         return this;
     }
 
