@@ -1,7 +1,6 @@
 ﻿using Infrastructure.Abstractions.Utility;
 using Infrastructure.Enums;
 using Infrastructure.Exceptions;
-using System.Text;
 
 namespace Infrastructure.Services.Utils;
 
@@ -42,11 +41,16 @@ public class Randomizer : IRandomizer
         if (count < InfrastructureImmutable.ValidationParameter.MinGuidCombineLength || count > InfrastructureImmutable.ValidationParameter.MaxGuidCombineLength)
             throw new InvalidArgumentException($"The allowed number of GUID combinations must be between {InfrastructureImmutable.ValidationParameter.MinGuidCombineLength} and {InfrastructureImmutable.ValidationParameter.MaxGuidCombineLength}");
 
-        var builder = new StringBuilder(((int)format) * count);
-        for (int i = 0; i < count; i++)
-            builder.Append(Guid.NewGuid().ToString(format.ToString()));
-
-        return builder.ToString();
+        return string.Create(count * (int)format, (count, format), (span, state) =>
+        {
+            var (cnt, fmt) = state;
+            for (int i = 0; i < cnt; i++)
+            {
+                var guid = Guid.NewGuid().ToString(fmt.ToString());
+                guid.AsSpan().CopyTo(span);
+                span = span[guid.Length..];
+            }
+        });
     }
 
     /// <summary>
@@ -60,11 +64,13 @@ public class Randomizer : IRandomizer
         if (length < InfrastructureImmutable.ValidationParameter.MinCodeLength || length > InfrastructureImmutable.ValidationParameter.MaxCodeLength)
             throw new InvalidArgumentException($"The valid code length must be in the range from {InfrastructureImmutable.ValidationParameter.MinCodeLength} to {InfrastructureImmutable.ValidationParameter.MaxCodeLength}");
 
-        var builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++)
-            builder.Append(Random.Shared.Next(10));
-
-        return builder.ToString();
+        return string.Create(length, Random.Shared, (span, random) =>
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                span[i] = (char)('0' + random.Next(10));
+            }
+        });
     }
 
     /// <summary>
