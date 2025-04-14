@@ -24,7 +24,7 @@ namespace Infrastructure.Services.EntityFramework;
 /// <remarks>
 /// This repository class provides methods for querying, adding, updating, and deleting entities in a database.
 /// It uses asynchronous operations to ensure non-blocking behavior and supports cancellation through <see cref="CancellationToken"/>.
-/// Operations are performed in a thread-safe manner using a <see cref="ReaderWriterLockSlim"/> to avoid race conditions during database access.
+/// Operations are performed in a thread-safe manner using a <see cref="SemaphoreSlim"/> to avoid race conditions during database access.
 /// </remarks>
 public sealed class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
@@ -38,7 +38,7 @@ public sealed class Repository<TEntity, TDbContext> :
     private readonly DbSet<TEntity> _dbSet;
     private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
 
-    private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     private bool disposed;
 
@@ -65,7 +65,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public IQueryable<TEntity> GetQuery()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterReadLock();
+        _semaphore.Wait();
 
         try
         {
@@ -73,7 +73,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitReadLock();
+            _semaphore.Release();
         }
     }
 
@@ -88,7 +88,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterReadLock();
+        _semaphore.Wait();
 
         try
         {
@@ -106,7 +106,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitReadLock();
+            _semaphore.Release();
         }
     }
 
@@ -122,7 +122,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterReadLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -142,7 +142,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitReadLock();
+            _semaphore.Release();
         }
     }
 
@@ -158,7 +158,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<TEntity?> GetByFilterAsync(SingleQueryBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterReadLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -181,7 +181,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitReadLock();
+            _semaphore.Release();
         }
     }
 
@@ -197,7 +197,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<IEnumerable<TEntity>> GetRangeAsync(RangeQueryBuilder<TEntity>? builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterReadLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -223,7 +223,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitReadLock();
+            _semaphore.Release();
         }
     }
 
@@ -239,7 +239,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<TEntity> AddAsync(CreateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -265,7 +265,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -283,7 +283,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<IEnumerable<TEntity>> AddRangeAsync(CreateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -311,7 +311,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -327,7 +327,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<TEntity?> DeleteAsync(RemoveSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -366,7 +366,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -382,7 +382,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -440,7 +440,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -456,7 +456,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -485,7 +485,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -501,7 +501,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -532,7 +532,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -548,7 +548,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<TEntity> RestoreAsync(RestoreSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -573,7 +573,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -589,7 +589,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task<IEnumerable<TEntity>> RestoreRangeAsync(RestoreRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _lock.EnterWriteLock();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -614,7 +614,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         finally
         {
-            _lock.ExitWriteLock();
+            _semaphore.Release();
         }
     }
 
@@ -693,7 +693,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
         if (disposing)
         {
-            _lock.Dispose();
+            _semaphore?.Dispose();
         }
 
         disposed = true;
