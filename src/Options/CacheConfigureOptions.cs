@@ -19,7 +19,7 @@ public sealed class CacheConfigureOptions : Validator
         /// <param name="name">The property name to convert.</param>
         /// <returns>The property name in lowercase.</returns>
         public override string ConvertName(string name)
-            => name.ToLowerInvariant();
+            => name;
     }
 
     private JsonNamingPolicy _jsonNamingPolicy;
