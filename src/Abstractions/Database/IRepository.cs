@@ -6,6 +6,7 @@ using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 using Infrastructure.Services.EntityFramework.Builder.Query;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Abstractions.Database;
@@ -21,14 +22,15 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// Returns an <see cref="IQueryable{TEntity}"/> to perform further queries on the entity set.
     /// <para>Thread-safe method.</para>
     /// </summary>
-    IQueryable<TEntity> GetQuery();
+    public IQueryable<TEntity> GetQuery();
 
     /// <summary>
     /// Asynchronously retrieves the count of entities that match the specified filter.
     /// <para>Thread-safe method.</para>
     /// </summary>
     /// <param name="filter">Optional filter expression</param>
-    ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter);
+    /// <param name="cancellationToken">Cancellation token</param>
+    public Task<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously retrieves an entity by its identifier.
@@ -36,7 +38,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="id">Entity identifier</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default);
+    public Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously retrieves an entity using a configured query builder.
@@ -44,7 +46,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured query builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<TEntity?> GetByFilterAsync(SingleQueryBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<TEntity?> GetByFilterAsync(SingleQueryBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously retrieves multiple entities using a configured query builder.
@@ -52,7 +54,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured query builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<IEnumerable<TEntity>> GetRangeAsync(RangeQueryBuilder<TEntity>? builder, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<TEntity>> GetRangeAsync(RangeQueryBuilder<TEntity>? builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously adds an entity using a configured builder.
@@ -60,7 +62,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured create builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<TEntity> AddAsync(CreateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<TEntity> AddAsync(CreateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously adds multiple entities using a configured builder.
@@ -68,7 +70,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured create builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<IEnumerable<TEntity>> AddRangeAsync(CreateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<TEntity>> AddRangeAsync(CreateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously deletes an entity using a configured builder.
@@ -76,7 +78,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured delete builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<TEntity?> DeleteAsync(RemoveSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<TEntity?> DeleteAsync(RemoveSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously deletes multiple entities using a configured builder.
@@ -84,7 +86,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured delete builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<TEntity>> DeleteRangeAsync(RemoveRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously updates an entity using a configured builder.
@@ -92,7 +94,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured update builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<TEntity> UpdateAsync(UpdateSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously updates multiple entities using a configured builder.
@@ -100,7 +102,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured update builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<TEntity>> UpdateRangeAsync(UpdateRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously restores an entity using a configured builder.
@@ -108,7 +110,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured restore builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<TEntity> RestoreAsync(RestoreSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<TEntity> RestoreAsync(RestoreSingleBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously restores multiple entities using a configured builder.
@@ -116,7 +118,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
     /// </summary>
     /// <param name="builder">Configured restore builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task<IEnumerable<TEntity>> RestoreRangeAsync(RestoreRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<TEntity>> RestoreRangeAsync(RestoreRangeBuilder<TEntity> builder, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

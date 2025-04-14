@@ -23,7 +23,7 @@ public interface IS3Client
     /// - Expiration timestamp (Expires)
     /// </returns>
     /// <exception cref="S3ClientException">Thrown when URL generation fails.</exception>
-    ValueTask<S3ObjectUrlDetails> SignUrlAsync(string bucket, string key, DateTime expires);
+    public ValueTask<S3ObjectUrlDetails> SignUrlAsync(string bucket, string key, DateTime expires);
 
     /// <summary>
     /// Downloads an object with complete content metadata from S3 storage.
@@ -39,7 +39,7 @@ public interface IS3Client
     /// - MIME type (ContentType)
     /// </returns>
     /// <exception cref="S3ClientException">Thrown when download fails.</exception>
-    Task<S3ObjectContentDetails> DownloadAsync(string bucket, string key, CancellationToken cancellationToken = default);
+    public Task<S3ObjectContentDetails> DownloadAsync(string bucket, string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Uploads a stream to S3 storage.
@@ -50,7 +50,7 @@ public interface IS3Client
     /// <param name="cancellationToken">A cancellation token to cancel the operation (optional).</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="S3ClientException">Thrown when upload fails.</exception>
-    Task UploadAsync(Stream stream, string bucket, string key, CancellationToken cancellationToken = default);
+    public Task UploadAsync(Stream stream, string bucket, string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes an object from S3 storage.
@@ -60,5 +60,5 @@ public interface IS3Client
     /// <param name="cancellationToken">A cancellation token to cancel the operation (optional).</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="S3ClientException">Thrown when removal fails.</exception>
-    Task RemoveAsync(string bucket, string key, CancellationToken cancellationToken = default);
+    public Task RemoveAsync(string bucket, string key, CancellationToken cancellationToken = default);
 }

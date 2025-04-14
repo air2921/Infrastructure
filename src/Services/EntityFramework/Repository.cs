@@ -11,6 +11,7 @@ using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Threading;
 
 namespace Infrastructure.Services.EntityFramework;
 
@@ -82,13 +83,14 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <para>Thread-safe method.</para>
     /// </summary>
     /// <param name="filter">The filter expression to apply to the entity set.</param>
+    /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>The count of entities that match the filter.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs during the count operation.</exception>
     /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
-    public ValueTask<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter)
+    public async Task<int> GetCountAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        _semaphore.Wait();
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -96,8 +98,8 @@ public sealed class Repository<TEntity, TDbContext> :
             if (filter is not null)
                 query = query.Where(filter);
 
-            var result = query.Count();
-            return new ValueTask<int>(result);
+            var result = await query.CountAsync(cancellationToken);
+            return result;
         }
         catch (Exception ex)
         {
@@ -634,6 +636,7 @@ public sealed class Repository<TEntity, TDbContext> :
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -643,6 +646,10 @@ public sealed class Repository<TEntity, TDbContext> :
         {
             _logger.LogError(ex, "An error occurred while attempting to save changes. {entity}", _tName.Value);
             throw new EntityException("An error occurred while attempting to save changes");
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 
@@ -659,16 +666,20 @@ public sealed class Repository<TEntity, TDbContext> :
     public void SaveChanges()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
+        _semaphore.Wait();
 
         try
         {
-
             _context.SaveChanges();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while attempting to save changes. {entity}", _tName.Value);
             throw new EntityException("An error occurred while attempting to save changes");
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 

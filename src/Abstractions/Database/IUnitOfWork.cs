@@ -34,7 +34,7 @@ public interface IUnitOfWork
     /// The operation will be canceled if the provided cancellation token is triggered.
     /// </para>
     /// </remarks>
-    Task SaveChangesAsync(CancellationToken cancellationToken = default);
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Synchronously saves all changes made in this unit of work to the underlying database.
@@ -44,5 +44,5 @@ public interface IUnitOfWork
     /// all changes (inserts, updates, deletes) to the database in a single transaction.
     /// Consider using <see cref="SaveChangesAsync"/> for non-blocking operations.
     /// </remarks>
-    void SaveChanges();
+    public void SaveChanges();
 }

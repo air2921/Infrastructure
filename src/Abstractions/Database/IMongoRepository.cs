@@ -21,7 +21,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation, with a collection of documents as the result.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while retrieving the documents.</exception>
-    Task<IEnumerable<TDocument>> GetRangeAsync(RangeQueryDocumentBuilder<TDocument> queryBuilder, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<TDocument>> GetRangeAsync(RangeQueryDocumentBuilder<TDocument> queryBuilder, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a document by its identifier.
@@ -30,7 +30,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation, with the document as the result, or <c>null</c> if not found.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while retrieving the document.</exception>
-    Task<TDocument?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
+    public Task<TDocument?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a document based on a specified filter.
@@ -39,7 +39,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation, with the document as the result, or <c>null</c> if not found.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while retrieving the document.</exception>
-    Task<TDocument?> GetByFilterAsync(Expression<Func<TDocument, bool>> query, CancellationToken cancellationToken = default);
+    public Task<TDocument?> GetByFilterAsync(Expression<Func<TDocument, bool>> query, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new document to the collection.
@@ -49,7 +49,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation, with the identifier of the added document.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while adding the document.</exception>
-    Task<string> AddAsync(TDocument documentEntity, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
+    public Task<string> AddAsync(TDocument documentEntity, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds multiple documents to the collection.
@@ -59,7 +59,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation, with the identifiers of the added documents.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while adding the documents.</exception>
-    Task<IEnumerable<string>> AddRangeAsync(IEnumerable<TDocument> documentEntities, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
+    public Task<IEnumerable<string>> AddRangeAsync(IEnumerable<TDocument> documentEntities, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes a document based on its identifier.
@@ -69,7 +69,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while removing the document.</exception>
-    Task RemoveSingleAsync(string id, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
+    public Task RemoveSingleAsync(string id, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes multiple documents based on their identifiers.
@@ -79,7 +79,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while removing the documents.</exception>
-    Task RemoveRangeAsync(IEnumerable<string> identifiers, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
+    public Task RemoveRangeAsync(IEnumerable<string> identifiers, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates a single document in the collection.
@@ -89,7 +89,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while updating the document.</exception>
-    Task UpdateSingleAsync(TDocument documentEntity, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
+    public Task UpdateSingleAsync(TDocument documentEntity, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates multiple documents in the collection.
@@ -99,7 +99,7 @@ public interface IMongoRepository<TDocument> where TDocument : DocumentBase
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <exception cref="EntityException">Thrown when an error occurs while updating the documents.</exception>
-    Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
+    public Task UpdateRangeAsync(IEnumerable<TDocument> documentEntities, IClientSessionHandle? sessionHandle = null, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
