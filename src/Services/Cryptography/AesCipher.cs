@@ -60,7 +60,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         {
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
-            logger.LogError(ex, "An error occurred while attempting to encrypt data", [nameof(EncryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex]);
+            logger.LogError(ex, "An error occurred while attempting to encrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(EncryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex);
             throw new CryptographyException("An error occurred while attempting to decrypt data");
         }
     }
@@ -103,7 +103,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         {
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
-            logger.LogError(ex, "An error occurred while attempting to encrypt data", [nameof(Encrypt), key.Length, source.Length, target.Length, keyHash, ivHex]);
+            logger.LogError(ex, "An error occurred while attempting to encrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(Encrypt), key.Length, source.Length, target.Length, keyHash, ivHex);
             throw new CryptographyException("An error occurred while attempting to decrypt data");
         }
     }
@@ -147,7 +147,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         {
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
-            logger.LogError(ex, "An error occurred while attempting to decrypt data", [nameof(DecryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex]);
+            logger.LogError(ex, "An error occurred while attempting to decrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(DecryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex);
             throw new CryptographyException("An error occurred while attempting to encrypt data");
         }
     }
@@ -190,7 +190,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
         {
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
-            logger.LogError(ex, "An error occurred while attempting to decrypt data", [nameof(Decrypt), key.Length, source.Length, target.Length, keyHash, ivHex]);
+            logger.LogError(ex, "An error occurred while attempting to decrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(Decrypt), key.Length, source.Length, target.Length, keyHash, ivHex);
             throw new CryptographyException("An error occurred while attempting to encrypt data");
         }
     }

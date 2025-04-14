@@ -52,11 +52,7 @@ public static class ElasticSearchLoggerExtension
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Is(options.EventLevel)
-            .Enrich.WithMachineName()
-            .Enrich.WithProcessId()
             .Enrich.WithCorrelationId()
-            .Enrich.WithClientIp()
-            .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
             .Enrich.WithProperty(InfrastructureImmutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(InfrastructureImmutable.ASPNETCore.AspNetCoreEnv)!)

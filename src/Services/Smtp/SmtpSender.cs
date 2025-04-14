@@ -42,7 +42,7 @@ public class SmtpSender(
         }
         catch (Exception ex) when (ex is not SmtpClientException)
         {
-            logger.LogError(ex, "SMTP error while sending email", [mail.To]);
+            logger.LogError(ex, "SMTP error while sending email. {to}", mail.To);
             throw new SmtpClientException("An error occurred while sending the email");
         }
     }
@@ -66,7 +66,7 @@ public class SmtpSender(
         }
         catch (Exception ex) when (ex is not SmtpClientException)
         {
-            logger.LogError(ex, "SMTP error while sending email", [mail.To]);
+            logger.LogError(ex, "SMTP error while sending email. {to}", mail.To);
             throw new SmtpClientException("An error occurred while sending the email");
         }
     }

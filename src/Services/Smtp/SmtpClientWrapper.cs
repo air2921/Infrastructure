@@ -70,7 +70,7 @@ public class SmtpClientWrapper : IDisposable
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
-            _logger.LogError(ex, "Unable to connect or authorize to smtp server", [message.To.Select(x => x.Name)]);
+            _logger.LogError(ex, "Unable to connect or authorize to smtp server. {to}", message.To.Select(x => x.Name));
             throw new SmtpClientException("Error during email sending due to authentication or network issues");
         }
         catch (OperationCanceledException)
@@ -94,7 +94,7 @@ public class SmtpClientWrapper : IDisposable
         }
         catch (Exception ex) when (ex is AuthenticationException || ex is SocketException)
         {
-            _logger.LogError(ex, "Unable to connect or authorize to smtp server", [message.To.Select(x => x.Name)]);
+            _logger.LogError(ex, "Unable to connect or authorize to smtp server. {to}", message.To.Select(x => x.Name));
             throw new SmtpClientException("Error during email sending due to authentication or network issues");
         }
     }

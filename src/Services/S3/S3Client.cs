@@ -57,7 +57,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to create a signed reference to an object", [bucket, key]);
+            logger.LogError(ex, "An error occurred while attempting to create a signed reference to an object. {key}, {bucket}", key, bucket);
             throw new S3ClientException("An error occurred while attempting to create a signed reference to an object");
         }
     }
@@ -96,7 +96,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while trying to unload an object from storage", [bucket, key]);
+            logger.LogError(ex, "An error occurred while trying to unload an object from storage. {key}, {bucket}", key, bucket);
             throw new S3ClientException("An error occurred while trying to unload an object from storage");
         }
     }
@@ -122,7 +122,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while trying to load the object into storage", [bucket, key]);
+            logger.LogError(ex, "An error occurred while trying to load the object into storage. {key}, {bucket}", key, bucket);
             throw new S3ClientException("An error occurred while trying to load the object into storage");
         }
     }
@@ -146,7 +146,7 @@ public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to delete an object from storage", [bucket, key]);
+            logger.LogError(ex, "An error occurred while attempting to delete an object from storage. {key}, {bucket}", key, bucket);
             throw new S3ClientException("An error occurred while attempting to delete an object from storage");
         }
     }

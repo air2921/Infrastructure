@@ -31,7 +31,7 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while hashing the object", [hashType]);
+            logger.LogError(ex, "An error occurred while hashing the object, via {hashtype}", hashType);
             throw new CryptographyException("An error occurred while hashing the object");
         }
     }
@@ -52,7 +52,7 @@ public class Hasher(ILogger<Hasher> logger) : IHasher
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while checking the hash", [hashType]);
+            logger.LogError(ex, "An error occurred while checking the hash via {hashtype}", hashType);
             throw new CryptographyException("An error occurred while checking the hash");
         }
     }

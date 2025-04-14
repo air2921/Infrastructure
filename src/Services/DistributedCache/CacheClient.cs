@@ -32,7 +32,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     {
         try
         {
-            logger.LogInformation("Received request to get object from cache", [key]);
+            logger.LogInformation("Received request to get object from cache, {key}", key);
 
             var result = await cache.GetStringAsync(key, cancellationToken).ConfigureAwait(false);
             if (result is null)
@@ -42,7 +42,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to retrieve data from the cache", [key, typeof(TResult)]);
+            logger.LogError(ex, "Failed to retrieve cached data. {cacheKey}, {resultType}", key, typeof(TResult).Name);
             throw new DistributedCacheException("An error occurred while attempting to retrieve data from the cache");
         }
     }
@@ -68,11 +68,11 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
 
             await cache.SetStringAsync(key, json, options, cancellationToken).ConfigureAwait(false);
 
-            logger.LogInformation("Received request to set object into cache", [key, typeof(TValue), absolute, sliding]);
+            logger.LogInformation("Received request to set object into cache. {key}, {type}, {absolute}, {sliding}", key, typeof(TValue), absolute.TotalSeconds, sliding.TotalSeconds);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to cache data", [key, typeof(TValue), absolute.TotalSeconds, sliding.TotalSeconds]);
+            logger.LogError(ex, "An error occurred while attempting to cache data. {key}, {type}, {absolute}, {sliding}", key, typeof(TValue), absolute.TotalSeconds, sliding.TotalSeconds);
             throw new DistributedCacheException("An error occurred while attempting to cache data");
         }
     }
@@ -96,11 +96,11 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
 
             await cache.SetStringAsync(key, json, options, cancellationToken).ConfigureAwait(false);
 
-            logger.LogInformation("Received request to set object into cache", [key, typeof(TValue), absolute]);
+            logger.LogInformation("Received request to set object into cache. {key}, {type}, {absolute}", key, typeof(TValue), absolute.TotalSeconds);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to cache data", [key, typeof(TValue), absolute.TotalSeconds]);
+            logger.LogError(ex, "An error occurred while attempting to cache data. {key}, {type}, {absolute}", key, typeof(TValue), absolute.TotalSeconds);
             throw new DistributedCacheException("An error occurred while attempting to cache data");
         }
     }
@@ -115,12 +115,12 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     {
         try
         {
-            logger.LogInformation("Received request to remove object from cache", [key]);
+            logger.LogInformation("Received request to remove object from cache. {key}", key);
             await cache.RemoveAsync(key, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to remove data from the cache", [key]);
+            logger.LogError(ex, "An error occurred while attempting to remove data from the cache. {key}", key);
             throw new DistributedCacheException("An error occurred while attempting to remove data from the cache");
         }
     }
@@ -136,7 +136,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     {
         try
         {
-            logger.LogInformation("Received request to check object existing in cache", [key]);
+            logger.LogInformation("Received request to check object existing in cache. {key}", key);
 
             var value = await cache.GetStringAsync(key, cancellationToken).ConfigureAwait(false);
             if (value is null)
@@ -146,7 +146,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to check if a key exists in the cache", [key]);
+            logger.LogError(ex, "An error occurred while attempting to check if a key exists in the cache. {key}", key);
             throw new DistributedCacheException("An error occurred while attempting to check if a key exists in the cache");
         }
     }
