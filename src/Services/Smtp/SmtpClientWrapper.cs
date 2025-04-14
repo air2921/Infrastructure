@@ -20,7 +20,7 @@ namespace Infrastructure.Services.Smtp;
 /// </remarks>
 public class SmtpClientWrapper : IDisposable
 {
-    private readonly Lazy<IMailTransport> _transport;
+    private readonly Lazy<SmtpClient> _transport;
     private readonly ILogger<SmtpClientWrapper> _logger;
 
     private volatile bool _disposed;
@@ -36,7 +36,7 @@ public class SmtpClientWrapper : IDisposable
     {
         _logger = logger;
 
-        _transport = new Lazy<IMailTransport>(() =>
+        _transport = new Lazy<SmtpClient>(() =>
         {
             var client = new SmtpClient();
             try

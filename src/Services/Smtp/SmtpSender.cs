@@ -20,7 +20,7 @@ namespace Infrastructure.Services.Smtp;
 public class SmtpSender(
     ILogger<SmtpSender> logger,
     SmtpConfigureOptions configureOptions,
-    Lazy<SmtpClientWrapper> smtpClient) : ISender<MailDetails>
+    SmtpClientWrapper smtpClient) : ISender<MailDetails>
 {
     /// <summary>
     /// Asynchronously sends an email using the provided <see cref="MailDetails"/> object.
@@ -38,7 +38,7 @@ public class SmtpSender(
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
-            await smtpClient.Value.SendAsync(emailMessage, cancellationToken);
+            await smtpClient.SendAsync(emailMessage, cancellationToken);
         }
         catch (Exception ex) when (ex is not SmtpClientException)
         {
@@ -62,7 +62,7 @@ public class SmtpSender(
             emailMessage.Subject = mail.Subject;
             emailMessage.Body = mail.Entity;
 
-            smtpClient.Value.Send(emailMessage);
+            smtpClient.Send(emailMessage);
         }
         catch (Exception ex) when (ex is not SmtpClientException)
         {

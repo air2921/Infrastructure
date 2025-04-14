@@ -33,9 +33,9 @@ public sealed class Repository<TEntity, TDbContext> :
 {
     #region fields and constructor
 
-    private readonly Lazy<ILogger<Repository<TEntity, TDbContext>>> _logger;
+    private readonly ILogger<Repository<TEntity, TDbContext>> _logger;
     private readonly TDbContext _context;
-    private readonly Lazy<DbSet<TEntity>> _dbSet;
+    private readonly DbSet<TEntity> _dbSet;
     private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
 
     private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
@@ -49,9 +49,9 @@ public sealed class Repository<TEntity, TDbContext> :
     /// <param name="context">An instance of the database context to interact with the underlying database.</param>
     public Repository(ILogger<Repository<TEntity, TDbContext>> logger, TDbContext context)
     {
-        _logger = new Lazy<ILogger<Repository<TEntity, TDbContext>>>(() => logger);
+        _logger = logger;
         _context = context ?? throw new InvalidArgumentException("Database context cannot be null");
-        _dbSet = new Lazy<DbSet<TEntity>>(() => _context.Set<TEntity>(), LazyThreadSafetyMode.ExecutionAndPublication);
+        _dbSet = _context.Set<TEntity>();
     }
 
     #endregion
@@ -69,7 +69,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
         try
         {
-            return _dbSet.Value;
+            return _dbSet;
         }
         finally
         {
@@ -92,7 +92,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
         try
         {
-            IQueryable<TEntity> query = _dbSet.Value;
+            IQueryable<TEntity> query = _dbSet;
             if (filter is not null)
                 query = query.Where(filter);
 
@@ -101,7 +101,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve count of entities", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve count of entities", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to retrieve count of entities");
         }
         finally
@@ -129,7 +129,7 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetByIdTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            return await _dbSet.Value.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
+            return await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -137,7 +137,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve an entity by its ID", [_tName.Value, id]);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve an entity by its ID", [_tName.Value, id]);
             throw new EntityException("An error occurred while attempting to retrieve an entity by its ID");
         }
         finally
@@ -165,7 +165,7 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetByFilterTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet.Value;
+            IQueryable<TEntity> query = _dbSet;
 
             query = builder.Apply(query);
             return builder.TakeFirst ? await query.FirstOrDefaultAsync(cancellationToken) : await query.LastOrDefaultAsync(cancellationToken);
@@ -176,7 +176,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve an entity using a single query builder", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve an entity using a single query builder", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to retrieve an entity using a single query builder");
         }
         finally
@@ -204,7 +204,7 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetRangeTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            IQueryable<TEntity> query = _dbSet.Value;
+            IQueryable<TEntity> query = _dbSet;
 
             if (builder is null)
                 return await query.ToListAsync(cancellationToken);
@@ -218,7 +218,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to retrieve a range of entities", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve a range of entities", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to retrieve a range of entities");
         }
         finally
@@ -247,7 +247,7 @@ public sealed class Repository<TEntity, TDbContext> :
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             builder.Entity.CreatedBy = builder.CreatedByUser;
-            await _dbSet.Value.AddAsync(builder.Entity, cancellationToken);
+            await _dbSet.AddAsync(builder.Entity, cancellationToken);
             
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -260,7 +260,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to add an entity", [_tName.Value, new { builder.Entity.Id }]);
+            _logger.LogError(ex, "An error occurred while attempting to add an entity", [_tName.Value, new { builder.Entity.Id }]);
             throw new EntityException("An error occurred while attempting to add an entity");
         }
         finally
@@ -293,7 +293,7 @@ public sealed class Repository<TEntity, TDbContext> :
             foreach (var entity in builder.Entities)
                 entity.CreatedBy = builder.CreatedByUser;
 
-            await _dbSet.Value.AddRangeAsync(builder.Entities, cancellationToken);
+            await _dbSet.AddRangeAsync(builder.Entities, cancellationToken);
             
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -306,7 +306,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to add a range of entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
+            _logger.LogError(ex, "An error occurred while attempting to add a range of entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
             throw new EntityException("An error occurred while attempting to add a range of entities");
         }
         finally
@@ -340,15 +340,15 @@ public sealed class Repository<TEntity, TDbContext> :
                 entity = builder.Entity;
 
             if (builder.RemoveByMode == RemoveByMode.Identifier)
-                entity = await _dbSet.Value.FindAsync([builder.Id, cancellationToken], cancellationToken: cancellationToken);
+                entity = await _dbSet.FindAsync([builder.Id, cancellationToken], cancellationToken: cancellationToken);
 
             if (builder.RemoveByMode == RemoveByMode.Filter && builder.Filter is not null)
-                entity = await _dbSet.Value.FirstOrDefaultAsync(builder.Filter, cancellationToken);
+                entity = await _dbSet.FirstOrDefaultAsync(builder.Filter, cancellationToken);
 
             if (entity is null)
                 return null;
 
-            var deletedEntity = _dbSet.Value.Remove(entity).Entity;
+            var deletedEntity = _dbSet.Remove(entity).Entity;
             
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -361,7 +361,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to delete an entity using a filter", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to delete an entity using a filter", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to delete an entity using a filter");
         }
         finally
@@ -401,7 +401,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
             if (builder.RemoveByMode == RemoveByMode.Identifier)
             {
-                var entities = await _dbSet.Value
+                var entities = await _dbSet
                     .Where(e => builder.Identifiers.Contains(e.Id))
                     .ToListAsync(cancellationToken);
 
@@ -415,7 +415,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
             if (builder.RemoveByMode == RemoveByMode.Filter && builder.Filter is not null)
             {
-                var entities = await _dbSet.Value
+                var entities = await _dbSet
                     .Where(builder.Filter)
                     .ToListAsync(cancellationToken);
 
@@ -435,7 +435,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to delete a range of entities by their IDs", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to delete a range of entities by their IDs", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to delete a range of entities by their IDs");
         }
         finally
@@ -466,7 +466,7 @@ public sealed class Repository<TEntity, TDbContext> :
             var entity = builder.Entity;
             entity.UpdatedBy = builder.UpdatedByUser;
 
-            _dbSet.Value.Attach(entity);
+            _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
 
             if (builder.SaveChanges)
@@ -480,7 +480,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to update an entity", [_tName.Value, builder.Entity.Id]);
+            _logger.LogError(ex, "An error occurred while attempting to update an entity", [_tName.Value, builder.Entity.Id]);
             throw new EntityException("An error occurred while attempting to update an entity");
         }
         finally
@@ -508,7 +508,7 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.UpdateRangeTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _dbSet.Value.AttachRange(builder.Entities);
+            _dbSet.AttachRange(builder.Entities);
 
             foreach (var entity in builder.Entities)
             {
@@ -527,7 +527,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to update a range of entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
+            _logger.LogError(ex, "An error occurred while attempting to update a range of entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
             throw new EntityException("An error occurred while attempting to update a range of entities");
         }
         finally
@@ -568,7 +568,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity", [_tName.Value, builder.Entity.Id]);
+            _logger.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity", [_tName.Value, builder.Entity.Id]);
             throw new EntityException("An error occurred while attempting to restore a soft-deleted entity");
         }
         finally
@@ -609,7 +609,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
+            _logger.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities", [_tName.Value, builder.Entities.Select(x => new { x.Id })]);
             throw new EntityException("An error occurred while attempting to restore a range of soft-deleted entities");
         }
         finally
@@ -641,7 +641,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to save changes", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to save changes", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to save changes");
         }
     }
@@ -667,7 +667,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.Value.LogError(ex, "An error occurred while attempting to save changes", [_tName.Value]);
+            _logger.LogError(ex, "An error occurred while attempting to save changes", [_tName.Value]);
             throw new EntityException("An error occurred while attempting to save changes");
         }
     }

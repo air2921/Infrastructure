@@ -17,8 +17,7 @@ namespace Infrastructure.Services.Sms;
 /// <remarks>
 /// The constructor initializes the <see cref="SmsSender"/> with the provided logger and SMS client. It does not send any messages but prepares the instance for use.
 /// </remarks>
-public class SmsSender(
-    SmsClientWrapper smsClient) : ISender<SmsDetails>
+public class SmsSender(SmsClientWrapper smsClient) : ISender<SmsDetails>
 {
     /// <summary>
     /// Sends an SMS message asynchronously.
