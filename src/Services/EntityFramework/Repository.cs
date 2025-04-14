@@ -59,7 +59,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Returns an <see cref="IQueryable{TEntity}"/> to perform further queries on the entity set.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <returns>An <see cref="IQueryable{TEntity}"/> representing the entity set.</returns>
     /// <exception cref="ObjectDisposedException">Thrown if the repository has been disposed.</exception>
@@ -80,7 +80,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously retrieves the count of entities that match the specified filter.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="filter">The filter expression to apply to the entity set.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
@@ -114,7 +114,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously retrieves an entity by its identifier.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="id">The identifier of the entity to retrieve.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
@@ -150,7 +150,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously retrieves the first or last entity that matches the specified filter, including options for ordering and tracking.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">A <see cref="SingleQueryBuilder{TEntity}"/> that defines the query criteria.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
@@ -189,7 +189,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously retrieves a range of entities based on the specified query builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">A <see cref="RangeQueryBuilder{TEntity}"/> that defines the query criteria.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
@@ -231,7 +231,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously adds a new entity to the repository.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Preconfigured builder containing the entity to add.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
@@ -273,7 +273,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously adds multiple entities to the repository using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Preconfigured builder containing the entities to add.</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
@@ -319,7 +319,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously deletes an entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Builder with entity deletion parameters</param>
     /// <param name="cancellationToken">A token to cancel the operation if needed</param>
@@ -374,7 +374,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously deletes multiple entities using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured builder with deletion parameters</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -448,7 +448,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously updates an entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Builder with entity update parameters</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -493,7 +493,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously updates multiple entities using a configured builder.
-    /// <para>Thread-safe batch update operation.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured builder with update parameters</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -540,7 +540,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously restores a soft-deleted entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Builder with entity restore parameters</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -581,7 +581,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously restores multiple soft-deleted entities using a configured builder.
-    /// <para>Thread-safe batch operation.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Builder with entities to restore</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -622,7 +622,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Asynchronously saves all changes made in this repository to the underlying database.
-    /// <para>Thread-safe method that persists all pending changes (inserts, updates, deletes).</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="cancellationToken">A token to cancel the operation if needed.</param>
     /// <returns>A task representing the asynchronous save operation.</returns>
@@ -655,7 +655,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
     /// <summary>
     /// Synchronously saves all changes made in this repository to the underlying database.
-    /// <para>Thread-safe method that persists all pending changes (inserts, updates, deletes).</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <exception cref="EntityException">Thrown when an error occurs during the save operation.</exception>
     /// <remarks>

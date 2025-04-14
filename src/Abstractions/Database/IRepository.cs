@@ -20,13 +20,13 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 {
     /// <summary>
     /// Returns an <see cref="IQueryable{TEntity}"/> to perform further queries on the entity set.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     public IQueryable<TEntity> GetQuery();
 
     /// <summary>
     /// Asynchronously retrieves the count of entities that match the specified filter.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="filter">Optional filter expression</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -34,7 +34,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously retrieves an entity by its identifier.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="id">Entity identifier</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -42,7 +42,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously retrieves an entity using a configured query builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured query builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -50,7 +50,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously retrieves multiple entities using a configured query builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured query builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -58,7 +58,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously adds an entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured create builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -66,7 +66,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously adds multiple entities using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured create builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -74,7 +74,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously deletes an entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured delete builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -82,7 +82,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously deletes multiple entities using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured delete builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -90,7 +90,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously updates an entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured update builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -98,7 +98,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously updates multiple entities using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured update builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -106,7 +106,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously restores an entity using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured restore builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -114,7 +114,7 @@ public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
 
     /// <summary>
     /// Asynchronously restores multiple entities using a configured builder.
-    /// <para>Thread-safe method.</para>
+    /// <para>Thread-safe for a single <typeparamref name="TEntity"/> type.</para>
     /// </summary>
     /// <param name="builder">Configured restore builder</param>
     /// <param name="cancellationToken">Cancellation token</param>
