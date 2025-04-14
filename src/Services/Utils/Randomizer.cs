@@ -33,7 +33,7 @@ public class Randomizer : IRandomizer
     /// Combines multiple GUIDs into a single optimized string.
     /// </summary>
     /// <param name="count">Number of GUIDs to combine (between <see cref="InfrastructureImmutable.ValidationParameter.MinGuidCombineLength"/> and <see cref="InfrastructureImmutable.ValidationParameter.MaxGuidCombineLength"/>)</param>
-    /// <param name="format">Guid generator format. Defaults is <see cref="GuidFormat.D"/><c>false</c>.</param>
+    /// <param name="format">Guid generator format. Defaults is <see cref="GuidFormat.D"/>.</param>
     /// <returns>Concatenated GUID string in specified format</returns>
     /// <exception cref="InvalidArgumentException">Thrown when count is outside valid range</exception>
     public string GuidCombine(int count, GuidFormat format = GuidFormat.D)

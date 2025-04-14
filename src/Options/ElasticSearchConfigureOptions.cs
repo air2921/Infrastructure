@@ -65,7 +65,7 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// </remarks>
     public override bool IsValidConfigure()
     {
-        if (string.IsNullOrWhiteSpace(Connection) || Configuration is null || Index.StartsWith("logs", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(Connection) || Configuration is null || !Index.StartsWith("logs", StringComparison.OrdinalIgnoreCase))
             return false;
 
         return true;
