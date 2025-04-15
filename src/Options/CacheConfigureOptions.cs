@@ -8,20 +8,6 @@ namespace Infrastructure.Options;
 /// </summary>
 public sealed class CacheConfigureOptions : Validator
 {
-    /// <summary>
-    /// Internal class implementing a JSON naming policy that converts property names to lowercase.
-    /// </summary>
-    private class LowerCaseNamingPolicy : JsonNamingPolicy
-    {
-        /// <summary>
-        /// Converts a property name to lowercase.
-        /// </summary>
-        /// <param name="name">The property name to convert.</param>
-        /// <returns>The property name in lowercase.</returns>
-        public override string ConvertName(string name)
-            => name;
-    }
-
     private JsonNamingPolicy _jsonNamingPolicy;
     private JsonSerializerOptions _jsonSerializerSettings;
 
@@ -30,10 +16,10 @@ public sealed class CacheConfigureOptions : Validator
     /// </summary>
     public CacheConfigureOptions()
     {
-        _jsonNamingPolicy = new LowerCaseNamingPolicy();
+        _jsonNamingPolicy = JsonNamingPolicy.CamelCase;
         _jsonSerializerSettings = new JsonSerializerOptions
         {
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Default,
             PropertyNamingPolicy = _jsonNamingPolicy,
             WriteIndented = true
         };

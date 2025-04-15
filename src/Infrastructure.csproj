@@ -9,8 +9,6 @@
 	<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
 	<Microsoft_V8>8.0.4</Microsoft_V8>
-	<Npgsql_V8>8.0.2</Npgsql_V8>
-	<DI_V8>8.0.1</DI_V8>
 	<Microsoft_V7>7.0.0</Microsoft_V7>
 
 	<SerilogAsp_V8>8.0.0</SerilogAsp_V8>
@@ -47,7 +45,7 @@
 		<PackageId>AirSoft.Infrastructure</PackageId>
 		<Authors>AirSoft Team</Authors>
 		<Company>AirSoft</Company>
-		<Version>2.5.1</Version>
+		<Version>2.6.0</Version>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<RepositoryUrl>https://github.com/air2921/Infrastructure</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -58,7 +56,7 @@
 
 	<ItemGroup>
 		<!-- Microsoft.Extensions.* -->
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(DI_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
 
 		<!-- Microsoft.Extensions.Caching.StackExchangeRedis -->
@@ -78,7 +76,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
 
 		<!-- PostgreSQL Provider -->
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(Npgsql_V8)" Condition="'$(TargetFramework)' == 'net8.0'" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(Microsoft_V7)" Condition="'$(TargetFramework)' == 'net7.0'" />
 
 		<!-- Serilog.AspNetCore -->

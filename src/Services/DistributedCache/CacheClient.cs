@@ -38,7 +38,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
             if (result is null)
                 return null;
 
-            return JsonSerializer.Deserialize<TResult>(result);
+            return JsonSerializer.Deserialize<TResult>(result, configureOptions.JsonSerializerSettings);
         }
         catch (Exception ex)
         {
@@ -142,7 +142,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
             if (value is null)
                 return false;
 
-            return false;
+            return true;
         }
         catch (Exception ex)
         {
