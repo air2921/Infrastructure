@@ -1,5 +1,7 @@
 ﻿using Infrastructure.Abstractions.Cryptography;
 using Infrastructure.Exceptions;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -51,6 +53,19 @@ namespace Infrastructure.Services.Cryptography.Oqs;
 /// </remarks>
 public abstract class OqsAlgorithm : IDisposable
 {
+    /// <summary>
+    /// Logger instance for recording operational events and errors during cryptographic operations.
+    /// </summary>
+    /// <remarks>
+    /// Initialized during construction with both Serilog (if available) and Console logging.
+    /// Used to log:
+    /// - Native library loading errors
+    /// - Function resolution failures
+    /// - Temporary file cleanup warnings
+    /// Thread-safe for concurrent operations.
+    /// </remarks>
+    private readonly Microsoft.Extensions.Logging.ILogger _logger;
+
     /// <summary>
     /// The algorithm format specification containing parameters and metadata for the quantum-safe cryptographic algorithm.
     /// </summary>
@@ -215,7 +230,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// <remarks>
     /// This object ensures thread safety when performing signature operations such as signing and verification.
     /// </remarks>
-    protected readonly object _pointerLock = new();
+    private readonly object _pointerLock = new();
 
     #endregion
 
@@ -228,7 +243,15 @@ public abstract class OqsAlgorithm : IDisposable
     /// Provides access to the metadata and parameters (e.g., key lengths, algorithm name)
     /// defined by the <see cref="IOqsAlgorithmFormat"/> implementation passed during construction.
     /// </remarks>
-    protected IOqsAlgorithmFormat AlgorithmFormat => _algorithmFormat;
+    /// <exception cref="ObjectDisposedException">Thrown if the <b>oqs</b> has been disposed</exception>
+    protected IOqsAlgorithmFormat AlgorithmFormat
+    {
+        get
+        {
+            CheckDisposed();
+            return _algorithmFormat;
+        }
+    }
 
     /// <summary>
     /// Gets the pointer to the native signature object.
@@ -237,7 +260,15 @@ public abstract class OqsAlgorithm : IDisposable
     /// This pointer refers to the native structure used internally by the OQS library
     /// to perform signing and verification operations.
     /// </remarks>
-    protected IntPtr Signature => _sig;
+    /// <exception cref="ObjectDisposedException">Thrown if the <b>oqs</b> has been disposed</exception>
+    protected IntPtr Signature
+    {
+        get
+        {
+            CheckDisposed();
+            return _sig;
+        }
+    }
 
     /// <summary>
     /// Gets the delegate used to generate key pairs via the native OQS library.
@@ -246,7 +277,15 @@ public abstract class OqsAlgorithm : IDisposable
     /// Resolves to the <c>OQS_SIG_keypair</c> function used to generate algorithm-specific
     /// public and private key pairs.
     /// </remarks>
-    protected OQS_SIG_keypairDelegate KeyPairDelegate => _oqsSigKeypair;
+    /// <exception cref="ObjectDisposedException">Thrown if the <b>oqs</b> has been disposed</exception>
+    protected OQS_SIG_keypairDelegate CreateKeyPair
+    {
+        get
+        {
+            CheckDisposed();
+            return _oqsSigKeypair;
+        }
+    }
 
     /// <summary>
     /// Gets the delegate used to sign messages via the native OQS library.
@@ -255,7 +294,15 @@ public abstract class OqsAlgorithm : IDisposable
     /// Resolves to the <c>OQS_SIG_sign</c> function used to create digital signatures
     /// based on the selected algorithm and private key.
     /// </remarks>
-    protected OQS_SIG_signDelegate SignDelegate => _oqsSigSign;
+    /// <exception cref="ObjectDisposedException">Thrown if the <b>oqs</b> has been disposed</exception>
+    protected OQS_SIG_signDelegate Sign
+    {
+        get
+        {
+            CheckDisposed();
+            return _oqsSigSign;
+        }
+    }
 
     /// <summary>
     /// Gets the delegate used to verify message signatures via the native OQS library.
@@ -264,7 +311,15 @@ public abstract class OqsAlgorithm : IDisposable
     /// Resolves to the <c>OQS_SIG_verify</c> function that checks the validity of a
     /// signature against a message and public key.
     /// </remarks>
-    protected OQS_SIG_verifyDelegate VerifyDelegate => _oqsSigVerify;
+    /// <exception cref="ObjectDisposedException">Thrown if the <b>oqs</b> has been disposed</exception>
+    protected OQS_SIG_verifyDelegate Verify
+    {
+        get
+        {
+            CheckDisposed();
+            return _oqsSigVerify; 
+        }
+    }
 
     /// <summary>
     /// Gets the synchronization object used for locking access to native pointers.
@@ -273,7 +328,15 @@ public abstract class OqsAlgorithm : IDisposable
     /// Used internally to ensure thread-safe cryptographic operations by synchronizing
     /// access to <see cref="_sig"/> and related unmanaged resources.
     /// </remarks>
-    protected object PointerSync => _pointerLock;
+    /// <exception cref="ObjectDisposedException">Thrown if the <b>oqs</b> has been disposed</exception>
+    protected object PointerSync
+    {
+        get
+        {
+            CheckDisposed();
+            return _pointerLock;
+        }
+    }
 
     #endregion
 
@@ -283,28 +346,59 @@ public abstract class OqsAlgorithm : IDisposable
     /// Initializes a new instance of the <see cref="OqsAlgorithm"/> class.
     /// Automatically creates and validates the algorithm format specification.
     /// </summary>
+    /// <param name="algorithmFormat">The algorithm format specification to use</param>
     /// <exception cref="CryptographyException">
     /// Thrown when:
-    /// - The algorithm format fails validation (via <see cref="IsValidFormat"/>)
-    /// - Failed to load or initialize the native OQS library
-    /// - Failed to create the signature scheme instance
+    /// <list type="bullet">
+    ///   <item><description>The algorithm format fails validation (via <see cref="IsValidFormat"/>)</description></item>
+    ///   <item><description>Failed to load or initialize the native OQS library</description></item>
+    ///   <item><description>Failed to create the signature scheme instance</description></item>
+    /// </list>
     /// </exception>
     /// <remarks>
+    /// <para>
     /// The constructor performs the following operations:
     /// <list type="number">
+    ///   <item><description>Initializes a logger instance with both Serilog (if configured) and Console output</description></item>
     ///   <item><description>Validates the algorithm format using <see cref="IsValidFormat"/></description></item>
     ///   <item><description>Stores the validated format in <see cref="_algorithmFormat"/></description></item>
     ///   <item><description>Initializes native resources by calling <see cref="DilithiumPointerResolve"/></description></item>
     ///   <item><description>Registers a process exit handler to clean up the temporary DLL file</description></item>
     /// </list>
+    /// </para>
+    /// 
+    /// <para>
+    /// Logger configuration details:
+    /// <list type="bullet">
+    ///   <item><description>Automatically integrates with Serilog if <see cref="Log.Logger"/> is configured</description></item>
+    ///   <item><description>Adds console logging as a fallback output</description></item>
+    ///   <item><description>Logs errors during temporary file cleanup</description></item>
+    /// </list>
+    /// </para>
     /// 
     /// <para>
     /// Note: The temporary DLL file (<see cref="_dllPath"/>) is automatically deleted when the process exits.
+    /// Any errors during deletion are logged but otherwise ignored.
+    /// </para>
+    /// 
+    /// <para>
+    /// Thread safety: Constructor execution is not thread-safe. The caller must ensure proper synchronization
+    /// when creating multiple instances concurrently.
     /// </para>
     /// </remarks>
     protected OqsAlgorithm(IOqsAlgorithmFormat algorithmFormat)
     {
         _algorithmFormat = algorithmFormat;
+
+        var loggerFactory = LoggerFactory.Create(logger =>
+        {
+            if (Log.Logger is not null)
+                logger.AddSerilog();
+
+            logger.AddConsole();
+        });
+
+        _logger = loggerFactory.CreateLogger<OqsAlgorithm>();
 
         if (!IsValidFormat())
             throw new CryptographyException("Invalid algorithm format");
@@ -321,7 +415,7 @@ public abstract class OqsAlgorithm : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error deleting DLL file: " + ex.Message);
+                    _logger.LogError(ex, "An error occurred while trying to delete the temporary library file oqs. {dllPath}", _dllPath);
                 }
             }
         };
@@ -394,7 +488,7 @@ public abstract class OqsAlgorithm : IDisposable
             }
             catch (Exception ex) when (ex is not CryptographyException)
             {
-                Console.WriteLine("Error during initialization: " + ex.ToString());
+                _logger.LogError(ex, "An error occurred while trying to resolve native functions from the oqs library. {algName}, {dllPath}", _algorithmFormat.Algorithm, _dllPath);
                 throw new CryptographyException(ex.Message);
             }
         }
@@ -644,7 +738,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// the method throws an <see cref="ObjectDisposedException"/> with the current instance's type name.
     /// </para>
     /// </remarks>
-    protected void CheckDisposed()
+    protected virtual void CheckDisposed()
         => ObjectDisposedException.ThrowIf(_disposed, this);
 
     #endregion
