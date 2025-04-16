@@ -57,56 +57,17 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
     }
 
     /// <summary>
-    /// Configures the database model by applying entity configurations, setting up a public ID sequence,
-    /// and configuring global query filters for soft-delete functionality.
+    /// Configures the model that was discovered by convention from the entity types
     /// </summary>
-    /// <param name="modelBuilder">The builder used to construct the model for this context.</param>
+    /// <param name="modelBuilder">The builder being used to construct the model</param>
     /// <remarks>
-    /// <para>
-    /// This method performs the following configuration steps:
-    /// </para>
-    /// <list type="number">
-    ///   <item>
-    ///     <description>Applies all entity configurations defined in the current assembly (classes implementing IEntityTypeConfiguration&lt;T&gt;)</description>
-    ///   </item>
-    ///   <item>
-    ///     <description>Creates a database sequence named "PublicIdSequence" starting at 10000 with increment of 1</description>
-    ///   </item>
-    ///   <item>
-    ///     <description>Configures all entities inheriting from EntityBase to use the sequence for PublicId generation</description>
-    ///   </item>
-    ///   <item>
-    ///     <description>Applies a global query filter to automatically exclude soft-deleted entities (where IsDeleted = true)</description>
-    ///   </item>
-    /// </list>
-    /// <para>
-    /// Note: The soft-delete filter is only applied to entities inheriting from EntityBase.
-    /// </para>
+    /// Applies configurations from the assembly and sets up soft-delete filtering
+    /// for all entities inheriting from EntityBase.
     /// </remarks>
-    /// <example>
-    /// The PublicId sequence ensures all entities get unique public-facing IDs:
-    /// <code>
-    /// var user = new User(); // PublicId will be automatically assigned from sequence
-    /// </code>
-    /// The soft-delete filter makes deleted entities invisible by default:
-    /// <code>
-    /// context.Users.ToList(); // Only returns non-deleted users
-    /// </code>
-    /// </example>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        modelBuilder.HasSequence<int>("PublicIdSequence")
-            .StartsAt(10000)
-            .IncrementsBy(1);
-
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(t => typeof(EntityBase).IsAssignableFrom(t.ClrType) && !t.ClrType.IsAbstract))
-        {
-            modelBuilder.Entity(entityType.ClrType)
-                .Property(nameof(EntityBase.PublicId))
-                .HasDefaultValueSql("NEXT VALUE FOR PublicIdSequence");
-        }
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
@@ -116,8 +77,6 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
                     .HasQueryFilter(ConvertFilterExpression<EntityBase>(e => !e.IsDeleted, entityType.ClrType));
             }
         }
-
-        base.OnModelCreating(modelBuilder);
     }
 
     private static LambdaExpression ConvertFilterExpression<TEntity>(
