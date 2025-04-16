@@ -9,6 +9,7 @@ namespace Infrastructure.Services.EntityFramework.Entity;
 /// <para>Provides default identifiers and audit tracking for entities.</para>
 /// </summary>
 [Index(nameof(IsDeleted), IsUnique = false)]
+[Index(nameof(PublicId), IsUnique = true)]
 public abstract class EntityBase
 {
     /// <summary>
@@ -18,6 +19,19 @@ public abstract class EntityBase
     [Key]
     [MaxLength(128)]
     public virtual string Id { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Gets or sets the public-facing identifier for the entity.
+    /// <para>
+    /// This value is automatically generated from the database sequence "PublicIdSequence"
+    /// starting at 10000 and increments by 1. Provides a more user-friendly identifier
+    /// than the GUID-based Id property.
+    /// </para>
+    /// <para>
+    /// The PublicId is unique across all entities of the same type (enforced by database index).
+    /// </para>
+    /// </summary>
+    public virtual int PublicId { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the entity was created, in UTC format.
