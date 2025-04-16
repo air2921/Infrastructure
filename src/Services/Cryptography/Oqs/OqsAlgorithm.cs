@@ -359,7 +359,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// <para>
     /// The constructor performs the following operations:
     /// <list type="number">
-    ///   <item><description>Initializes a logger instance with both Serilog (if configured) and Console output</description></item>
+    ///   <item><description>Initializes a logger instance with both Serilog and Console output</description></item>
     ///   <item><description>Validates the algorithm format using <see cref="IsValidFormat"/></description></item>
     ///   <item><description>Stores the validated format in <see cref="_algorithmFormat"/></description></item>
     ///   <item><description>Initializes native resources by calling <see cref="DilithiumPointerResolve"/></description></item>
@@ -392,9 +392,7 @@ public abstract class OqsAlgorithm : IDisposable
 
         var loggerFactory = LoggerFactory.Create(logger =>
         {
-            if (Log.Logger is not null)
-                logger.AddSerilog();
-
+            logger.AddSerilog(Log.Logger);
             logger.AddConsole();
         });
 
