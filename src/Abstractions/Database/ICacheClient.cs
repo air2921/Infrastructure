@@ -38,7 +38,7 @@ public interface ICacheClient
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>The cached object, or <c>null</c> if the key is not found.</returns>
     /// <exception cref="DistributedCacheException">Thrown if there is an error while retrieving the object from the cache.</exception>
-    public Task<TResult?> GetAsync<TResult>(string key, CancellationToken cancellationToken = default) where TResult : class;
+    public Task<TResult?> GetAsync<TResult>(string key, CancellationToken cancellationToken = default) where TResult : notnull;
 
     /// <summary>
     /// Asynchronously removes an object from the cache associated with the specified key.

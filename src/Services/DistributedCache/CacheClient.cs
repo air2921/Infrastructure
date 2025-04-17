@@ -28,7 +28,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
     /// <returns>The cached object, or <c>null</c> if the key is not found.</returns>
     /// <exception cref="DistributedCacheException">Thrown if an error occurs during the operation.</exception>
-    public async Task<TResult?> GetAsync<TResult>(string key, CancellationToken cancellationToken = default) where TResult : class
+    public async Task<TResult?> GetAsync<TResult>(string key, CancellationToken cancellationToken = default) where TResult : notnull
     {
         try
         {
@@ -36,7 +36,7 @@ public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, C
 
             var result = await cache.GetStringAsync(key, cancellationToken).ConfigureAwait(false);
             if (result is null)
-                return null;
+                return default;
 
             return JsonSerializer.Deserialize<TResult>(result, configureOptions.JsonSerializerSettings);
         }
