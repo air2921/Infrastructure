@@ -30,6 +30,9 @@ internal static class InfrastructureImmutable
     /// </summary>
     internal static class RepositoryTimeout
     {
+        /// <summary>Timeout for GetCount operations (20 seconds).</summary>
+        internal const int GetCountTimeout = 20;
+
         /// <summary>Timeout for GetRange operations (20 seconds).</summary>
         internal const int GetRangeTimeout = 20;
 
