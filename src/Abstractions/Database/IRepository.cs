@@ -16,7 +16,7 @@ namespace Infrastructure.Abstractions.Database;
 /// <para>All methods are thread-safe and support cancellation.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity. It must inherit from <see cref="EntityBase"/>.</typeparam>
-public interface IRepository<TEntity> : IUnitOfWork where TEntity : EntityBase
+public interface IRepository<TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Returns an <see cref="IQueryable{TEntity}"/> to perform further queries on the entity set.

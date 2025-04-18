@@ -55,6 +55,7 @@ public static class EntityFrameworkRepositoryExtension
         options.EnsureSuccessValidation("Invalid database configuration, check connection string");
 
         builder.AddDatabaseContext<TDbContext>(options);
+        builder.Services.AddScoped<IUnitOfWork, TDbContext>();
 
         builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();
         builder.Services.AddTransient<ITransactionFactory<TDbContext>, TransactionFactory<TDbContext>>();
