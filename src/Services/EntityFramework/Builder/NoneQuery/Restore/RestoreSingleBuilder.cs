@@ -11,7 +11,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Restore;
 /// <typeparam name="TEntity">
 /// The type of entity to restore, must inherit from EntityBase and implement soft delete.
 /// </typeparam>
-public sealed class RestoreSingleBuilder<TEntity> : NoneQueryBuilder<RestoreSingleBuilder<TEntity>> where TEntity : EntityBase
+public sealed class RestoreSingleBuilder<TEntity> : NoneQueryBuilder<RestoreSingleBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method pattern.
@@ -36,7 +36,7 @@ public sealed class RestoreSingleBuilder<TEntity> : NoneQueryBuilder<RestoreSing
     /// Sets the entity to be restored from soft-deleted state.
     /// </summary>
     /// <param name="entity">The entity instance to restore.</param>
-    /// <returns>The current builder instance for fluent method chaining.</returns>
+    /// <returns>The current builder instance.</returns>
     public RestoreSingleBuilder<TEntity> WithEntity(TEntity entity)
     {
         Entity = entity ?? throw new InvalidArgumentException("Entity for restore cannot be null");

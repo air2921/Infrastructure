@@ -8,7 +8,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
 /// Fluent builder for configuring single entity creation with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to create, must inherit from EntityBase</typeparam>
-public sealed class CreateSingleBuilder<TEntity> : NoneQueryBuilder<CreateSingleBuilder<TEntity>> where TEntity : EntityBase
+public sealed class CreateSingleBuilder<TEntity> : NoneQueryBuilder<CreateSingleBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -40,7 +40,7 @@ public sealed class CreateSingleBuilder<TEntity> : NoneQueryBuilder<CreateSingle
     /// Sets the entity to be created
     /// </summary>
     /// <param name="entity">Entity instance</param>
-    /// <returns>Current builder instance</returns>
+    /// <returns>The current builder instance.</returns>
     public CreateSingleBuilder<TEntity> WithEntity(TEntity entity)
     {
         Entity = entity ?? throw new InvalidArgumentException("Entity for creation cannot be null");
@@ -51,7 +51,7 @@ public sealed class CreateSingleBuilder<TEntity> : NoneQueryBuilder<CreateSingle
     /// Sets the user who performed the creation
     /// </summary>
     /// <param name="user">User identifier/name</param>
-    /// <returns>Current builder instance</returns>
+    /// <returns>The current builder instance.</returns>
     public CreateSingleBuilder<TEntity> WithCreatedBy(string? user)
     {
         CreatedByUser = user;

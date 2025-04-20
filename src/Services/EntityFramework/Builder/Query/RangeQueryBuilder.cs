@@ -12,14 +12,8 @@ namespace Infrastructure.Services.EntityFramework.Builder.Query;
 /// <para>This class is designed to assist with pagination and custom queries for entities of type <typeparamref name="TEntity"/>.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to query.</typeparam>
-public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
+public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
-    /// <summary>
-    /// A flag indicating whether to ignore builder constraints (like maximum take limit).
-    /// This should be used with caution as it bypasses safety checks.
-    /// </summary>
-    private bool ignoreBuilderConstraints = false;
-
     /// <summary>
     /// Private constructor to enforce use of factory method.
     /// </summary>
@@ -38,6 +32,12 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool IgnoreDefaultQueryFilters { get; private set; } = false;
+
+    /// <summary>
+    /// Indicates whether to use split query behavior to avoid cartesian explosion.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool AsSplitQuery { get; private set; } = true;
 
     /// <summary>
     /// An expression for sorting entities.
@@ -81,19 +81,6 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     public static RangeQueryBuilder<TEntity> Create() => new();
 
     /// <summary>
-    /// Disables builder constraints (like maximum take limit).
-    /// This method should be used with caution as it bypasses safety checks.
-    /// </summary>
-    /// <returns>The current builder instance.</returns>
-    [Obsolete("Do not use disabling builder restrictions unless it is done intentionally")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public RangeQueryBuilder<TEntity> WithIgnoreBuilderConstraints()
-    {
-        ignoreBuilderConstraints = true;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the filter expression for the query.
     /// </summary>
     /// <param name="filter">The filter expression.</param>
@@ -112,6 +99,17 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
     public RangeQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
     {
         IgnoreDefaultQueryFilters = ignore;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets whether to use split query behavior.
+    /// </summary>
+    /// <param name="split">True to use split query (recommended when including collections).</param>
+    /// <returns>The current builder instance.</returns>
+    public RangeQueryBuilder<TEntity> WithSplitQuery(bool split = true)
+    {
+        AsSplitQuery = split;
         return this;
     }
 
@@ -166,7 +164,7 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
         if (take <= 0)
             throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param less or zero is not allowed");
 
-        if (take > 1000 && !ignoreBuilderConstraints)
+        if (take > 1000 && !IsIgnoredBuilderConstraints)
             throw new InvalidArgumentException($"Using a {nameof(WithPagination)} with {nameof(take)} param more than 1000 is not allowed");
 
         Skip = skip;
@@ -200,6 +198,9 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
         if (AsNoTracking)
             query = query.AsNoTracking();
 
+        if (AsSplitQuery)
+            query = query.AsSplitQuery();
+
         if (Filter is not null)
             query = query.Where(Filter);
 
@@ -208,7 +209,6 @@ public sealed class RangeQueryBuilder<TEntity> where TEntity : EntityBase
 
         query = query.Skip(Skip).Take(Take);
 
-        query = query.AsSplitQuery();
         return query;
     }
 }

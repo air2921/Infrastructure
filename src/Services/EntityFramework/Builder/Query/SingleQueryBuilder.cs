@@ -11,7 +11,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.Query;
 /// A builder class for constructing queries to retrieve a single entity with various options.
 /// </summary>
 /// <typeparam name="TEntity">The type of entity to query, must inherit from EntityBase.</typeparam>
-public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
+public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -32,6 +32,12 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool IgnoreDefaultQueryFilters { get; private set; } = false;
+
+    /// <summary>
+    /// Indicates whether to use split query behavior to avoid cartesian explosion.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal bool AsSplitQuery { get; private set; } = true;
 
     /// <summary>
     /// Ordering expression for the query.
@@ -72,6 +78,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets the filter expression for the query.
     /// </summary>
     /// <param name="filter">The filter expression.</param>
+    /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithFilter(Expression<Func<TEntity, bool>> filter)
     {
         Filter = filter ?? throw new InvalidArgumentException($"Using a {nameof(WithFilter)} without filter expression is not allowed");
@@ -82,9 +89,21 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets whether to ignore default query filters.
     /// </summary>
     /// <param name="ignore">True to ignore default filters.</param>
+    /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithIgnoreQueryFilters(bool ignore = true)
     {
         IgnoreDefaultQueryFilters = ignore;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets whether to use split query behavior.
+    /// </summary>
+    /// <param name="split">True to use split query (recommended when including collections).</param>
+    /// <returns>The current builder instance.</returns>
+    public SingleQueryBuilder<TEntity> WithSplitQuery(bool split = true)
+    {
+        AsSplitQuery = split;
         return this;
     }
 
@@ -93,6 +112,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// </summary>
     /// <param name="orderExpression">The ordering expression.</param>
     /// <param name="descending">True for descending order.</param>
+    /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithOrdering(
         Expression<Func<TEntity, object?>> orderExpression,
         bool descending = true)
@@ -106,6 +126,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets the include query for related entities.
     /// </summary>
     /// <param name="includeQuery">The include query.</param>
+    /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
         IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without  includable expression is not allowed");
@@ -116,6 +137,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets whether to disable change tracking.
     /// </summary>
     /// <param name="noTracking">True to disable tracking.</param>
+    /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithNoTracking(bool noTracking = true)
     {
         AsNoTracking = noTracking;
@@ -126,6 +148,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// Sets whether to take the first entity (true) or last entity (false).
     /// </summary>
     /// <param name="takeFirst">True to take first entity, false for last.</param>
+    /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithTakeFirst(bool takeFirst = true)
     {
         TakeFirst = takeFirst;
@@ -144,8 +167,7 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
     /// 3. Disable change tracking (if configured)
     /// 4. Apply filtering (if specified)
     /// 5. Apply sorting (if specified)
-    /// 6. Configure as split query (to avoid cartesian explosion when including collections)
-    /// 
+    /// 7. Configure as split query (to avoid cartesian explosion when including collections)
     /// Note: This method prepares the query but doesn't execute it. You'll need to call
     /// either FirstOrDefault() or LastOrDefault() (depending on TakeFirst setting) to actually retrieve the entity.
     /// </remarks>
@@ -160,13 +182,15 @@ public sealed class SingleQueryBuilder<TEntity> where TEntity : EntityBase
         if (AsNoTracking)
             query = query.AsNoTracking();
 
+        if (AsSplitQuery)
+            query = query.AsSplitQuery();
+
         if (Filter is not null)
             query = query.Where(Filter);
 
         if (OrderExpression is not null)
             query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
 
-        query = query.AsSplitQuery();
         return query;
     }
 }

@@ -9,7 +9,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 /// <para>This class provides a way to specify an entity to be updated and optionally track who performed the update.</para>
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity to update.</typeparam>
-public sealed class UpdateSingleBuilder<TEntity> : NoneQueryBuilder<UpdateSingleBuilder<TEntity>> where TEntity : EntityBase
+public sealed class UpdateSingleBuilder<TEntity> : NoneQueryBuilder<UpdateSingleBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -42,7 +42,7 @@ public sealed class UpdateSingleBuilder<TEntity> : NoneQueryBuilder<UpdateSingle
     /// Sets the entity to be updated
     /// </summary>
     /// <param name="entity">The entity to update</param>
-    /// <returns>The current builder instance</returns>
+    /// <returns>The current builder instance.</returns>
     public UpdateSingleBuilder<TEntity> WithEntity(TEntity entity)
     {
         Entity = entity ?? throw new InvalidArgumentException("Entity for updating cannot be null");
@@ -53,7 +53,7 @@ public sealed class UpdateSingleBuilder<TEntity> : NoneQueryBuilder<UpdateSingle
     /// Sets the user who performed the update
     /// </summary>
     /// <param name="user">User identifier/name</param>
-    /// <returns>The current builder instance</returns>
+    /// <returns>The current builder instance.</returns>
     public UpdateSingleBuilder<TEntity> WithUpdatedBy(string? user)
     {
         UpdatedByUser = user;

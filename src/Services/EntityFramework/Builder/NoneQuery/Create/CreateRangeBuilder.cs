@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
+using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
@@ -7,7 +8,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
 /// Fluent builder for configuring bulk entity creation with optional audit tracking
 /// </summary>
 /// <typeparam name="TEntity">Type of entity to create, must inherit from EntityBase</typeparam>
-public sealed class CreateRangeBuilder<TEntity> : NoneQueryBuilder<CreateRangeBuilder<TEntity>> where TEntity : EntityBase
+public sealed class CreateRangeBuilder<TEntity> : NoneQueryBuilder<CreateRangeBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.
@@ -38,7 +39,7 @@ public sealed class CreateRangeBuilder<TEntity> : NoneQueryBuilder<CreateRangeBu
     /// Sets the entities to be created
     /// </summary>
     /// <param name="entities">Collection of entities</param>
-    /// <returns>Current builder instance</returns>
+    /// <returns>The current builder instance.</returns>
     public CreateRangeBuilder<TEntity> WithEntities(IEnumerable<TEntity> entities)
     {
         Entities = entities.ToArray();
@@ -49,7 +50,7 @@ public sealed class CreateRangeBuilder<TEntity> : NoneQueryBuilder<CreateRangeBu
     /// Sets the user who performed the creation
     /// </summary>
     /// <param name="user">User identifier/name</param>
-    /// <returns>Current builder instance</returns>
+    /// <returns>The current builder instance.</returns>
     public CreateRangeBuilder<TEntity> WithCreatedBy(string? user)
     {
         CreatedByUser = user;

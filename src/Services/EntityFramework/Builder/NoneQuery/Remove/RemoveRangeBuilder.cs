@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Enums;
 using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Restore;
 using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
 using System.Linq.Expressions;
@@ -11,7 +12,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
 /// Provides flexible ways to specify entities for removal either by entity instances or their identifiers.
 /// </summary>
 /// <typeparam name="TEntity">The type of entities to remove, must inherit from EntityBase.</typeparam>
-public sealed class RemoveRangeBuilder<TEntity> : NoneQueryBuilder<RemoveRangeBuilder<TEntity>> where TEntity : EntityBase
+public sealed class RemoveRangeBuilder<TEntity> : NoneQueryBuilder<RemoveRangeBuilder<TEntity>, TEntity> where TEntity : EntityBase
 {
     /// <summary>
     /// Private constructor to enforce use of factory method.

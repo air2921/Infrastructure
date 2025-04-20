@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Infrastructure.Services.EntityFramework.Entity;
+using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery;
 
@@ -6,7 +7,10 @@ namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery;
 /// Abstract base class for command builders that perform database operations without returning query results.
 /// Serves as the foundation for create, update, and delete operation builders.
 /// </summary>
-public abstract class NoneQueryBuilder<TBuilder> where TBuilder : NoneQueryBuilder<TBuilder>
+public abstract class NoneQueryBuilder<TBuilder, TEntity> :
+    BaseBuilder<TBuilder, TEntity>
+    where TBuilder : NoneQueryBuilder<TBuilder, TEntity>
+    where TEntity : EntityBase
 {
     /// <summary>
     /// Gets whether changes should be immediately persisted to the database.

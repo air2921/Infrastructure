@@ -11,6 +11,7 @@ using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using static Infrastructure.InfrastructureImmutable.RepositoryTimeout;
 
 namespace Infrastructure.Services.EntityFramework;
 
@@ -68,7 +69,7 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetCountTimeout));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(GetCountTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -100,7 +101,7 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetByIdTimeout));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(GetByIdTimeout));
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             return await _dbSet.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
@@ -127,7 +128,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetByFilterTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(GetByFilterTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -157,7 +159,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.GetRangeTimeout));
+            var timeout = builder?.Timeout == TimeSpan.Zero || builder is null ? TimeSpan.FromSeconds(GetRangeTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             IQueryable<TEntity> query = _dbSet;
@@ -190,7 +193,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.AddTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(AddTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             builder.Entity.CreatedBy = builder.CreatedByUser;
@@ -225,7 +229,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.AddRangeTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(AddRangeTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             foreach (var entity in builder.Entities)
@@ -260,7 +265,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.RemoveByFilterTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(RemoveByFilterTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             TEntity? entity = default;
@@ -306,7 +312,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.RemoveRangeTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(RemoveRangeTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             if (builder.RemoveByMode == RemoveByMode.Entity)
@@ -371,7 +378,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.UpdateTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(UpdateTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             var entity = builder.Entity;
@@ -407,7 +415,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.UpdateRangeTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(UpdateRangeTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             _dbSet.AttachRange(builder.Entities);
@@ -445,7 +454,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.RestoreTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(RestoreTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             _context.Restore(builder.Entity);
@@ -477,7 +487,8 @@ public sealed class Repository<TEntity, TDbContext> :
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(InfrastructureImmutable.RepositoryTimeout.RestoreRangeTimeout));
+            var timeout = builder.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(RestoreRangeTimeout) : builder.Timeout;
+            using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
             _context.RestoreRange(builder.Entities);
