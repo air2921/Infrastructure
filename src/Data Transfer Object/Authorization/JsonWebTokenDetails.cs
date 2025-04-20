@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace Infrastructure.Data_Transfer_Object.Authorization;
 

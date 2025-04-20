@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Data_Transfer_Object.Base;
-using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Data_Transfer_Object.S3;
 

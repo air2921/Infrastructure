@@ -1,6 +1,5 @@
 ﻿using Infrastructure.Data_Transfer_Object.Base;
 using MimeKit;
-using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Data_Transfer_Object;
 

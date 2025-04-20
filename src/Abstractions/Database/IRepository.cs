@@ -1,12 +1,10 @@
-﻿using Infrastructure.Exceptions;
-using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
+﻿using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Restore;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 using Infrastructure.Services.EntityFramework.Builder.Query;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Abstractions.Database;

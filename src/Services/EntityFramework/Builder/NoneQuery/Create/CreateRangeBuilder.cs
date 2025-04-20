@@ -1,5 +1,4 @@
-﻿using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
-using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
 
 namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;

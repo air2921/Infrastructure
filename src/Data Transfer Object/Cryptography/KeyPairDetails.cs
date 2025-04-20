@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Infrastructure.Data_Transfer_Object.Cryptography;
+﻿namespace Infrastructure.Data_Transfer_Object.Cryptography;
 
 /// <summary>
 /// Represents a cryptographic key pair containing both public and private keys.
