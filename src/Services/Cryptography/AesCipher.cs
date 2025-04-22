@@ -41,12 +41,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     public async Task EncryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
     {
         using var aes = Aes.Create();
+        SetMode(aes);
 
         try
         {
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
             byte[] iv = aes.IV;
             target.Write(iv);
 
@@ -61,7 +59,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
             logger.LogError(ex, "An error occurred while attempting to encrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(EncryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex);
-            throw new CryptographyException("An error occurred while attempting to decrypt data");
+            throw new CryptographyException("An error occurred while attempting to encrypt data");
         }
     }
 
@@ -84,12 +82,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     public void Encrypt(Stream source, Stream target, byte[] key)
     {
         using var aes = Aes.Create();
+        SetMode(aes);
 
         try
         {
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
             byte[] iv = aes.IV;
             target.Write(iv);
 
@@ -104,7 +100,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
             logger.LogError(ex, "An error occurred while attempting to encrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(Encrypt), key.Length, source.Length, target.Length, keyHash, ivHex);
-            throw new CryptographyException("An error occurred while attempting to decrypt data");
+            throw new CryptographyException("An error occurred while attempting to encrypt data");
         }
     }
 
@@ -127,12 +123,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     public async Task DecryptAsync(Stream source, Stream target, byte[] key, CancellationToken cancellationToken = default)
     {
         using var aes = Aes.Create();
+        SetMode(aes);
 
         try
         {
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
             byte[] iv = new byte[aes.BlockSize / 8];
             source.Read(iv);
             aes.IV = iv;
@@ -148,7 +142,7 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
             logger.LogError(ex, "An error occurred while attempting to decrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(DecryptAsync), key.Length, source.Length, target.Length, keyHash, ivHex);
-            throw new CryptographyException("An error occurred while attempting to encrypt data");
+            throw new CryptographyException("An error occurred while attempting to decrypt data");
         }
     }
 
@@ -170,12 +164,10 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
     public void Decrypt(Stream source, Stream target, byte[] key)
     {
         using var aes = Aes.Create();
+        SetMode(aes);
 
         try
         {
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
             byte[] iv = new byte[aes.BlockSize / 8];
             source.Read(iv);
             aes.IV = iv;
@@ -191,7 +183,24 @@ public class AesCipher(ILogger<AesCipher> logger) : ICipher
             byte[] keyHash = SHA256.HashData(key);
             string ivHex = BitConverter.ToString(aes.IV).Replace("-", "");
             logger.LogError(ex, "An error occurred while attempting to decrypt data. {method}, {keyLength}, {sourceLength}, {targetLength}, {keyHash}, {ivHex}", nameof(Decrypt), key.Length, source.Length, target.Length, keyHash, ivHex);
-            throw new CryptographyException("An error occurred while attempting to encrypt data");
+            throw new CryptographyException("An error occurred while attempting to decrypt data");
         }
+    }
+
+    /// <summary>
+    /// Configures the encryption mode and padding for the AES algorithm instance.
+    /// </summary>
+    /// <param name="aes">The AES instance to configure. Must not be null.</param>
+    /// <remarks>
+    /// This method sets:
+    /// - Cipher mode to <see cref="CipherMode.CBC"/> (Cipher Block Chaining)
+    /// - Padding mode to <see cref="PaddingMode.PKCS7"/>
+    /// These settings provide a good balance between security and compatibility.
+    /// The method is static as it doesn't depend on instance state.
+    /// </remarks>
+    private static void SetMode(Aes aes)
+    {
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.PKCS7;
     }
 }

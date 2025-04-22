@@ -32,7 +32,7 @@ public class SmsSender(SmsClientWrapper smsClient) : ISender<SmsDetails>
     /// </remarks>
     /// <exception cref="SmsClientException">Thrown when an error occurs during the SMS sending process.</exception>
     public Task SendAsync(SmsDetails sms, CancellationToken cancellationToken = default)
-        => smsClient.SendAsync(sms.To, sms.Message);
+        => smsClient.SendAsync(sms.To, sms.Message, sms.From);
 
     /// <summary>
     /// Sends an SMS message synchronously.
@@ -44,5 +44,5 @@ public class SmsSender(SmsClientWrapper smsClient) : ISender<SmsDetails>
     /// </remarks>
     /// <exception cref="SmsClientException">Thrown when an error occurs during the SMS sending process.</exception>
     public void Send(SmsDetails sms)
-        => smsClient.Send(sms.To, sms.Message);
+        => smsClient.Send(sms.To, sms.Message, sms.From);
 }
