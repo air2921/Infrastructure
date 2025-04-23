@@ -40,5 +40,5 @@ public class LogDetails
     /// </summary>
     /// <value>Initialized to an empty collection when created.</value>
     [JsonPropertyName("args")]
-    public required IEnumerable<string> Params { get; set; } = [];
+    public required IEnumerable<object?> Params { get; set; } = [];
 }

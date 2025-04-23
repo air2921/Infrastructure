@@ -1,9 +1,9 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Infrastructure.Abstractions.Database;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Data_Transfer_Object.S3;
 using Infrastructure.Exceptions;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.S3;
 
@@ -17,7 +17,7 @@ namespace Infrastructure.Services.S3;
 /// This class encapsulates common S3 operations with enhanced metadata tracking.
 /// It handles exceptions internally and logs errors using the provided logger.
 /// </remarks>
-public class S3Client(IAmazonS3 s3Client, ILogger<S3Client> logger) : IS3Client
+public class S3Client(IAmazonS3 s3Client, ILoggerEnhancer<S3Client> logger) : IS3Client
 {
     /// <summary>
     /// Generates a pre-signed URL for accessing an S3 object with comprehensive metadata.

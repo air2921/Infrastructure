@@ -1,8 +1,6 @@
 ﻿using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;

@@ -1,7 +1,7 @@
-﻿using Infrastructure.Enums;
+﻿using Infrastructure.Abstractions.External_Services;
+using Infrastructure.Enums;
 using Infrastructure.Exceptions;
 using Infrastructure.Options;
-using Microsoft.Extensions.Logging;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
@@ -17,7 +17,7 @@ namespace Infrastructure.Services.Sms;
 /// </remarks>
 /// <param name="options">The configuration options containing Twilio username, password, Account SID, and phone number.</param>
 /// <param name="logger">A logger for tracking errors and operations performed by this class.</param>
-public class SmsClientWrapper(ILogger logger, TwilioConfigureOptions options)
+public class SmsClientWrapper(ILoggerEnhancer<SmsClientWrapper> logger, TwilioConfigureOptions options)
 {
     /// <summary>
     /// Asynchronously sends an SMS message.

@@ -1,7 +1,7 @@
 ﻿using BCrypt.Net;
 using Infrastructure.Abstractions.Cryptography;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Cryptography;
 
@@ -14,7 +14,7 @@ namespace Infrastructure.Services.Cryptography;
 /// This class uses the BCrypt algorithm to hash and verify strings. It supports enhanced hashing with different hash types,
 /// such as SHA512. Errors during hashing or verification are logged using the provided logger.
 /// </remarks>
-public class Hasher(ILogger<Hasher> logger) : IHasher
+public class Hasher(ILoggerEnhancer<Hasher> logger) : IHasher
 {
     /// <summary>
     /// Hashes a password using the BCrypt algorithm.

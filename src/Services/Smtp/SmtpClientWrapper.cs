@@ -1,8 +1,8 @@
-﻿using Infrastructure.Exceptions;
+﻿using Infrastructure.Abstractions.External_Services;
+using Infrastructure.Exceptions;
 using Infrastructure.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Logging;
 using MimeKit;
 using System.Net.Sockets;
 
@@ -20,7 +20,7 @@ namespace Infrastructure.Services.Smtp;
 public class SmtpClientWrapper : IDisposable
 {
     private readonly Lazy<SmtpClient> _transport;
-    private readonly ILogger<SmtpClientWrapper> _logger;
+    private readonly ILoggerEnhancer<SmtpClientWrapper> _logger;
 
     private volatile bool _disposed;
 
@@ -31,7 +31,7 @@ public class SmtpClientWrapper : IDisposable
     /// <param name="logger">A logger for tracking errors and operations performed by this class.</param>
     /// <param name="configureOptions">Configuration options containing SMTP provider, port, address, and password for authentication.</param>
     /// <exception cref="SmtpClientException">Thrown if authentication or connection fails.</exception>
-    public SmtpClientWrapper(ILogger<SmtpClientWrapper> logger, SmtpConfigureOptions configureOptions)
+    public SmtpClientWrapper(ILoggerEnhancer<SmtpClientWrapper> logger, SmtpConfigureOptions configureOptions)
     {
         _logger = logger;
 

@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Abstractions.Cryptography;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
-using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 
 namespace Infrastructure.Services.Cryptography;
@@ -19,7 +19,7 @@ namespace Infrastructure.Services.Cryptography;
 /// - Includes cancellation support for async operations
 /// Errors during encryption or decryption are logged using the provided logger.
 /// </remarks>
-public class AesCipher(ILogger<AesCipher> logger) : ICipher
+public class AesCipher(ILoggerEnhancer<AesCipher> logger) : ICipher
 {
     /// <summary>
     /// Asynchronously encrypts data from the source stream and writes the result to the target stream.

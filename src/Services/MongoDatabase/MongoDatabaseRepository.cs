@@ -1,8 +1,8 @@
 ﻿using Infrastructure.Abstractions.Database;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
 using Infrastructure.Services.MongoDatabase.Builder;
 using Infrastructure.Services.MongoDatabase.Document;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
@@ -18,7 +18,7 @@ namespace Infrastructure.Services.MongoDatabase;
 /// This class provides methods for querying, inserting, updating, and deleting documents in a MongoDB collection.
 /// It uses the provided <typeparamref name="TMongoContext"/> to access the database and ensures thread-safe operations.
 /// </remarks>
-public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILogger<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
+public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoContext context, ILoggerEnhancer<MongoDatabaseRepository<TMongoContext, TDocument>> logger, TDocument document)
     : IMongoRepository<TDocument>, IMongoRepository<TMongoContext, TDocument>
     where TDocument : DocumentBase
     where TMongoContext : MongoContext

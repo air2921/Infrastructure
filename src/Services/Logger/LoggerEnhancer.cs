@@ -18,7 +18,7 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     /// </summary>
     /// <param name="message">The message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
-    public void LogInformation(string message, params string[] args)
+    public void LogInformation(string message, params object?[] args)
     {
         var log = FormatLogMessage(null, message, args);
 #pragma warning disable CA2254
@@ -31,7 +31,7 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     /// </summary>
     /// <param name="message">The message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
-    public void LogWarning(string message, params string[] args)
+    public void LogWarning(string message, params object?[] args)
     {
         var log = FormatLogMessage(null, message, args);
 #pragma warning disable CA2254
@@ -44,7 +44,7 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     /// </summary>
     /// <param name="message">The message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
-    public void LogCritical(string message, params string[] args)
+    public void LogCritical(string message, params object?[] args)
     {
         var log = FormatLogMessage(null, message, args);
 #pragma warning disable CA2254
@@ -57,7 +57,7 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     /// </summary>
     /// <param name="message">The message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
-    public void LogError(string message, params string[] args)
+    public void LogError(string message, params object?[] args)
     {
         var log = FormatLogMessage(null, message, args);
 #pragma warning disable CA2254
@@ -71,7 +71,7 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">The message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
-    public void LogError(Exception? exception, string message, params string[] args)
+    public void LogError(Exception? exception, string message, params object?[] args)
     {
         var log = FormatLogMessage(exception, message, args);
 #pragma warning disable CA2254
@@ -87,7 +87,7 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     /// <param name="message">The message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
     /// <returns>A JSON string containing all log details in a structured format.</returns>
-    private static string FormatLogMessage(Exception? exception, string message, IEnumerable<string> args)
+    private static string FormatLogMessage(Exception? exception, string message, IEnumerable<object?> args)
     {
         ExceptionDetails? exceptionDetails = null;
 

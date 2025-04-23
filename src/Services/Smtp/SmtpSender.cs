@@ -1,8 +1,8 @@
 ﻿using Infrastructure.Abstractions.Exteranal_Services;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Data_Transfer_Object;
 using Infrastructure.Exceptions;
 using Infrastructure.Options;
-using Microsoft.Extensions.Logging;
 using MimeKit;
 
 namespace Infrastructure.Services.Smtp;
@@ -18,7 +18,7 @@ namespace Infrastructure.Services.Smtp;
 /// It handles errors during the email construction and sending process and logs any exceptions for further analysis.
 /// </remarks>
 public class SmtpSender(
-    ILogger<SmtpSender> logger,
+    ILoggerEnhancer<SmtpSender> logger,
     SmtpConfigureOptions configureOptions,
     SmtpClientWrapper smtpClient) : ISender<MailDetails>
 {

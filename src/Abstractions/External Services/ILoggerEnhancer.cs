@@ -18,28 +18,28 @@ public interface ILoggerEnhancer<out TCategory>
     /// </summary>
     /// <param name="message">The descriptive message to log.</param>
     /// <param name="args">Additional parameters to include in the structured log entry.</param>
-    public void LogInformation(string message, params string[] args);
+    public void LogInformation(string message, params object?[] args);
 
     /// <summary>
     /// Logs a warning message with additional structured parameters.
     /// </summary>
     /// <param name="message">The descriptive message to log.</param>
     /// <param name="args">Additional parameters to include in the structured log entry.</param>
-    public void LogWarning(string message, params string[] args);
+    public void LogWarning(string message, params object?[] args);
 
     /// <summary>
     /// Logs a critical error message with additional structured parameters.
     /// </summary>
     /// <param name="message">The descriptive message to log.</param>
     /// <param name="args">Additional parameters to include in the structured log entry.</param>
-    public void LogCritical(string message, params string[] args);
+    public void LogCritical(string message, params object?[] args);
 
     /// <summary>
     /// Logs an error message with additional structured parameters.
     /// </summary>
     /// <param name="message">The descriptive message to log.</param>
     /// <param name="args">Additional parameters to include in the structured log entry.</param>
-    public void LogError(string message, params string[] args);
+    public void LogError(string message, params object?[] args);
 
     /// <summary>
     /// Logs an error message with an associated exception and additional structured parameters.
@@ -47,5 +47,5 @@ public interface ILoggerEnhancer<out TCategory>
     /// <param name="exception">The exception to log (can be null).</param>
     /// <param name="message">The descriptive message to log.</param>
     /// <param name="args">Additional parameters to include in the structured log entry.</param>
-    public void LogError(Exception? exception, string message, params string[] args);
+    public void LogError(Exception? exception, string message, params object?[] args);
 }

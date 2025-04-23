@@ -1,8 +1,8 @@
 ﻿using Infrastructure.Abstractions.Database;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
 using Infrastructure.Options;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Infrastructure.Services.DistributedCache;
@@ -18,7 +18,7 @@ namespace Infrastructure.Services.DistributedCache;
 /// This class provides methods to interact with a distributed cache, such as getting, setting, removing, and checking the existence of cached items.
 /// It handles serialization and deserialization of objects using the provided JSON serializer settings.
 /// </remarks>
-public class CacheClient(IDistributedCache cache, ILogger<CacheClient> logger, CacheConfigureOptions configureOptions) : ICacheClient
+public class CacheClient(IDistributedCache cache, ILoggerEnhancer<CacheClient> logger, CacheConfigureOptions configureOptions) : ICacheClient
 {
     /// <summary>
     /// Retrieves an object from the cache associated with the specified key.

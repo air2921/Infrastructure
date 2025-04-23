@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Abstractions.Database;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Enums;
 using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Create;
@@ -9,7 +10,6 @@ using Infrastructure.Services.EntityFramework.Builder.Query;
 using Infrastructure.Services.EntityFramework.Context;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using static Infrastructure.InfrastructureImmutable.RepositoryTimeout;
 
@@ -32,7 +32,7 @@ public sealed class Repository<TEntity, TDbContext> :
 {
     #region fields and constructor
 
-    private readonly ILogger<Repository<TEntity, TDbContext>> _logger;
+    private readonly ILoggerEnhancer<Repository<TEntity, TDbContext>> _logger;
     private readonly TDbContext _context;
     private readonly DbSet<TEntity> _dbSet;
     private readonly Lazy<string> _tName = new(() => typeof(TEntity).FullName ?? typeof(TEntity).Name);
@@ -42,7 +42,7 @@ public sealed class Repository<TEntity, TDbContext> :
     /// </summary>
     /// <param name="logger">A logger instance for logging errors and repository activities.</param>
     /// <param name="context">An instance of the database context to interact with the underlying database.</param>
-    public Repository(ILogger<Repository<TEntity, TDbContext>> logger, TDbContext context)
+    public Repository(ILoggerEnhancer<Repository<TEntity, TDbContext>> logger, TDbContext context)
     {
         _logger = logger;
         _context = context ?? throw new InvalidArgumentException("Database context cannot be null");

@@ -1,5 +1,7 @@
 ﻿using Infrastructure.Abstractions.Cryptography;
+using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
+using Infrastructure.Services.Logger;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Reflection;
@@ -64,7 +66,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// - Temporary file cleanup warnings
     /// Thread-safe for concurrent operations.
     /// </remarks>
-    private readonly Microsoft.Extensions.Logging.ILogger _logger;
+    private readonly ILoggerEnhancer<OqsAlgorithm> _logger;
 
     /// <summary>
     /// The algorithm format specification containing parameters and metadata for the quantum-safe cryptographic algorithm.
@@ -396,7 +398,8 @@ public abstract class OqsAlgorithm : IDisposable
             logger.AddConsole();
         });
 
-        _logger = loggerFactory.CreateLogger<OqsAlgorithm>();
+        _logger = new LoggerEnhancer<OqsAlgorithm>(loggerFactory.CreateLogger<OqsAlgorithm>());
+
 
         if (!IsValidFormat())
             throw new CryptographyException("Invalid algorithm format");
