@@ -31,7 +31,6 @@ public static class ElasticSearchLoggerExtension
     /// <list type="bullet">
     ///     <item><description><see cref="ElasticSearchConfigureOptions"/> - Singleton service for storing ElasticSearch configuration.</description></item>
     ///     <item><description><see cref="Serilog.ILogger"/> - Global logger instance configured with Serilog, including ElasticSearch sink.</description></item>
-    ///     <item><description><see cref="ILogger{TCategoryName}"/> - Logging services integrated with ASP.NET Core's logging infrastructure.</description></item>
     /// </list>
     /// Additionally, this method configures the following logging behaviors:
     /// <list type="bullet">
@@ -71,12 +70,6 @@ public static class ElasticSearchLoggerExtension
                 TypeName = null
             })
             .CreateLogger();
-
-        builder.Services.AddLogging(logger =>
-        {
-            logger.AddSerilog(Log.Logger);
-            logger.AddConsole();
-        });
 
         return builder;
     }
