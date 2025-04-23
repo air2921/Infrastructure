@@ -81,13 +81,13 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to get entity by id. {collection}, {id}", document.CollectionName, id);
+            logger.LogInformation("Received request to get entity by id", document.CollectionName, id);
 
             return await _collection.Value.Find(x => x.Id.Equals(id)).FirstOrDefaultAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to retrieve a document by its ID, {id}", id);
+            logger.LogError(ex, "An error occurred while attempting to retrieve a document by its ID", id);
             throw new EntityException("An error occurred while attempting to retrieve a document by its ID");
         }
     }
@@ -103,7 +103,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to get entity by filter. {collection}", document.CollectionName);
+            logger.LogInformation("Received request to get entity by filter", document.CollectionName);
 
             return await _collection.Value.Find(query).FirstOrDefaultAsync(cancellationToken);
         }
@@ -127,7 +127,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to insert one entity. {collection}", document.CollectionName);
+            logger.LogInformation("Received request to insert one entity", document.CollectionName);
 
             if (sessionHandle is not null)
                 await _collection.Value.InsertOneAsync(sessionHandle, documentEntity, _insertOneOptions.Value, cancellationToken);
@@ -138,7 +138,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to save a document. {collection}, {id}", documentEntity.CollectionName, documentEntity.Id);
+            logger.LogError(ex, "An error occurred while attempting to save a document", documentEntity.CollectionName, documentEntity.Id);
             throw new EntityException("An error occurred while attempting to save a document");
         }
     }
@@ -156,7 +156,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to insert a range of entities. {collection}, {identifiers}", document.CollectionName, documentEntities.Select(x => x.Id));
+            logger.LogInformation("Received request to insert a range of entities", document.CollectionName, documentEntities.Select(x => x.Id));
 
             if (sessionHandle is not null)
                 await _collection.Value.InsertManyAsync(sessionHandle, documentEntities, _insertManyOptions.Value, cancellationToken);
@@ -167,7 +167,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to save a collection of documents. {collection}, {identifiers}", document.CollectionName, documentEntities.Select(x => x.Id));
+            logger.LogError(ex, "An error occurred while attempting to save a collection of documents", document.CollectionName, documentEntities.Select(x => x.Id));
             throw new EntityException("An error occurred while attempting to save a collection of documents");
         }
     }
@@ -185,7 +185,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to remove one entity by id. {collection}, {id}", document.CollectionName, id);
+            logger.LogInformation("Received request to remove one entity by id", document.CollectionName, id);
 
             var filter = Builders<TDocument>.Filter.Eq(x => x.Id, id);
 
@@ -196,7 +196,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to delete a document. {collection}, {id}", document.CollectionName, id);
+            logger.LogError(ex, "An error occurred while attempting to delete a document", document.CollectionName, id);
             throw new EntityException("An error occurred while attempting to delete a document");
         }
     }
@@ -214,7 +214,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to remove a range of entities by identifiers. {collection}, {identifiers}", document.CollectionName, identifiers);
+            logger.LogInformation("Received request to remove a range of entities by identifiers", document.CollectionName, identifiers);
 
             var filter = Builders<TDocument>.Filter.In(x => x.Id, identifiers);
 
@@ -244,7 +244,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to update one entity. {collection}, {id}", document.CollectionName, documentEntity.Id);
+            logger.LogInformation("Received request to update one entity", document.CollectionName, documentEntity.Id);
 
             document.UpdatedAt = DateTimeOffset.UtcNow;
             var filter = Builders<TDocument>.Filter.Eq(x => x.Id, documentEntity.Id);
@@ -256,7 +256,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to update a document. {collection}, {id}", document.CollectionName, documentEntity.Id);
+            logger.LogError(ex, "An error occurred while attempting to update a document", document.CollectionName, documentEntity.Id);
             throw new EntityException("An error occurred while attempting to update a document");
         }
     }
@@ -280,7 +280,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
     {
         try
         {
-            logger.LogInformation("Received request to update a range of entities. {collection}, {identifiers}", document.CollectionName, documentEntities.Select(x => x.Id));
+            logger.LogInformation("Received request to update a range of entities", document.CollectionName, documentEntities.Select(x => x.Id));
 
             var documentsList = documentEntities.ToList();
             var bulkOps = new List<WriteModel<TDocument>>();
@@ -302,7 +302,7 @@ public sealed class MongoDatabaseRepository<TMongoContext, TDocument>(TMongoCont
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while attempting to update a collection of documents. {collection}, {identifiers}", document.CollectionName, documentEntities.Select(x => x.Id));
+            logger.LogError(ex, "An error occurred while attempting to update a collection of documents", document.CollectionName, documentEntities.Select(x => x.Id));
             throw new EntityException("An error occurred while attempting to update a collection of documents");
         }
     }

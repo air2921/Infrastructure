@@ -66,7 +66,7 @@ public abstract class OqsAlgorithm : IDisposable
     /// - Temporary file cleanup warnings
     /// Thread-safe for concurrent operations.
     /// </remarks>
-    private readonly ILoggerEnhancer<OqsAlgorithm> _logger;
+    private readonly LoggerEnhancer<OqsAlgorithm> _logger;
 
     /// <summary>
     /// The algorithm format specification containing parameters and metadata for the quantum-safe cryptographic algorithm.
@@ -416,7 +416,7 @@ public abstract class OqsAlgorithm : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while trying to delete the temporary library file oqs. {dllPath}", _dllPath);
+                    _logger.LogError(ex, "An error occurred while trying to delete the temporary library file oqs", _dllPath);
                 }
             }
         };
@@ -489,7 +489,7 @@ public abstract class OqsAlgorithm : IDisposable
             }
             catch (Exception ex) when (ex is not CryptographyException)
             {
-                _logger.LogError(ex, "An error occurred while trying to resolve native functions from the oqs library. {algName}, {dllPath}", _algorithmFormat.Algorithm, _dllPath);
+                _logger.LogError(ex, "An error occurred while trying to resolve native functions from the oqs library", _algorithmFormat.Algorithm, _dllPath);
                 throw new CryptographyException(ex.Message);
             }
         }

@@ -55,7 +55,7 @@ public class SmsClientWrapper(ILoggerEnhancer<SmsClientWrapper> logger, TwilioCo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Twilio error while sending email. {to}, {from}", phone, from);
+            logger.LogError(ex, "Twilio error while sending email", phone, from);
             throw new SmsClientException("An error occurred while sending the SMS");
         }
     }
@@ -96,7 +96,7 @@ public class SmsClientWrapper(ILoggerEnhancer<SmsClientWrapper> logger, TwilioCo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Twilio error while sending email. {to}, {from}", phone, from);
+            logger.LogError(ex, "Twilio error while sending email", phone, from);
             throw new SmsClientException("An error occurred while sending the SMS");
         }
     }

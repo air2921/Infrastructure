@@ -85,7 +85,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to retrieve count of entities. {entity}", _tName.Value);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve count of entities", _tName.Value);
             throw new EntityException("An error occurred while attempting to retrieve count of entities");
         }
     }
@@ -112,7 +112,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to retrieve an entity by its ID. {entity}, {id}", _tName.Value, id);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve an entity by its ID", _tName.Value, id);
             throw new EntityException("An error occurred while attempting to retrieve an entity by its ID");
         }
     }
@@ -143,7 +143,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to retrieve an entity using a single query builder. {entity}", _tName.Value);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve an entity using a single query builder", _tName.Value);
             throw new EntityException("An error occurred while attempting to retrieve an entity using a single query builder");
         }
     }
@@ -177,7 +177,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to retrieve a range of entities. {entity}", _tName.Value);
+            _logger.LogError(ex, "An error occurred while attempting to retrieve a range of entities", _tName.Value);
             throw new EntityException("An error occurred while attempting to retrieve a range of entities");
         }
     }
@@ -211,7 +211,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to add an entity. {entity}, {id}", _tName.Value, builder.Entity.Id);
+            _logger.LogError(ex, "An error occurred while attempting to add an entity", _tName.Value, builder.Entity.Id);
             throw new EntityException("An error occurred while attempting to add an entity");
         }
     }
@@ -249,7 +249,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to add a range of entities. {entity}, {identifiers}", _tName.Value, builder.Entities.Select(x =>  x.Id));
+            _logger.LogError(ex, "An error occurred while attempting to add a range of entities", _tName.Value, builder.Entities.Select(x =>  x.Id));
             throw new EntityException("An error occurred while attempting to add a range of entities");
         }
     }
@@ -296,7 +296,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to delete an entity using a filter. {entity}", _tName.Value);
+            _logger.LogError(ex, "An error occurred while attempting to delete an entity using a filter", _tName.Value);
             throw new EntityException("An error occurred while attempting to delete an entity using a filter");
         }
     }
@@ -362,7 +362,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to delete a range of entities by their IDs. {entity}", _tName.Value);
+            _logger.LogError(ex, "An error occurred while attempting to delete a range of entities by their IDs", _tName.Value);
             throw new EntityException("An error occurred while attempting to delete a range of entities by their IDs");
         }
     }
@@ -399,7 +399,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to update an entity. {entity}, {id}", _tName.Value, builder.Entity.Id);
+            _logger.LogError(ex, "An error occurred while attempting to update an entity", _tName.Value, builder.Entity.Id);
             throw new EntityException("An error occurred while attempting to update an entity");
         }
     }
@@ -438,7 +438,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to update a range of entities. {entity}, {identifiers}", _tName.Value, builder.Entities.Select(x => x.Id));
+            _logger.LogError(ex, "An error occurred while attempting to update a range of entities", _tName.Value, builder.Entities.Select(x => x.Id));
             throw new EntityException("An error occurred while attempting to update a range of entities");
         }
     }
@@ -471,7 +471,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity, {entity}, {id}", _tName.Value, builder.Entity.Id);
+            _logger.LogError(ex, "An error occurred while attempting to restore a soft-deleted entity", _tName.Value, builder.Entity.Id);
             throw new EntityException("An error occurred while attempting to restore a soft-deleted entity");
         }
     }
@@ -504,7 +504,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities. {entity}, {identifiers}", _tName.Value, builder.Entities.Select(x => x.Id));
+            _logger.LogError(ex, "An error occurred while attempting to restore a range of soft-deleted entities", _tName.Value, builder.Entities.Select(x => x.Id));
             throw new EntityException("An error occurred while attempting to restore a range of soft-deleted entities");
         }
     }
