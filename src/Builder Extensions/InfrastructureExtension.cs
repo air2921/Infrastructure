@@ -30,7 +30,6 @@ public static class AddInfrastructureBuilder
         services.AddLogging(log =>
         {
             log.AddConsole();
-            log.AddSerilog(Log.Logger);
         });
 
         return new InfrastructureBuilder(services);

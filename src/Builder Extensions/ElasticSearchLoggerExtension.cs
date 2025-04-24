@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
@@ -68,6 +69,11 @@ public static class ElasticSearchLoggerExtension
                 TypeName = null
             })
             .CreateLogger();
+
+        builder.Services.AddLogging(log =>
+        {
+            log.AddSerilog(Log.Logger);
+        });
 
         return builder;
     }
