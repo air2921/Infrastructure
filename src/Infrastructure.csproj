@@ -33,7 +33,7 @@
 		<PackageId>AirSoft.Infrastructure</PackageId>
 		<Authors>AirSoft Team</Authors>
 		<Company>AirSoft</Company>
-		<Version>7.0.1</Version>
+		<Version>7.1.0</Version>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<RepositoryUrl>https://github.com/air2921/Infrastructure</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>

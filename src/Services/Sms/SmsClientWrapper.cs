@@ -38,7 +38,7 @@ public class SmsClientWrapper(ILoggerEnhancer<SmsClientWrapper> logger, TwilioCo
         if (options.PhoneMode == TwilioPhoneNumberMode.CallOnly)
             throw new SmsClientException($"Unable to send message with mode {options.PhoneMode}. Use {TwilioPhoneNumberMode.MessageOnly} or {TwilioPhoneNumberMode.All}");
 
-        if (!options.MessagePhoneNumber.Contains(from) && from is not null)
+        if (!options.MessagePhoneNumber.Contains(from))
             throw new SmsClientException($"Phone {from} is not registered in options. Unregistered phone number cannot be used");
 
         try
@@ -79,7 +79,7 @@ public class SmsClientWrapper(ILoggerEnhancer<SmsClientWrapper> logger, TwilioCo
         if (options.PhoneMode == TwilioPhoneNumberMode.CallOnly)
             throw new SmsClientException($"Unable to send message with mode {options.PhoneMode}. Use {TwilioPhoneNumberMode.MessageOnly} or {TwilioPhoneNumberMode.All}");
 
-        if (!options.MessagePhoneNumber.Contains(from) && from is not null)
+        if (!options.MessagePhoneNumber.Contains(from))
             throw new SmsClientException($"Phone {from} is not registered in options. Unregistered phone number cannot be used");
 
         try

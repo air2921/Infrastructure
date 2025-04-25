@@ -111,6 +111,9 @@ public class S3Client(IAmazonS3 s3Client, ILoggerEnhancer<S3Client> logger) : IS
     /// <exception cref="S3ClientException">Thrown if upload fails.</exception>
     public async Task UploadAsync(Stream stream, string bucket, string key, CancellationToken cancellationToken = default)
     {
+        if (!stream.CanRead)
+            throw new S3ClientException("The stream cannot be read due to the stream policy");
+
         try
         {
             await s3Client.PutObjectAsync(new PutObjectRequest

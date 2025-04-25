@@ -12,7 +12,7 @@ namespace Infrastructure.Services.EntityFramework.Context;
 /// Base database context with soft delete functionality and audit tracking
 /// </summary>
 /// <param name="options">The options to be used by a DbContext</param>
-public abstract class EntityFrameworkContext(DbContextOptions options) : DbContext(options), IUnitOfWork
+public abstract class EntityFrameworkContext(DbContextOptions options) : DbContext(options)
 {
     /// <summary>
     /// Restores a soft-deleted entity by marking it as active
@@ -172,56 +172,6 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
                         break;
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously saves all changes made in this unit of work to the underlying database.
-    /// </summary>
-    /// <param name="cancellationToken">
-    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous save operation.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// This method will automatically detect changes to tracked entities and persist
-    /// all changes (inserts, updates, deletes) to the database in a single transaction.
-    /// </para>
-    /// <para>
-    /// The operation will be canceled if the provided cancellation token is triggered.
-    /// </para>
-    /// </remarks>
-    public async Task SaveBatchChangesAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await this.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            throw new EntityException("An error occurred while attempting to save changes");
-        }
-    }
-
-    /// <summary>
-    /// Synchronously saves all changes made in this unit of work to the underlying database.
-    /// </summary>
-    /// <remarks>
-    /// This method will automatically detect changes to tracked entities and persist
-    /// all changes (inserts, updates, deletes) to the database in a single transaction.
-    /// Consider using <see cref="SaveBatchChangesAsync"/> for non-blocking operations.
-    /// </remarks>
-    public void SaveBatchChanges()
-    {
-        try
-        {
-            this.SaveChanges();
-        }
-        catch (Exception)
-        {
-            throw new EntityException("An error occurred while attempting to save changes");
         }
     }
 }

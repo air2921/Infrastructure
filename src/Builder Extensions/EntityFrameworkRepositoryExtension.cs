@@ -30,6 +30,8 @@ public static class EntityFrameworkRepositoryExtension
     /// This method registers the following services for Dependency Injection (DI):
     /// <list type="bullet">
     ///     <item><description><see cref="EntityFrameworkConfigureOptions"/> - Singleton service for storing Entity Framework configuration.</description></item>
+    ///     <item><description><see cref="IUnitOfWork"/> - Scoped service for saving changes</description></item>
+    ///     <item><description><see cref="IUnitOfWork{TDbContext}"/> - Scoped service for saving changes specific to <typeparamref name="TDbContext"/>.</description></item>
     ///     <item><description><see cref="ITransactionFactory"/> - Transient service for creating transactions.</description></item>
     ///     <item><description><see cref="ITransactionFactory{TDbContext}"/> - Transient service for creating transactions specific to <typeparamref name="TDbContext"/>.</description></item>
     ///     <item><description>Scoped services for <see cref="IRepository{T}"/> and <see cref="IRepository{T, TDbContext}"/> for each entity type in <typeparamref name="TDbContext"/>.</description></item>
@@ -55,7 +57,8 @@ public static class EntityFrameworkRepositoryExtension
         options.EnsureSuccessValidation("Invalid database configuration, check connection string");
 
         builder.AddDatabaseContext<TDbContext>(options);
-        builder.Services.AddScoped<IUnitOfWork, TDbContext>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork<TDbContext>>();
+        builder.Services.AddScoped<IUnitOfWork<TDbContext>, UnitOfWork<TDbContext>>();
 
         builder.Services.AddTransient<ITransactionFactory, TransactionFactory<TDbContext>>();
         builder.Services.AddTransient<ITransactionFactory<TDbContext>, TransactionFactory<TDbContext>>();
