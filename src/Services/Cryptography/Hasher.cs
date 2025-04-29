@@ -1,4 +1,5 @@
-﻿using BCrypt.Net;
+﻿using static BCrypt.Net.BCrypt;
+using BCrypt.Net;
 using Infrastructure.Abstractions.Cryptography;
 using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
@@ -27,7 +28,7 @@ public class Hasher(ILoggerEnhancer<Hasher> logger) : IHasher
     {
         try
         {
-            return BCrypt.Net.BCrypt.EnhancedHashPassword(password, hashType);
+            return EnhancedHashPassword(password, hashType);
         }
         catch (Exception ex)
         {
@@ -48,7 +49,7 @@ public class Hasher(ILoggerEnhancer<Hasher> logger) : IHasher
     {
         try
         {
-            return BCrypt.Net.BCrypt.EnhancedVerify(input, src, hashType);
+            return EnhancedVerify(input, src, hashType);
         }
         catch (Exception ex)
         {

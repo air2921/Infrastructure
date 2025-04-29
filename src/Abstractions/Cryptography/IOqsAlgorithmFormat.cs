@@ -13,7 +13,7 @@ public interface IOqsAlgorithmFormat
     /// <summary>
     /// Path to embedded OQS library
     /// </summary>
-    public string ResourceName => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "Infrastructure.Assembly.oqs.so" : "Infrastructure.Assembly.oqs.dll";
+    public string ResourceName => DefineOqsResource();
 
     /// <summary>
     /// Algorithm name (e.g. "Dilithium5")
@@ -34,4 +34,24 @@ public interface IOqsAlgorithmFormat
     /// Private key length in bytes
     /// </summary>
     public int PrivateKeyLength { get; }
+
+    /// <summary>
+    /// Determines the appropriate OQS (Open Quantum Safe) library resource based on the current operating system.
+    /// </summary>
+    /// <returns>The platform-specific OQS library filename.</returns>
+    /// <exception cref="PlatformNotSupportedException">
+    /// Thrown when the current platform is either OSX (temporarily unsupported) 
+    /// or any other unsupported platform.
+    /// </exception>
+    private static string DefineOqsResource()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return "Infrastructure.Assembly.oqs.dll";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            return "Infrastructure.Assembly.oqs.so";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            throw new PlatformNotSupportedException("OSX platform is temporarily unsupported");
+
+        throw new PlatformNotSupportedException("Oqs is not supported on this platform");
+    }
 }

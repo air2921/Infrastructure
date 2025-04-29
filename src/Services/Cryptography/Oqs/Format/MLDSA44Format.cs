@@ -8,12 +8,24 @@ namespace Infrastructure.Services.Cryptography.Oqs.Format;
 /// <remarks>
 /// Implements parameters for the 44-bit security variant of ML-DSA according to NIST PQC standards.
 /// </remarks>
-public class MLDSA44Format : IOqsAlgorithmFormat
+public readonly struct MLDSA44Format : IOqsAlgorithmFormat
 {
     /// <summary>
-    /// Gets the algorithm name "ML-DSA-44" (FIPS 204 ML-DSA with 44-bit security)
+    /// The standardized algorithm name string "ML-DSA-44"
     /// </summary>
-    public string Algorithm => "ML-DSA-44";
+    /// <remarks>
+    /// Corresponds to FIPS 204 ML-DSA specification with 44-bit security level.
+    /// Represents Module-Lattice based Digital Signature Algorithm.
+    /// </remarks>
+    private const string AlgorithmIdentifier = "ML-DSA-44";
+
+    /// <summary>
+    /// Gets the algorithm name identifier
+    /// </summary>
+    /// <value>
+    /// Always returns "ML-DSA-44" string constant
+    /// </value>
+    public string Algorithm => AlgorithmIdentifier;
 
     /// <summary>
     /// Gets the signature length of 2420 bytes for ML-DSA-44

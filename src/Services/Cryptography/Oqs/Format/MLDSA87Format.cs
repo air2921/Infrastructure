@@ -8,12 +8,24 @@ namespace Infrastructure.Services.Cryptography.Oqs.Format;
 /// <remarks>
 /// Implements parameters for the 87-bit security variant of ML-DSA according to NIST PQC standards.
 /// </remarks>
-public class MLDSA87Format : IOqsAlgorithmFormat
+public readonly struct MLDSA87Format : IOqsAlgorithmFormat
 {
     /// <summary>
-    /// Gets the algorithm name "ML-DSA-87" (FIPS 204 ML-DSA with 87-bit security)
+    /// The standardized algorithm name string "ML-DSA-87"
     /// </summary>
-    public string Algorithm => "ML-DSA-87";
+    /// <remarks>
+    /// Corresponds to FIPS 204 ML-DSA specification with 87-bit security level.
+    /// Represents Module-Lattice based Digital Signature Algorithm with enhanced security parameters.
+    /// </remarks>
+    private const string AlgorithmIdentifier = "ML-DSA-87";
+
+    /// <summary>
+    /// Gets the algorithm name identifier
+    /// </summary>
+    /// <value>
+    /// Always returns "ML-DSA-87" string constant
+    /// </value>
+    public string Algorithm => AlgorithmIdentifier;
 
     /// <summary>
     /// Gets the signature length of 4627 bytes for ML-DSA-87

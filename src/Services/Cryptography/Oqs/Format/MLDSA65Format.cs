@@ -8,12 +8,24 @@ namespace Infrastructure.Services.Cryptography.Oqs.Format;
 /// <remarks>
 /// Implements parameters for the 65-bit security variant of ML-DSA according to NIST PQC standards.
 /// </remarks>
-public class MLDSA65Format : IOqsAlgorithmFormat
+public readonly struct MLDSA65Format : IOqsAlgorithmFormat
 {
     /// <summary>
-    /// Gets the algorithm name "ML-DSA-65" (FIPS 204 ML-DSA with 65-bit security)
+    /// The standardized algorithm name string "ML-DSA-65"
     /// </summary>
-    public string Algorithm => "ML-DSA-65";
+    /// <remarks>
+    /// Corresponds to FIPS 204 ML-DSA specification with 65-bit security level.
+    /// Represents Module-Lattice based Digital Signature Algorithm.
+    /// </remarks>
+    private const string AlgorithmIdentifier = "ML-DSA-65";
+
+    /// <summary>
+    /// Gets the algorithm name identifier
+    /// </summary>
+    /// <value>
+    /// Always returns "ML-DSA-65" string constant
+    /// </value>
+    public string Algorithm => AlgorithmIdentifier;
 
     /// <summary>
     /// Gets the signature length of 3309 bytes for ML-DSA-65

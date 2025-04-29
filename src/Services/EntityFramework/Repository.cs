@@ -385,8 +385,15 @@ public sealed class Repository<TEntity, TDbContext> :
             var entity = builder.Entity;
             entity.UpdatedBy = builder.UpdatedByUser;
 
-            _dbSet.Attach(entity);
-            _context.Entry(entity).State = EntityState.Modified;
+            var entry = _context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                _dbSet.Attach(entity);
+                entry.State = EntityState.Modified;
+            }
+            else
+                entry.CurrentValues.SetValues(entity);
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -419,12 +426,18 @@ public sealed class Repository<TEntity, TDbContext> :
             using var cts = new CancellationTokenSource(timeout);
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
 
-            _dbSet.AttachRange(builder.Entities);
-
             foreach (var entity in builder.Entities)
             {
                 entity.UpdatedBy = builder.UpdatedByUser;
-                _context.Entry(entity).State = EntityState.Modified;
+                var entry = _context.Entry(entity);
+
+                if (entry.State == EntityState.Detached)
+                {
+                    _dbSet.Attach(entity);
+                    entry.State = EntityState.Modified;
+                }
+                else
+                    entry.CurrentValues.SetValues(entity);
             }
 
             if (builder.SaveChanges)

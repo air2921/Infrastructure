@@ -8,12 +8,23 @@ namespace Infrastructure.Services.Cryptography.Oqs.Format;
 /// <remarks>
 /// Implements parameters for the 1024-bit security variant of Falcon according to NIST PQC standards.
 /// </remarks>
-public class Falcon1024Format : IOqsAlgorithmFormat
+public readonly struct Falcon1024Format : IOqsAlgorithmFormat
 {
     /// <summary>
-    /// Gets the algorithm name "Falcon-1024" (FIPS 205 SLH-DSA with 1024-bit security)
+    /// The standardized algorithm name string "Falcon-1024"
     /// </summary>
-    public string Algorithm => "Falcon-1024";
+    /// <remarks>
+    /// Corresponds to FIPS 205 SLH-DSA specification with 1024-bit security level
+    /// </remarks>
+    private const string AlgorithmIdentifier = "Falcon-1024";
+
+    /// <summary>
+    /// Gets the algorithm name identifier
+    /// </summary>
+    /// <value>
+    /// Always returns "Falcon-1024" string constant
+    /// </value>
+    public string Algorithm => AlgorithmIdentifier;
 
     /// <summary>
     /// Gets the signature length of 1280 bytes for Falcon-1024

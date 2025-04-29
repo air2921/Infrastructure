@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Services.EntityFramework.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Abstractions.Database;
 
@@ -21,7 +22,7 @@ public interface IUnitOfWork
 }
 
 /// <summary>
-/// Defines the contract for a unit of work pattern that operates on a specific <see cref="EntityFrameworkContext"/> database context.
+/// Defines the contract for a unit of work pattern that operates on a specific <see cref="DbContext"/> database context.
 /// </summary>
-/// <typeparam name="TDbContext">The type of database context this unit of work operates on, which must inherit from <see cref="EntityFrameworkContext"/>.</typeparam>
-public interface IUnitOfWork<TDbContext> : IUnitOfWork where TDbContext : EntityFrameworkContext;
+/// <typeparam name="TDbContext">The type of database context this unit of work operates on, which must inherit from <see cref="DbContext"/>.</typeparam>
+public interface IUnitOfWork<TDbContext> : IUnitOfWork where TDbContext : DbContext;

@@ -8,13 +8,23 @@ namespace Infrastructure.Services.Cryptography.Oqs.Format;
 /// <remarks>
 /// Implements parameters for the 512-bit security variant of Falcon according to NIST PQC standards.
 /// </remarks>
-public class Falcon512Format : IOqsAlgorithmFormat
+public readonly struct Falcon512Format : IOqsAlgorithmFormat
 {
     /// <summary>
-    /// Gets the algorithm name "Falcon-512" (SLH-DSA with 512-bit security level)
+    /// The standardized algorithm name string "Falcon-512"
     /// </summary>
-    /// <value>The standardized algorithm identifier string</value>
-    public string Algorithm => "Falcon-512";
+    /// <remarks>
+    /// Corresponds to FIPS 205 SLH-DSA specification with 512-bit security level
+    /// </remarks>
+    private const string AlgorithmIdentifier = "Falcon-512";
+
+    /// <summary>
+    /// Gets the algorithm name identifier
+    /// </summary>
+    /// <value>
+    /// Always returns "Falcon-512" string constant
+    /// </value>
+    public string Algorithm => AlgorithmIdentifier;
 
     /// <summary>
     /// Gets the signature length of 666 bytes for Falcon-512
