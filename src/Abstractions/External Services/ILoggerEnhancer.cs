@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.Logger;
+﻿using Infrastructure.Data_Transfer_Object.Logger;
+using Infrastructure.Services.Logger;
 
 namespace Infrastructure.Abstractions.External_Services;
 
@@ -48,4 +49,13 @@ public interface ILoggerEnhancer<out TCategory>
     /// <param name="message">The descriptive message to log.</param>
     /// <param name="args">Additional parameters to include in the structured log entry.</param>
     public void LogError(Exception? exception, string message, params object?[] args);
+
+    /// <summary>
+    /// Logs an error message with an exception and structured parameters.
+    /// </summary>
+    /// <param name="exception">The exception to log.</param>
+    /// <param name="message">The message template string.</param>
+    /// <param name="argument">The arguments of logger</param>
+    /// <param name="args">Additional parameters to include in the structured log.</param>
+    public void LogError(Exception? exception, string message, LoggerArgument argument, params object?[] args);
 }
