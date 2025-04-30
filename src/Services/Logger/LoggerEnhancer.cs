@@ -80,24 +80,56 @@ public class LoggerEnhancer<TCategory>(ILogger<TCategory> logger) : ILoggerEnhan
     }
 
     /// <summary>
+    /// Logs an error message with an exception and structured parameters.
+    /// </summary>
+    /// <param name="exception">The exception to log.</param>
+    /// <param name="message">The message template string.</param>
+    /// <param name="argument">The arguments of logger</param>
+    /// <param name="args">Additional parameters to include in the structured log.</param>
+    public void LogError(Exception? exception, string message, LoggerArgument argument, params object?[] args)
+    {
+        var log = FormatLogMessage(exception, message, args, argument);
+#pragma warning disable CA2254
+        logger.LogError(log);
+#pragma warning restore CA2254
+    }
+
+    /// <summary>
     /// Formats the log message along with exception details (if provided) and additional parameters
     /// into a structured JSON string.
     /// </summary>
-    /// <param name="exception">The exception to include in the log, or null.</param>
-    /// <param name="message">The message template string.</param>
+    /// <param name="exception">The exception to include in the log, or null if no exception is provided.</param>
+    /// <param name="message">The primary log message template string.</param>
     /// <param name="args">Additional parameters to include in the structured log.</param>
+    /// <param name="argument">The arguments of logger</param>
     /// <returns>A JSON string containing all log details in a structured format.</returns>
-    private static string FormatLogMessage(Exception? exception, string message, IEnumerable<object?> args)
+    private static string FormatLogMessage(Exception? exception, string message, IEnumerable<object?> args, LoggerArgument? argument = null)
     {
         ExceptionDetails? exceptionDetails = null;
 
         if (exception is not null)
         {
+            Dictionary<string, string> exceptions = [];
+
+            if (argument is not null && argument.LogInnerExceptions)
+            {
+                var currentInnerException = exception.InnerException;
+                var index = 1;
+
+                while (currentInnerException is not null)
+                {
+                    exceptions.Add($"{index}-{currentInnerException.GetType().Name}", currentInnerException.Message);
+                    currentInnerException = currentInnerException.InnerException;
+                    index++;
+                }
+            }
+
             exceptionDetails = new()
             {
-                Type = exception.GetType().Name,
+                OuterExceptionName = exception.GetType().Name,
                 Message = exception.Message,
-                StackTrace = exception.StackTrace
+                StackTrace = argument is not null && argument.LogStackTrace ? exception.StackTrace : null,
+                InnerExceptions = exceptions
             };
         }
 
