@@ -36,12 +36,6 @@ public static class EntityFrameworkRepositoryExtension
     ///     <item><description><see cref="ITransactionFactory{TDbContext}"/> - Transient service for creating transactions specific to <typeparamref name="TDbContext"/>.</description></item>
     ///     <item><description>Scoped services for <see cref="IRepository{T}"/> and <see cref="IRepository{T, TDbContext}"/> for each entity type in <typeparamref name="TDbContext"/>.</description></item>
     /// </list>
-    /// Additionally, this method configures the database context based on the specified SQL database type:
-    /// <list type="bullet">
-    ///     <item><description>PostgreSQL: Configures <typeparamref name="TDbContext"/> to use Npgsql with detailed errors and logging.</description></item>
-    ///     <item><description>SQL Server: Configures <typeparamref name="TDbContext"/> to use SQL Server with detailed errors and logging.</description></item>
-    ///     <item><description>SQLite: Configures <typeparamref name="TDbContext"/> to use SQLite with detailed errors and logging.</description></item>
-    /// </list>
     /// <para>
     /// Note: This method automatically registers repository services for all entity types (DbSet&lt;T&gt;) found in the specified <typeparamref name="TDbContext"/>.
     /// </para>
@@ -56,7 +50,6 @@ public static class EntityFrameworkRepositoryExtension
 
         options.EnsureSuccessValidation("Invalid database configuration, check connection string");
 
-        builder.AddDatabaseContext<TDbContext>(options);
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork<TDbContext>>();
         builder.Services.AddScoped<IUnitOfWork<TDbContext>, UnitOfWork<TDbContext>>();
 
