@@ -10,22 +10,6 @@
 internal static class InfrastructureImmutable
 {
     /// <summary>
-    /// Contains constants related to ASP.NET Core configuration.
-    /// </summary>
-    internal static class ASPNETCore
-    {
-        /// <summary>
-        /// The environment variable name used by ASP.NET Core to determine the current environment.
-        /// </summary>
-        internal const string AspNetCoreEnv = "ASPNETCORE_ENVIRONMENT";
-
-        /// <summary>
-        /// The property name used to access the environment in IWebHostEnvironment.
-        /// </summary>
-        internal const string EnvProperty = "Environment";
-    }
-
-    /// <summary>
     /// Contains timeout values (in seconds) for various repository operations.
     /// </summary>
     internal static class RepositoryTimeout

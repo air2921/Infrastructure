@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
+using Serilog.Sinks.Elasticsearch;
 
 namespace Infrastructure.Options;
 
@@ -19,9 +20,18 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// </summary>
     /// <value>
     /// The connection string in URI format (e.g., "http://localhost:9200").
-    /// This property must be set to a non-null, non-empty value.
+    /// This property must be set to a non-null, non-empty value if <see cref="SinkOptions"/> is null.
     /// </value>
-    public string Connection { internal get; set; } = null!;
+    public string Connection { internal get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets additional custom properties for Elasticsearch configuration.
+    /// </summary>
+    /// <value>
+    /// A dictionary of key-value pairs representing custom Elasticsearch properties.
+    /// These properties can be used to extend configuration beyond the standard options.
+    /// </value>
+    public Dictionary<string, object> Properties { internal get; set; } = [];
 
     /// <summary>
     /// Gets or sets the index name pattern for Elasticsearch.
@@ -31,6 +41,15 @@ public sealed class ElasticSearchConfigureOptions : Validator
     /// Custom index names can be set but must start with "logs" (case insensitive).
     /// </value>
     public string Index { internal get; set; } = $"logs-{DateTime.UtcNow:yyyy.MM.dd}";
+
+    /// <summary>
+    /// Gets or sets the options for the Elasticsearch sink in Serilog.
+    /// </summary>
+    /// <value>
+    /// The <see cref="ElasticsearchSinkOptions"/> containing specific settings for Serilog's Elasticsearch sink.
+    /// If not provided, default sink options will be used based on other configuration properties.
+    /// </value>
+    public ElasticsearchSinkOptions? SinkOptions { internal get; set; }
 
     /// <summary>
     /// Gets or sets the minimum log level for Elasticsearch.
@@ -50,24 +69,28 @@ public sealed class ElasticSearchConfigureOptions : Validator
     public IConfiguration Configuration { internal get; set; } = null!;
 
     /// <summary>
-    /// Validates whether the Elasticsearch configuration is properly set.
+    /// Validates the Elasticsearch configuration options.
     /// </summary>
     /// <returns>
-    /// <c>true</c> if the configuration is valid; otherwise, <c>false</c>.
-    /// </returns>
-    /// <remarks>
-    /// The configuration is considered valid when:
+    /// <c>true</c> if the configuration is valid based on the following criteria:
     /// <list type="bullet">
-    ///   <item><description>The <see cref="Connection"/> property is not null, empty, or whitespace</description></item>
-    ///   <item><description>The <see cref="Configuration"/> property is not null</description></item>
-    ///   <item><description>The <see cref="Index"/> property does not start with "logs" (case insensitive)</description></item>
+    ///     <item><description><see cref="Configuration"/> is not null (required in all cases)</description></item>
+    ///     <item><description>Either <see cref="SinkOptions"/> is provided (overrides other checks)</description></item>
+    ///     <item><description>OR both <see cref="Connection"/> is not empty AND <see cref="Index"/> starts with "logs" (case-insensitive)</description></item>
     /// </list>
-    /// </remarks>
+    /// Otherwise returns <c>false</c>.
+    /// </returns>
     public override bool IsValidConfigure()
     {
-        if (string.IsNullOrWhiteSpace(Connection) || Configuration is null || !Index.StartsWith("logs", StringComparison.OrdinalIgnoreCase))
+        if (Configuration is null)
             return false;
 
-        return true;
+        if (SinkOptions is not null)
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(Connection) || Index.StartsWith("logs", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
     }
 }

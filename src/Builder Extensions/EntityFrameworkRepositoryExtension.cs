@@ -40,7 +40,7 @@ public static class EntityFrameworkRepositoryExtension
     /// Note: This method automatically registers repository services for all entity types (DbSet&lt;T&gt;) found in the specified <typeparamref name="TDbContext"/>.
     /// </para>
     /// </remarks>
-    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : EntityFrameworkContext
+    public static IInfrastructureBuilder AddEntityFrameworkRepository<TDbContext>(this IInfrastructureBuilder builder, Action<EntityFrameworkConfigureOptions> configureOptions) where TDbContext : DbContext
     {
         var options = new EntityFrameworkConfigureOptions();
         configureOptions.Invoke(options);

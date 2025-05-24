@@ -39,7 +39,7 @@ public class MailDetails : MessageDetails
     /// is transferred to the <see cref="MimeMessage"/> instance, which becomes responsible for its disposal.
     /// </para>
     /// <para>
-    /// Do not dispose this object manually after assignment to avoid double disposal.
+    /// Do not call <see cref="IDisposable.Dispose"/> this object manually after assignment to avoid double disposal.
     /// </para>
     /// </remarks>
     public required MimeEntity Entity { get; set; }

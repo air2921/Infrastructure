@@ -7,7 +7,6 @@ using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Remove;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Restore;
 using Infrastructure.Services.EntityFramework.Builder.NoneQuery.Update;
 using Infrastructure.Services.EntityFramework.Builder.Query;
-using Infrastructure.Services.EntityFramework.Context;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -28,7 +27,7 @@ namespace Infrastructure.Services.EntityFramework;
 /// </remarks>
 public sealed class Repository<TEntity, TDbContext> :
     IRepository<TEntity>,
-    IRepository<TEntity, TDbContext> where TEntity : EntityBase where TDbContext : EntityFrameworkContext
+    IRepository<TEntity, TDbContext> where TEntity : EntityBase where TDbContext : DbContext
 {
     #region fields and constructor
 
@@ -482,7 +481,19 @@ public sealed class Repository<TEntity, TDbContext> :
             using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
             cancellationToken = linkedToken.Token;
 
-            _context.Restore(builder.Entity);
+            var entity = builder.Entity;
+
+            entity.IsDeleted = false;
+            entity.UpdatedAt = DateTimeOffset.UtcNow;
+            var entry = _context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                _dbSet.Attach(entity);
+                entry.State = EntityState.Modified;
+            }
+            else
+                entry.CurrentValues.SetValues(entity);
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -516,7 +527,20 @@ public sealed class Repository<TEntity, TDbContext> :
             using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
             cancellationToken = linkedToken.Token;
 
-            _context.RestoreRange(builder.Entities);
+            foreach (var entity in builder.Entities)
+            {
+                entity.IsDeleted = false;
+                entity.UpdatedAt = DateTimeOffset.UtcNow;
+                var entry = _context.Entry(entity);
+
+                if (entry.State == EntityState.Detached)
+                {
+                    _dbSet.Attach(entity);
+                    entry.State = EntityState.Modified;
+                }
+                else
+                    entry.CurrentValues.SetValues(entity);
+            }
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);

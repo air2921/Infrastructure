@@ -1,16 +1,17 @@
 ﻿using Infrastructure.Abstractions.Database;
 using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFramework.Context;
 
 /// <summary>
 /// Represents a unit of work implementation that coordinates the writing of changes to the underlying database context.
 /// </summary>
-/// <typeparam name="TDbContext">The type of the database context, which must inherit from EntityFrameworkContext.</typeparam>
+/// <typeparam name="TDbContext">The type of the database context, which must inherit from DbContext.</typeparam>
 /// <param name="context">The database context instance that this unit of work will operate on.</param>
 /// <param name="logger">The enhanced logger instance used for logging operations and errors.</param>
-public class UnitOfWork<TDbContext>(TDbContext context, ILoggerEnhancer<UnitOfWork<TDbContext>> logger) : IUnitOfWork<TDbContext>, IUnitOfWork where TDbContext : EntityFrameworkContext
+public class UnitOfWork<TDbContext>(TDbContext context, ILoggerEnhancer<UnitOfWork<TDbContext>> logger) : IUnitOfWork<TDbContext>, IUnitOfWork where TDbContext : DbContext
 {
     /// <summary>
     /// Saves all changes made in this context to the underlying database.

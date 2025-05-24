@@ -1,13 +1,8 @@
 ﻿using Infrastructure.Configuration;
-using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Exceptions;
-using Serilog.Formatting.Compact;
-using Serilog.Formatting.Elasticsearch;
 using Serilog.Sinks.Elasticsearch;
-using System.Reflection;
 
 namespace Infrastructure.Builder_Extensions;
 
@@ -17,26 +12,18 @@ namespace Infrastructure.Builder_Extensions;
 public static class ElasticSearchLoggerExtension
 {
     /// <summary>
-    /// Adds ElasticSearch logging services to the <see cref="IInfrastructureBuilder"/>.
+    /// Adds Elasticsearch logging to the application infrastructure.
     /// </summary>
-    /// <param name="builder">The infrastructure builder to which the ElasticSearch logging services will be added.</param>
-    /// <param name="configureOptions">A delegate that configures the ElasticSearch options.</param>
-    /// <returns>The updated <see cref="IInfrastructureBuilder"/> with the added ElasticSearch logging services.</returns>
-    /// <exception cref="InfrastructureConfigurationException">
-    /// Thrown when the ElasticSearch configuration is invalid, such as an incorrect connection string.
-    /// </exception>
+    /// <param name="builder">Infrastructure builder instance</param>
+    /// <param name="configureOptions">Elasticsearch configuration action</param>
+    /// <returns>The builder for chaining</returns>
     /// <remarks>
-    /// This method configures logging services and registers the following components:
-    /// <list type="bullet">
-    ///     <item><description><see cref="ElasticSearchConfigureOptions"/> - Singleton service for storing ElasticSearch configuration.</description></item>
-    ///     <item><description><see cref="Serilog.ILogger"/> - Global logger instance configured with Serilog, including ElasticSearch sink.</description></item>
-    /// </list>
-    /// Additionally, this method configures the following logging behaviors:
-    /// <list type="bullet">
-    ///     <item><description>Logs are enriched with context properties such as assembly name and environment.</description></item>
-    ///     <item><description>Logs are written to both the console and ElasticSearch.</description></item>
-    ///     <item><description>ElasticSearch index format is set to <c>logs-YYYY</c>, where <c>YYYY</c> is the current year.</description></item>
-    /// </list>
+    /// Configures console and Elasticsearch logging with:
+    /// - Correlation ID
+    /// - Custom properties
+    /// - Batched Elasticsearch writes (50 events/5sec)
+    /// - Auto template registration
+    /// Skips setup if disabled in options.
     /// </remarks>
     public static IInfrastructureBuilder AddElasticSearchLogger(this IInfrastructureBuilder builder, Action<ElasticSearchConfigureOptions> configureOptions)
     {
@@ -46,29 +33,29 @@ public static class ElasticSearchLoggerExtension
         if (!options.IsEnable)
             return builder;
 
-        options.EnsureSuccessValidation("Invalid ElasticSearch configuration. Please check connection");
+        options.EnsureSuccessValidation("Invalid ElasticSearch configuration. Please check connection string or sink options");
 
-        Log.Logger = new LoggerConfiguration()
+        var logggerConfig = new LoggerConfiguration()
             .MinimumLevel.Is(options.EventLevel)
             .Enrich.WithCorrelationId()
-            .Enrich.WithExceptionDetails()
-            .Enrich.WithProperty("Assembly", Assembly.GetExecutingAssembly().GetName().Name)
-            .Enrich.WithProperty(InfrastructureImmutable.ASPNETCore.EnvProperty, Environment.GetEnvironmentVariable(InfrastructureImmutable.ASPNETCore.AspNetCoreEnv)!)
             .ReadFrom.Configuration(options.Configuration)
-            .WriteTo.Console(new CompactJsonFormatter())
-            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(options.Connection))
-            {
-                BatchPostingLimit = 50,
-                Period = TimeSpan.FromSeconds(2),
-                BufferFileSizeLimitBytes = 1024 * 1024,
-                BufferRetainedInvalidPayloadsLimitBytes = 5000,
-                AutoRegisterTemplate = true,
-                OverwriteTemplate = true,
-                CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true, formatStackTraceAsArray: true),
-                IndexFormat = options.Index,
-                TypeName = null
-            })
-            .CreateLogger();
+            .WriteTo.Console();
+
+        foreach (var prop in options.Properties)
+            logggerConfig.Enrich.WithProperty(prop.Key, prop.Value);
+
+        logggerConfig.WriteTo.Elasticsearch(options.SinkOptions ?? new ElasticsearchSinkOptions(new Uri(options.Connection))
+        {
+            BatchPostingLimit = 50,
+            Period = TimeSpan.FromSeconds(5),
+            BufferFileSizeLimitBytes = 1024 * 1024,
+            BufferRetainedInvalidPayloadsLimitBytes = 5000,
+            AutoRegisterTemplate = true,
+            OverwriteTemplate = true,
+            IndexFormat = options.Index,
+        });
+
+        Log.Logger = logggerConfig.CreateLogger();
 
         builder.Services.AddLogging(log =>
         {

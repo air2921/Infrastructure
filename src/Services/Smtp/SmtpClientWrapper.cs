@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
 using Infrastructure.Options;
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -19,7 +20,7 @@ namespace Infrastructure.Services.Smtp;
 /// </remarks>
 public class SmtpClientWrapper : IDisposable
 {
-    private readonly Lazy<SmtpClient> _transport;
+    private readonly Lazy<IMailTransport> _transport;
     private readonly ILoggerEnhancer<SmtpClientWrapper> _logger;
 
     private volatile bool _disposed;
@@ -35,7 +36,7 @@ public class SmtpClientWrapper : IDisposable
     {
         _logger = logger;
 
-        _transport = new Lazy<SmtpClient>(() =>
+        _transport = new Lazy<IMailTransport>(() =>
         {
             var client = new SmtpClient();
             try

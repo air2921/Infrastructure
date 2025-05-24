@@ -33,7 +33,7 @@
 		<PackageId>AirSoft.Infrastructure</PackageId>
 		<Authors>AirSoft Team</Authors>
 		<Company>AirSoft</Company>
-		<Version>8.0.0</Version>
+		<Version>9.0.0</Version>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<RepositoryUrl>https://github.com/air2921/Infrastructure</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -53,7 +53,6 @@
 		<PackageReference Include="System.Text.Json" Version="9.0.4" />
 		<PackageReference Include="AWSSDK.S3" Version="3.7.416.11" />
 		<PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
-		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="MongoDB.Driver" Version="3.3.0" />
 		<PackageReference Include="Twilio" Version="7.10.0" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />

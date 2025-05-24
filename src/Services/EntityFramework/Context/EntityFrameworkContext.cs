@@ -28,7 +28,7 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
     /// 3. Mark entity as Modified
     /// Note: Changes are not saved until SaveChanges is called
     /// </remarks>
-    public TEntity Restore<TEntity>(TEntity entity) where TEntity : EntityBase
+    public virtual TEntity Restore<TEntity>(TEntity entity) where TEntity : EntityBase
     {
         ArgumentNullException.ThrowIfNull(entity);
 
@@ -50,7 +50,7 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
     /// Applies the same restoration logic as Restore&lt;TEntity&gt; to each entity in the collection.
     /// Changes are not saved until SaveChanges is called.
     /// </remarks>
-    public IEnumerable<TEntity> RestoreRange<TEntity>(IEnumerable<TEntity> entities) where TEntity : EntityBase
+    public virtual IEnumerable<TEntity> RestoreRange<TEntity>(IEnumerable<TEntity> entities) where TEntity : EntityBase
     {
         foreach (var entity in entities)
             Restore(entity);
