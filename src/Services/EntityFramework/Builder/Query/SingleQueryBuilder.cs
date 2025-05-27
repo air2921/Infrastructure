@@ -28,6 +28,12 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     internal Expression<Func<TEntity, bool>>? Filter { get; private set; }
 
     /// <summary>
+    /// Gets the projection selector expression that transforms the query results.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, TEntity>>? Selector { get; private set; }
+
+    /// <summary>
     /// Whether to ignore default query filters.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -73,6 +79,17 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     /// Creates a new instance of SingleQueryBuilder.
     /// </summary>
     public static SingleQueryBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Sets a projection selector for the query results.
+    /// </summary>
+    /// <param name="selector">The projection expression that transforms the query results.</param>
+    /// <returns>The current builder instance.</returns>
+    public SingleQueryBuilder<TEntity> WithProjection(Expression<Func<TEntity, TEntity>> selector)
+    {
+        Selector = selector ?? throw new InvalidArgumentException($"Using a {nameof(WithProjection)} without projection expression is not allowed");
+        return this;
+    }
 
     /// <summary>
     /// Sets the filter expression for the query.
@@ -187,6 +204,9 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
 
         if (Filter is not null)
             query = query.Where(Filter);
+
+        if (Selector is not null)
+            query = query.Select(Selector);
 
         if (OrderExpression is not null)
             query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);

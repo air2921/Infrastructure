@@ -28,6 +28,12 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
     internal Expression<Func<TEntity, bool>>? Filter { get; private set; }
 
     /// <summary>
+    /// Gets the projection selector expression that transforms the query results.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal Expression<Func<TEntity, TEntity>>? Selector { get; private set; }
+
+    /// <summary>
     /// Indicates whether the query should ignore default query filters.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -79,6 +85,17 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
     /// Creates a new instance of RangeQueryBuilder with default settings.
     /// </summary>
     public static RangeQueryBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Sets a projection selector for the query results.
+    /// </summary>
+    /// <param name="selector">The projection expression that transforms the query results.</param>
+    /// <returns>The current builder instance.</returns>
+    public RangeQueryBuilder<TEntity> WithProjection(Expression<Func<TEntity, TEntity>> selector)
+    {
+        Selector = selector ?? throw new InvalidArgumentException($"Using a {nameof(WithProjection)} without projection expression is not allowed");
+        return this;
+    }
 
     /// <summary>
     /// Sets the filter expression for the query.
@@ -203,6 +220,9 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
 
         if (Filter is not null)
             query = query.Where(Filter);
+
+        if (Selector is not null)
+            query = query.Select(Selector);
 
         if (OrderExpression is not null)
             query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
