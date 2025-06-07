@@ -3,7 +3,7 @@ using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Services.EntityFramework.Context;
+namespace Infrastructure.Services.EntityFramework;
 
 /// <summary>
 /// Represents a unit of work implementation that coordinates the writing of changes to the underlying database context.

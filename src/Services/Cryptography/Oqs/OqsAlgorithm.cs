@@ -306,7 +306,7 @@ public abstract class OqsAlgorithm : IDisposable
         get
         {
             CheckDisposed();
-            return _oqsSigVerify; 
+            return _oqsSigVerify;
         }
     }
 

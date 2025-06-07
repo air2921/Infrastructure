@@ -203,7 +203,7 @@ public sealed class Repository<TEntity, TDbContext> :
 
             builder.Entity.CreatedBy = builder.CreatedByUser;
             await _dbSet.AddAsync(builder.Entity, cancellationToken);
-            
+
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -242,7 +242,7 @@ public sealed class Repository<TEntity, TDbContext> :
                 entity.CreatedBy = builder.CreatedByUser;
 
             await _dbSet.AddRangeAsync(builder.Entities, cancellationToken);
-            
+
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -254,7 +254,7 @@ public sealed class Repository<TEntity, TDbContext> :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while attempting to add a range of entities", _tName.Value, builder.Entities.Select(x =>  x.Id));
+            _logger.LogError(ex, "An error occurred while attempting to add a range of entities", _tName.Value, builder.Entities.Select(x => x.Id));
             throw new EntityException("An error occurred while attempting to add a range of entities");
         }
     }
@@ -290,7 +290,7 @@ public sealed class Repository<TEntity, TDbContext> :
                 return null;
 
             var deletedEntity = _dbSet.Remove(entity).Entity;
-            
+
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -393,15 +393,7 @@ public sealed class Repository<TEntity, TDbContext> :
             var entity = builder.Entity;
             entity.UpdatedBy = builder.UpdatedByUser;
 
-            var entry = _context.Entry(entity);
-
-            if (entry.State == EntityState.Detached)
-            {
-                _dbSet.Attach(entity);
-                entry.State = EntityState.Modified;
-            }
-            else
-                entry.CurrentValues.SetValues(entity);
+            _dbSet.Update(entity);
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -436,18 +428,9 @@ public sealed class Repository<TEntity, TDbContext> :
             cancellationToken = linkedToken.Token;
 
             foreach (var entity in builder.Entities)
-            {
                 entity.UpdatedBy = builder.UpdatedByUser;
-                var entry = _context.Entry(entity);
 
-                if (entry.State == EntityState.Detached)
-                {
-                    _dbSet.Attach(entity);
-                    entry.State = EntityState.Modified;
-                }
-                else
-                    entry.CurrentValues.SetValues(entity);
-            }
+            _dbSet.UpdateRange(builder.Entities);
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -482,18 +465,9 @@ public sealed class Repository<TEntity, TDbContext> :
             cancellationToken = linkedToken.Token;
 
             var entity = builder.Entity;
-
             entity.IsDeleted = false;
-            entity.UpdatedAt = DateTimeOffset.UtcNow;
-            var entry = _context.Entry(entity);
 
-            if (entry.State == EntityState.Detached)
-            {
-                _dbSet.Attach(entity);
-                entry.State = EntityState.Modified;
-            }
-            else
-                entry.CurrentValues.SetValues(entity);
+            _dbSet.Update(entity);
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);
@@ -528,19 +502,9 @@ public sealed class Repository<TEntity, TDbContext> :
             cancellationToken = linkedToken.Token;
 
             foreach (var entity in builder.Entities)
-            {
                 entity.IsDeleted = false;
-                entity.UpdatedAt = DateTimeOffset.UtcNow;
-                var entry = _context.Entry(entity);
 
-                if (entry.State == EntityState.Detached)
-                {
-                    _dbSet.Attach(entity);
-                    entry.State = EntityState.Modified;
-                }
-                else
-                    entry.CurrentValues.SetValues(entity);
-            }
+            _dbSet.UpdateRange(builder.Entities);
 
             if (builder.SaveChanges)
                 await _context.SaveChangesAsync(cancellationToken);

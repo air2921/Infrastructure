@@ -4,7 +4,6 @@ using Infrastructure.Configuration;
 using Infrastructure.Exceptions.Global;
 using Infrastructure.Options;
 using Infrastructure.Services.EntityFramework;
-using Infrastructure.Services.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;

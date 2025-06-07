@@ -5,7 +5,6 @@ using Infrastructure.Services.Logger;
 using Infrastructure.Services.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Serilog;
 
 namespace Infrastructure.Builder_Extensions;
 

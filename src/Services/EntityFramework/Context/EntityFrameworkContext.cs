@@ -1,7 +1,6 @@
-﻿using Infrastructure.Abstractions.Database;
-using Infrastructure.Exceptions;
-using Infrastructure.Services.EntityFramework.Entity;
+﻿using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -137,18 +136,25 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
     }
 
     /// <summary>
-    /// Applies audit tracking (timestamps) before saving changes
+    /// Applies audit tracking and delete behavior before saving changes to the database.
     /// </summary>
     /// <remarks>
-    /// Automatically:
-    /// - Sets CreatedAt/UpdatedAt for new entities
-    /// - Updates UpdatedAt for modified entities
-    /// - Converts hard deletes to soft deletes for EntityBase types
+    /// This method performs the following actions:
+    /// - For <see cref="EntityState.Added"/>:
+    ///   - Sets <c>CreatedAt</c> and <c>UpdatedAt</c> timestamps via <see cref="OnAdding"/>.
+    /// - For <see cref="EntityState.Modified"/>:
+    ///   - Updates <c>UpdatedAt</c> timestamp via <see cref="OnModifying"/>.
+    /// - For <see cref="EntityState.Deleted"/>:
+    ///   - If the entity inherits from <see cref="SoftEntityBase"/>:
+    ///     - Performs a soft delete (sets <c>IsDeleted</c> to true and updates <c>UpdatedAt</c>) via <see cref="OnSoftRemoving"/>.
+    ///   - If the entity inherits from <see cref="HardEntityBase"/>:
+    ///     - Leaves the deletion as-is for physical removal via <see cref="OnHardRemoving"/>.
+    ///   - Otherwise:
+    ///     - Calls <see cref="OnRemoving"/> as fallback.
     /// </remarks>
     private void OnBeforeSaving()
     {
         var entries = ChangeTracker.Entries();
-        var utcNow = DateTimeOffset.UtcNow;
 
         foreach (var entry in entries)
         {
@@ -156,22 +162,95 @@ public abstract class EntityFrameworkContext(DbContextOptions options) : DbConte
             {
                 switch (entry.State)
                 {
+                    case EntityState.Deleted when entity is SoftEntityBase softDeleteEntity:
+                        OnSoftRemoving(entry, softDeleteEntity);
+                        break;
+
+                    case EntityState.Deleted when entity is HardEntityBase hardDeleteEntity:
+                        OnHardRemoving(entry, hardDeleteEntity);
+                        break;
+
                     case EntityState.Added:
-                        entity.CreatedAt = utcNow;
-                        entity.UpdatedAt = utcNow;
+                        OnAdding(entry, entity);
                         break;
 
                     case EntityState.Modified:
-                        entity.UpdatedAt = utcNow;
+                        OnModifying(entry, entity);
                         break;
 
-                    case EntityState.Deleted when entity is EntityBase softDeleteEntity:
-                        entry.State = EntityState.Modified;
-                        softDeleteEntity.IsDeleted = true;
-                        softDeleteEntity.UpdatedAt = utcNow;
+                    case EntityState.Deleted:
+                        OnRemoving(entry, entity);
                         break;
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Applies audit fields for newly added entities.
+    /// </summary>
+    /// <param name="entry">The change tracker entry for the entity.</param>
+    /// <param name="entity">The entity being added.</param>
+    /// <remarks>
+    /// Sets <c>CreatedAt</c> and <c>UpdatedAt</c> to the current UTC time.
+    /// </remarks>
+    protected virtual void OnAdding(EntityEntry entry, EntityBase entity)
+    {
+        entity.CreatedAt = DateTimeOffset.UtcNow;
+        entity.UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
+    /// Updates audit fields for modified entities.
+    /// </summary>
+    /// <param name="entry">The change tracker entry for the entity.</param>
+    /// <param name="entity">The entity being modified.</param>
+    /// <remarks>
+    /// Updates <c>UpdatedAt</c> to the current UTC time.
+    /// </remarks>
+    protected virtual void OnModifying(EntityEntry entry, EntityBase entity)
+    {
+        entity.UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
+    /// Fallback method invoked when an entity marked as deleted does not match <see cref="SoftEntityBase"/> or <see cref="HardEntityBase"/>.
+    /// </summary>
+    /// <param name="entry">The change tracker entry for the entity.</param>
+    /// <param name="entity">The entity being removed.</param>
+    /// <remarks>
+    /// By default, does nothing. Can be overridden to apply custom delete logic for other <see cref="EntityBase"/> types.
+    /// </remarks>
+    protected virtual void OnRemoving(EntityEntry entry, EntityBase entity)
+    {
+        return;
+    }
+
+    /// <summary>
+    /// Handles physical deletion of entities that inherit from <see cref="HardEntityBase"/>.
+    /// </summary>
+    /// <param name="entry">The change tracker entry for the entity.</param>
+    /// <param name="entity">The hard-deletable entity being removed.</param>
+    /// <remarks>
+    /// By default, this method does nothing. Override if additional logic is needed during hard deletion.
+    /// </remarks>
+    protected virtual void OnHardRemoving(EntityEntry entry, HardEntityBase entity)
+    {
+        return;
+    }
+
+    /// <summary>
+    /// Handles soft deletion of entities that inherit from <see cref="SoftEntityBase"/>.
+    /// </summary>
+    /// <param name="entry">The change tracker entry for the entity.</param>
+    /// <param name="entity">The soft-deletable entity being removed.</param>
+    /// <remarks>
+    /// Sets <c>IsDeleted</c> to true, updates <c>UpdatedAt</c> timestamp, and converts the entity state to <see cref="EntityState.Modified"/>.
+    /// </remarks>
+    protected virtual void OnSoftRemoving(EntityEntry entry, SoftEntityBase entity)
+    {
+        entry.State = EntityState.Modified;
+        entity.IsDeleted = true;
+        entity.UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

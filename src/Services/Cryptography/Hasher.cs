@@ -1,8 +1,8 @@
-﻿using static BCrypt.Net.BCrypt;
-using BCrypt.Net;
+﻿using BCrypt.Net;
 using Infrastructure.Abstractions.Cryptography;
 using Infrastructure.Abstractions.External_Services;
 using Infrastructure.Exceptions;
+using static BCrypt.Net.BCrypt;
 
 namespace Infrastructure.Services.Cryptography;
 
