@@ -1,8 +1,8 @@
 ﻿using Infrastructure.Exceptions;
 using Infrastructure.Services.EntityFramework.Builder.Base;
+using Infrastructure.Services.EntityFramework.Builder.Modules;
 using Infrastructure.Services.EntityFramework.Entity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using System.ComponentModel;
 using System.Linq.Expressions;
 
@@ -20,6 +20,11 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     private SingleQueryBuilder()
     {
     }
+
+    /// <summary>
+    /// Holds the internal state for building include/then-include chains.
+    /// </summary>
+    internal IncludeChain<TEntity> IncludeChain { get; private set; } = new();
 
     /// <summary>
     /// Filter expression for the query.
@@ -52,12 +57,6 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     internal IList<(Expression<Func<TEntity, object?>> Expression, bool Descending)> OrderExpressions { get; } = [];
 
     /// <summary>
-    /// Include query for related entities.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal IIncludableQueryable<TEntity, object?>? IncludeQuery { get; private set; }
-
-    /// <summary>
     /// Whether to disable change tracking.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -73,6 +72,51 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     /// Creates a new instance of SingleQueryBuilder.
     /// </summary>
     public static SingleQueryBuilder<TEntity> Create() => new();
+
+    /// <summary>
+    /// Adds a navigation property to be eagerly loaded.
+    /// This method can be called multiple times to start separate include paths,
+    /// or consecutively to continue a previous include chain (equivalent to ThenInclude).
+    /// </summary>
+    /// <typeparam name="TProperty">The type of the navigation property.</typeparam>
+    /// <param name="navigation">The navigation expression (e.g., x => x.Avatar).</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public SingleQueryBuilder<TEntity> WithInclude<TProperty>(
+        Expression<Func<TEntity, TProperty>> navigation)
+    {
+        IncludeChain.AddInclude(navigation);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a ThenInclude to continue the last Include or ThenInclude path.
+    /// Used for including nested reference-type navigation properties.
+    /// </summary>
+    /// <typeparam name="TPreviousProperty">The type of the previous navigation property.</typeparam>
+    /// <typeparam name="TProperty">The type of the next property to include.</typeparam>
+    /// <param name="navigation">The navigation expression (e.g., x => x.Address).</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public SingleQueryBuilder<TEntity> WithThenInclude<TPreviousProperty, TProperty>(
+        Expression<Func<TPreviousProperty, TProperty>> navigation)
+    {
+        IncludeChain.AddThenInclude(navigation);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a ThenInclude for nested collection-type navigation properties.
+    /// Useful when including collections within included entities.
+    /// </summary>
+    /// <typeparam name="TPreviousProperty">The type of the previous navigation property.</typeparam>
+    /// <typeparam name="TProperty">The type of the collection's element to include.</typeparam>
+    /// <param name="navigation">The collection navigation expression (e.g., x => x.Items).</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public SingleQueryBuilder<TEntity> WithThenIncludeCollection<TPreviousProperty, TProperty>(
+        Expression<Func<TPreviousProperty, IEnumerable<TProperty>>> navigation)
+    {
+        IncludeChain.AddThenIncludeCollection(navigation);
+        return this;
+    }
 
     /// <summary>
     /// Sets a projection selector for the query results.
@@ -157,17 +201,6 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     }
 
     /// <summary>
-    /// Sets the include query for related entities.
-    /// </summary>
-    /// <param name="includeQuery">The include query.</param>
-    /// <returns>The current builder instance.</returns>
-    public SingleQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
-    {
-        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without includable expression is not allowed");
-        return this;
-    }
-
-    /// <summary>
     /// Sets whether to disable change tracking.
     /// </summary>
     /// <param name="noTracking">True to disable tracking.</param>
@@ -196,19 +229,19 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     /// <returns>A new IQueryable with all configured parameters applied.</returns>
     /// <remarks>
     /// The method applies parameters in the following order:
-    /// 1. Include related entities (if specified)
+    /// 1. Includes (with full support for multiple and nested navigation paths)
     /// 2. Ignore default query filters (if configured)
     /// 3. Disable change tracking (if configured)
     /// 4. Apply filtering (if specified)
-    /// 5. Apply sorting (if specified)
-    /// 7. Configure as split query (to avoid cartesian explosion when including collections)
-    /// Note: This method prepares the query but doesn't execute it. You'll need to call
-    /// either FirstOrDefault() or LastOrDefault() (depending on TakeFirst setting) to actually retrieve the entity.
+    /// 5. Apply projection (if specified)
+    /// 6. Apply ordering (primary + secondary)
+    /// 7. Configure split query mode (recommended for collection includes)
+    /// Note: This method does not execute the query. You must call a terminal operation
+    /// like FirstOrDefault(), SingleOrDefault(), ToList(), etc. on the returned IQueryable.
     /// </remarks>
     public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
     {
-        if (IncludeQuery is not null)
-            query = IncludeQuery;
+        query = IncludeChain.Apply(query);
 
         if (IgnoreDefaultQueryFilters)
             query = query.IgnoreQueryFilters();
