@@ -13,7 +13,7 @@ namespace Infrastructure.Services.EntityFramework.Builder.Modules;
 /// <typeparam name="TEntity">The type of the root entity.</typeparam>
 internal sealed class IncludeChain<TEntity> where TEntity : EntityBase
 {
-    private readonly List<Func<IQueryable<TEntity>, IQueryable<TEntity>>> _includeChain = [];
+    private readonly IList<Func<IQueryable<TEntity>, IQueryable<TEntity>>> _includeChain = [];
 
     private Func<IQueryable<TEntity>, IQueryable<TEntity>>? _currentInclude;
     private object? _lastIncludable;
