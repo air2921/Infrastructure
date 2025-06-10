@@ -46,10 +46,10 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
     internal bool AsSplitQuery { get; private set; } = true;
 
     /// <summary>
-    /// An expression for sorting entities.
+    /// A list of sorting expressions and their directions.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
+    internal IList<(Expression<Func<TEntity, object?>> Expression, bool Descending)> OrderExpressions { get; } = [];
 
     /// <summary>
     /// A query for including related entities.
@@ -62,12 +62,6 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool AsNoTracking { get; private set; } = true;
-
-    /// <summary>
-    /// Indicates sorting direction.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
     /// The number of entities to skip.
@@ -131,7 +125,7 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
     }
 
     /// <summary>
-    /// Sets the ordering expression and direction.
+    /// Sets the primary ordering expression and direction.
     /// </summary>
     /// <param name="orderExpression">The ordering expression.</param>
     /// <param name="descending">True for descending order.</param>
@@ -140,8 +134,31 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
         Expression<Func<TEntity, object?>> orderExpression,
         bool descending = true)
     {
-        OrderExpression = orderExpression ?? throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
-        OrderByDesc = descending;
+        if (orderExpression is null)
+            throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
+
+        OrderExpressions.Clear();
+        OrderExpressions.Add((orderExpression, descending));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a secondary ordering expression and direction.
+    /// </summary>
+    /// <param name="orderExpression">The ordering expression.</param>
+    /// <param name="descending">True for descending order.</param>
+    /// <returns>The current builder instance.</returns>
+    public RangeQueryBuilder<TEntity> WithThenOrdering(
+        Expression<Func<TEntity, object?>> orderExpression,
+        bool descending = false)
+    {
+        if (orderExpression is null)
+            throw new InvalidArgumentException($"Using a {nameof(WithThenOrdering)} without order expression is not allowed");
+
+        if (!OrderExpressions.Any())
+            throw new InvalidOperationException($"Cannot use {nameof(WithThenOrdering)} without first calling {nameof(WithOrdering)}");
+
+        OrderExpressions.Add((orderExpression, descending));
         return this;
     }
 
@@ -224,8 +241,21 @@ public sealed class RangeQueryBuilder<TEntity> : BaseBuilder<RangeQueryBuilder<T
         if (Selector is not null)
             query = query.Select(Selector);
 
-        if (OrderExpression is not null)
-            query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
+        if (OrderExpressions.Count > 0)
+        {
+            var orderedQuery = OrderExpressions[0].Descending
+                ? query.OrderByDescending(OrderExpressions[0].Expression)
+                : query.OrderBy(OrderExpressions[0].Expression);
+
+            for (int i = 1; i < OrderExpressions.Count; i++)
+            {
+                orderedQuery = OrderExpressions[i].Descending
+                    ? orderedQuery.ThenByDescending(OrderExpressions[i].Expression)
+                    : orderedQuery.ThenBy(OrderExpressions[i].Expression);
+            }
+
+            query = orderedQuery;
+        }
 
         query = query.Skip(Skip).Take(Take);
 

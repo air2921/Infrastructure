@@ -18,7 +18,6 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     /// </summary>
     private SingleQueryBuilder()
     {
-
     }
 
     /// <summary>
@@ -46,10 +45,10 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     internal bool AsSplitQuery { get; private set; } = true;
 
     /// <summary>
-    /// Ordering expression for the query.
+    /// A list of sorting expressions and their directions.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal Expression<Func<TEntity, object?>>? OrderExpression { get; private set; }
+    internal IList<(Expression<Func<TEntity, object?>> Expression, bool Descending)> OrderExpressions { get; } = [];
 
     /// <summary>
     /// Include query for related entities.
@@ -62,12 +61,6 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal bool AsNoTracking { get; private set; } = true;
-
-    /// <summary>
-    /// Whether to sort in descending order.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal bool OrderByDesc { get; private set; } = true;
 
     /// <summary>
     /// Whether to take the first entity (true) or last entity (false).
@@ -125,7 +118,7 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     }
 
     /// <summary>
-    /// Sets the ordering for the query.
+    /// Sets the primary ordering for the query.
     /// </summary>
     /// <param name="orderExpression">The ordering expression.</param>
     /// <param name="descending">True for descending order.</param>
@@ -134,8 +127,31 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
         Expression<Func<TEntity, object?>> orderExpression,
         bool descending = true)
     {
-        OrderExpression = orderExpression ?? throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
-        OrderByDesc = descending;
+        if (orderExpression == null)
+            throw new InvalidArgumentException($"Using a {nameof(WithOrdering)} without order expression is not allowed");
+
+        OrderExpressions.Clear();
+        OrderExpressions.Add((orderExpression, descending));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a secondary ordering for the query.
+    /// </summary>
+    /// <param name="orderExpression">The ordering expression.</param>
+    /// <param name="descending">True for descending order.</param>
+    /// <returns>The current builder instance.</returns>
+    public SingleQueryBuilder<TEntity> WithThenOrdering(
+        Expression<Func<TEntity, object?>> orderExpression,
+        bool descending = false)
+    {
+        if (orderExpression is null)
+            throw new InvalidArgumentException($"Using a {nameof(WithThenOrdering)} without order expression is not allowed");
+
+        if (!OrderExpressions.Any())
+            throw new InvalidOperationException($"Cannot use {nameof(WithThenOrdering)} without first calling {nameof(WithOrdering)}");
+
+        OrderExpressions.Add((orderExpression, descending));
         return this;
     }
 
@@ -146,7 +162,7 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
     /// <returns>The current builder instance.</returns>
     public SingleQueryBuilder<TEntity> WithIncludes(IIncludableQueryable<TEntity, object?> includeQuery)
     {
-        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without  includable expression is not allowed");
+        IncludeQuery = includeQuery ?? throw new InvalidArgumentException($"Using a {nameof(WithIncludes)} without includable expression is not allowed");
         return this;
     }
 
@@ -208,8 +224,21 @@ public sealed class SingleQueryBuilder<TEntity> : BaseBuilder<SingleQueryBuilder
         if (Selector is not null)
             query = query.Select(Selector);
 
-        if (OrderExpression is not null)
-            query = OrderByDesc ? query.OrderByDescending(OrderExpression) : query.OrderBy(OrderExpression);
+        if (OrderExpressions.Count > 0)
+        {
+            var orderedQuery = OrderExpressions[0].Descending
+                ? query.OrderByDescending(OrderExpressions[0].Expression)
+                : query.OrderBy(OrderExpressions[0].Expression);
+
+            for (int i = 1; i < OrderExpressions.Count; i++)
+            {
+                orderedQuery = OrderExpressions[i].Descending
+                    ? orderedQuery.ThenByDescending(OrderExpressions[i].Expression)
+                    : orderedQuery.ThenBy(OrderExpressions[i].Expression);
+            }
+
+            query = orderedQuery;
+        }
 
         return query;
     }
