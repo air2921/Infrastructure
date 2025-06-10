@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
 
-namespace Infrastructure.Services.EntityFramework.Builder.NoneQuery;
+namespace Infrastructure.Services.EntityFramework.Builder.Base;
 
 /// <summary>
 /// Abstract base class for command builders that perform database operations without returning query results.

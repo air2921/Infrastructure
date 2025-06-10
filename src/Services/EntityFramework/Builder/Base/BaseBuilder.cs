@@ -2,7 +2,7 @@
 using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
 
-namespace Infrastructure.Services.EntityFramework.Builder;
+namespace Infrastructure.Services.EntityFramework.Builder.Base;
 
 /// <summary>
 /// An abstract base class for building queries or commands with common functionality.

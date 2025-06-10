@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Enums;
 using Infrastructure.Exceptions;
+using Infrastructure.Services.EntityFramework.Builder.Base;
 using Infrastructure.Services.EntityFramework.Entity;
 using System.ComponentModel;
 using System.Linq.Expressions;
